@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ZK Match Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-8 bg-gray-100">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-xl font-bold mb-4">Template Match Tester</h1>
+
+        <div class="mb-4">
+            <button onclick="connect()" id="btnConnect" class="bg-gray-800 text-white px-4 py-2 rounded">1.
+                Connect</button>
+            <button onclick="openDevice()" id="btnOpen"
+                class="bg-orange-600 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed">2. Open Device</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 border rounded">
+                <h3 class="font-bold">Template 1</h3>
+                <button onclick="capture(1)" class="bg-blue-500 text-white px-2 py-1 rounded my-2">3. Capture 1</button>
+                <textarea id="t1" class="w-full h-24 text-xs font-mono border"></textarea>
+            </div>
+            <div class="p-4 border rounded">
+                <h3 class="font-bold">Template 2</h3>
+                <button onclick="capture(2)" class="bg-blue-500 text-white px-2 py-1 rounded my-2">4. Capture 2</button>
+                <textarea id="t2" class="w-full h-24 text-xs font-mono border"></textarea>
+            </div>
+        </div>
+
+        <div class="mt-4 p-4 border rounded bg-gray-50">
+            <h3 class="font-bold">Match Attempt</h3>
+            <div class="flex gap-2 my-2">
+                <button onclick="tryMatch('match')" class="bg-green-600 text-white px-3 py-1 rounded">Try
+                    'match'</button>
+                <button onclick="tryMatch('verify')" class="bg-green-600 text-white px-3 py-1 rounded">Try
+                    'verify'</button>
+                <button onclick="tryMatch('compare')" class="bg-green-600 text-white px-3 py-1 rounded">Try
+                    'compare'</button>
+            </div>
+            <div id="result" class="p-2 border bg-white min-h-[50px] font-mono whitespace-pre-wrap"></div>
+        </div>
+    </div>
+
+    <script>
+        const wsUrl = 'ws://127.0.0.1:22003';
+        let ws;
+
+        function connect() {
+            ws = new WebSocket(wsUrl);
+            ws.onopen = () => {
+                console.log('Connected');
+                document.getElementById('btnConnect').classList.add('bg-green-600');
+                document.getElementById('btnConnect').innerText = 'Connected';
+                document.getElementById('btnOpen').classList.remove('opacity-50', 'cursor-not-allowed');
+                log('Connected to Agent');
+            };
+            ws.onmessage = handleMessage;
+            ws.onerror = (err) => log('Error: ' + err);
+        }
+
+        function openDevice() {
+            ws.send(JSON.stringify({
+                "module": "fingerprint",
+                "function": "open",
+                "data": JSON.stringify({ timeout: 5000 })
+            }));
+            log('TX: Open Command Sent');
+        }
+
+        function handleMessage(e) {
+            console.log('RX:', e.data);
+            const data = JSON.parse(e.data);
+
+            if (data.ret === 0 && data.function === "open") {
+                log('RX: Device Opened Successfully');
+                return;
+            }
+
+            // Handle Capture
+            if (window.capturing) {
+                if (data.template || (data.data && data.data.template)) {
+                    const t = data.template || data.data.template;
+                    document.getElementById('t' + window.capturing).value = t;
+                    window.capturing = null;
+                    log('RX: Capture ' + window.capturing + ' Success');
+                }
+            } else {
+                // Handle Match Result
+                const resDiv = document.getElementById('result');
+                resDiv.innerText += `\nRX: ${e.data}`;
+            }
+        }
+
+        function log(msg) {
+            const resDiv = document.getElementById('result');
+            resDiv.innerText += `\n${msg}`;
+        }
+
+
+        function capture(n) {
+            window.capturing = n;
+            document.getElementById('t' + n).value = 'Capturing...';
+            ws.send(JSON.stringify({
+                "module": "fingerprint",
+                "function": "capture",
+                "data": JSON.stringify({ timeout: 10000, quality: 50 })
+            }));
+        }
+
+        function tryMatch(funcName) {
+            const t1 = document.getElementById('t1').value;
+            const t2 = document.getElementById('t2').value;
+
+            if (!t1 || !t2 || t1.length < 100 || t2.length < 100) {
+                alert('Please capture both templates first');
+                return;
+            }
+
+            const cmd = {
+                "module": "fingerprint",
+                "function": funcName,
+                "data": JSON.stringify({
+                    "reg": t1,
+                    "ver": t2,
+                    "template1": t1,
+                    "template2": t2,
+                    "source": t1,
+                    "dest": t2
+                })
+            };
+
+            document.getElementById('result').innerText += `\n\nTX (${funcName}): ` + JSON.stringify(cmd);
+            ws.send(JSON.stringify(cmd));
+        }
+    </script>
+</body>
+
+</html>

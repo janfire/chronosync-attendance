@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZKTeco WebSocket Debugger (Port 22003)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">ZKTeco WebSocket Debugger (Port 22003)</h1>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">WebSocket URL</label>
+                <input type="text" id="wsUrl" value="ws://127.0.0.1:22003"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            </div>
+            <div class="flex items-end">
+                <button onclick="connect()" id="btnConnect"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Connect</button>
+                <button onclick="disconnect()" id="btnDisconnect"
+                    class="ml-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 hidden">Disconnect</button>
+            </div>
+        </div>
+
+        <div id="status" class="mb-4 p-2 bg-gray-200 rounded text-sm">Status: Disconnected</div>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Command (JSON)</label>
+            <textarea id="jsonInput" rows="5"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 font-mono text-sm">{
+    "module": "fingerprint",
+    "function": "enroll",
+    "data": "{\"timeout\": 15000}"
+}</textarea>
+            <div class="mt-2 space-x-2">
+                <button onclick="send()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Send
+                    Command</button>
+                <div class="mt-2 p-2 bg-gray-50 rounded">
+                    <span class="text-xs font-bold text-gray-500 block mb-1">Fingerprint Module:</span>
+                    <button onclick="loadTemplate('fingerprint', 'capture')"
+                        class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs hover:bg-blue-200 m-1">capture</button>
+                    <button onclick="loadTemplate('fingerprint', 'enroll')"
+                        class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs hover:bg-blue-200 m-1">enroll</button>
+                    <button onclick="loadTemplate('fingerprint', 'reg')"
+                        class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs hover:bg-blue-200 m-1">reg</button>
+                    <button onclick="loadTemplate('fingerprint', 'identify')"
+                        class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs hover:bg-blue-200 m-1">identify</button>
+                    <button onclick="loadTemplate('fingerprint', 'verify')"
+                        class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs hover:bg-blue-200 m-1">verify</button>
+                    <button onclick="loadTemplate('fingerprint', 'cancel')"
+                        class="bg-red-100 text-red-800 px-3 py-1 rounded text-xs hover:bg-red-200 m-1">cancel</button>
+                    <button onclick="loadTemplate('fingerprint', 'Init')"
+                        class="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs hover:bg-gray-300 m-1">Init</button>
+                    <button onclick="loadTemplate('fingerprint', 'GetDeviceCount')"
+                        class="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs hover:bg-gray-300 m-1">GetDeviceCount</button>
+                </div>
+
+                <!-- AUTO DISCOVER BUTTON -->
+                <div class="mt-4 border-t pt-2">
+                    <span class="text-xs font-bold text-gray-500 block mb-1">Initialization Candidates:</span>
+                    <button onclick="loadTemplate('fingerprint', 'Open')"
+                        class="bg-orange-100 text-orange-800 px-3 py-1 rounded text-xs hover:bg-orange-200 m-1">Open</button>
+                    <button onclick="loadTemplate('fingerprint', 'open')"
+                        class="bg-orange-100 text-orange-800 px-3 py-1 rounded text-xs hover:bg-orange-200 m-1">open</button>
+                    <button onclick="loadTemplate('fingerprint', 'Connect')"
+                        class="bg-orange-100 text-orange-800 px-3 py-1 rounded text-xs hover:bg-orange-200 m-1">Connect</button>
+                    <button onclick="loadTemplate('fingerprint', 'connect')"
+                        class="bg-orange-100 text-orange-800 px-3 py-1 rounded text-xs hover:bg-orange-200 m-1">connect</button>
+                    <button onclick="loadTemplate('fingerprint', 'BeginCapture')"
+                        class="bg-orange-100 text-orange-800 px-3 py-1 rounded text-xs hover:bg-orange-200 m-1">BeginCapture</button>
+                </div>
+
+                <!-- AUTO DISCOVER BUTTON -->
+                <div class="mt-4 border-t pt-2">
+                    <span class="text-xs font-bold text-gray-500 block mb-1">Tools:</span>
+                    <button onclick="autoDiscover()"
+                        class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 w-full animate-pulse font-bold">
+                        <i class="fas fa-magic"></i> Run Auto-Discovery (Brute Force)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t pt-4">
+            <label class="block text-sm font-medium text-gray-700">Logs (Showing only interesting responses)</label>
+            <div id="logs" class="mt-1 bg-black text-green-400 p-4 rounded h-96 overflow-y-auto font-mono text-xs">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+
+        function log(msg, type = 'info') {
+            const logs = document.getElementById('logs');
+            const div = document.createElement('div');
+
+            // Filter out boring errors for Auto-Discovery visibility
+            if (window.isAutoDiscovering) {
+                if (msg.includes('Unsupport') || msg.includes('Module Invalid') || msg.includes('-10005') || msg.includes('-10004')) {
+                    return; // Don't spam logs during auto-discovery
+                }
+            }
+
+            div.className = type === 'error' ? 'text-red-400' : (type === 'rx' ? 'text-blue-300' : 'text-green-400');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logs.insertBefore(div, logs.firstChild);
+        }
+
+        function connect() {
+            const url = document.getElementById('wsUrl').value;
+            try {
+                ws = new WebSocket(url);
+
+                ws.onopen = () => {
+                    document.getElementById('status').innerText = 'Status: Connected';
+                    document.getElementById('status').className = 'mb-4 p-2 bg-green-100 text-green-800 rounded text-sm';
+                    document.getElementById('btnConnect').classList.add('hidden');
+                    document.getElementById('btnDisconnect').classList.remove('hidden');
+                    log('Connected to ' + url);
+                };
+
+                ws.onclose = () => {
+                    document.getElementById('status').innerText = 'Status: Disconnected';
+                    document.getElementById('status').className = 'mb-4 p-2 bg-gray-200 rounded text-sm';
+                    document.getElementById('btnConnect').classList.remove('hidden');
+                    document.getElementById('btnDisconnect').classList.add('hidden');
+                    log('Disconnected');
+                };
+
+                ws.onerror = (e) => {
+                    log('WebSocket Error', 'error');
+                };
+
+                ws.onmessage = (event) => {
+                    log('RX: ' + event.data, 'rx');
+                };
+
+            } catch (e) {
+                log('Connection Failed: ' + e.message, 'error');
+            }
+        }
+
+        function disconnect() {
+            if (ws) ws.close();
+        }
+
+        function send() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('Not connected');
+                return;
+            }
+            const content = document.getElementById('jsonInput').value;
+            try {
+                // Verify JSON first
+                JSON.parse(content);
+                ws.send(content);
+                log('TX: ' + content);
+            } catch (e) {
+                alert('Invalid JSON: ' + e.message);
+            }
+        }
+
+        function loadTemplate(module, func) {
+            let t = {};
+            // Default data
+            let data = JSON.stringify({ timeout: 15000 });
+
+            t = { "module": module, "function": func || "capture", "data": data };
+
+            document.getElementById('jsonInput').value = JSON.stringify(t, null, 4);
+        }
+
+        window.isAutoDiscovering = false;
+        async function autoDiscover() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) { alert('Connect first!'); return; }
+
+            if (!confirm('This will send ~50 commands to the agent to guess the protocol. Continue?')) return;
+
+            window.isAutoDiscovering = true;
+            log('Starting Auto-Discovery...', 'info');
+
+            const modules = ['fingerprint', 'zkfinger', 'biometrics', 'dev', 'device', 'helper', 'common', 'sys', 'zkbio', 'fp', 'Udevice', 'bio'];
+            const funcs = ['Init', 'init', 'OpenDevice', 'opendevice', 'GetDeviceCount', 'get_device_count', 'get_version', 'GetVersion', 'capture', 'Capture', 'enroll', 'Enroll', 'reg', 'Reg', 'identify', 'Identify', 'connect', 'Connect', 'cancel', 'Cancel', 'GetUserInfo', 'register', 'open', 'Open'];
+
+            for (const m of modules) {
+                for (const f of funcs) {
+                    const cmd = {
+                        "module": m,
+                        "function": f,
+                        "data": JSON.stringify({ timeout: 100 })
+                    };
+                    ws.send(JSON.stringify(cmd));
+                    await new Promise(r => setTimeout(r, 100)); // fast pace
+                }
+            }
+
+            setTimeout(() => {
+                window.isAutoDiscovering = false;
+                log('Auto-Discovery Complete. Check logs for any non-red messages.', 'info');
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+    --color-gray-900: #0b1a13;
+    --color-gray-800: #122a1f;
+    --color-gray-50: #f2f7f4;
+
+    --color-emerald-900: #0f2a1d;
+    --color-emerald-800: #16402b;
+    --color-emerald-700: #1d563a;
+    --color-emerald-600: #25704b;
+    --color-emerald-500: #2e8b5d;
+    --color-emerald-400: #42a975;
+    --color-emerald-300: #6abf94;
+    --color-emerald-200: #9dd8ba;
+    --color-emerald-100: #ccebda;
+    --color-emerald-50: #ebf6f0;
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.card-shadow {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+.progress-bar {
+    transition: width 0.5s ease-in-out;
+}
+.scanner-animation {
+    animation: scan 2s ease-in-out infinite;
+}
+@keyframes scan {
+    0%, 100% { transform: translateY(0); opacity: 0.7; }
+    50% { transform: translateY(100%); opacity: 1; }
+}
+.pulse-ring {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 1; }
+    70% { transform: scale(1.2); opacity: 0; }
+    100% { transform: scale(0.8); opacity: 0; }
+}
