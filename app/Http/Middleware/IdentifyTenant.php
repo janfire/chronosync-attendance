@@ -24,24 +24,33 @@ class IdentifyTenant
         $host = $request->getHost();
         $parts = explode('.', $host);
         
-        // If we're on a single-part host (like 'localhost' or an IP)
-        // we can't easily determine tenant. 
-        // For dev, let's assume if only 1 part, we check if a 'taxease' tenant exists as fallback
-        // In prod, $parts[0] will be the subdomain.
         $subdomain = $parts[0];
+        $tenant = null;
 
-        $tenant = Tenant::where('subdomain', $subdomain)->first();
+        // 1. Standard host-based resolution (production & standard local DNS)
+        if (count($parts) > 1 && $host !== 'zou-attendance.test') {
+            $tenant = Tenant::where('subdomain', $subdomain)->first();
+        }
 
-        // Fallback for development if accessing directly via localhost:8000
-        if (!$tenant && ($host === 'localhost' || $host === '127.0.0.1')) {
-            $tenant = Tenant::where('subdomain', 'taxease')->first();
+        // 2. Fallback for easy local development / testing using ?tenant=subdomain or session
+        if (!$tenant) {
+            $devSubdomain = $request->query('tenant') ?: $request->input('tenant') ?: session('dev_tenant_subdomain');
+            
+            if ($devSubdomain) {
+                $tenant = Tenant::where('subdomain', $devSubdomain)->first();
+                if ($tenant && $request->hasSession()) {
+                    session(['dev_tenant_subdomain' => $devSubdomain]);
+                }
+            }
+        }
+
+        // 3. Last fallback: default to first tenant if on local development (localhost / base domain)
+        if (!$tenant && ($host === 'localhost' || $host === '127.0.0.1' || $host === 'zou-attendance.test')) {
+            $tenant = Tenant::orderBy('id')->first();
         }
 
         if (!$tenant) {
-            // If it's a public route like /login, we might allow it without a tenant 
-            // BUT a SaaS login should be tenant-aware.
-            // For now, if no tenant, we just proceed (onboarding/landing page).
-            return $next($request);
+            abort(404, 'Workspace not found. Please check the URL.');
         }
 
         // Bind the tenant to the container

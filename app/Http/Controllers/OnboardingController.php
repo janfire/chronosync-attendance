@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\TenantProvisioningService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WorkspaceWelcomeMail;
 
 class OnboardingController extends Controller
 {
@@ -35,6 +37,28 @@ class OnboardingController extends Controller
         // Auto-login the new administrator
         auth()->login($result['admin']);
         
-        return redirect()->route('admin.dashboard')->with('success', "Welcome to your new workspace, {$result['tenant']->company_name}!");
+        // Construct the full URL with the new subdomain
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $scheme = parse_url(config('app.url'), PHP_URL_SCHEME);
+        $subdomain = $result['tenant']->subdomain;
+        
+        $workspaceUrl = "{$scheme}://{$subdomain}.{$appHost}";
+        $dashboardPath = route('admin.dashboard', [], false);
+        $redirectUrl = "{$workspaceUrl}{$dashboardPath}";
+
+        // Send Workspace Created notification with Login URL & User Guide info
+        try {
+            Mail::to($result['admin']->email)->send(new WorkspaceWelcomeMail(
+                $result['tenant']->company_name,
+                $result['admin']->name,
+                $workspaceUrl,
+                $result['admin']->email
+            ));
+        } catch (\Exception $e) {
+            // Log the error but don't crash the onboarding flow
+            logger()->error('Failed to send workspace welcome email: ' . $e->getMessage());
+        }
+
+        return redirect()->to($redirectUrl)->with('success', "Welcome to your new workspace, {$result['tenant']->company_name}!");
     }
 }

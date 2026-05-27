@@ -21,6 +21,11 @@ class AdminController extends Controller
         $this->analyticsService = $analyticsService;
     }
 
+    public function userGuide()
+    {
+        return view('admin.guide');
+    }
+
     public function dashboard()
     {
         // Get statistics
@@ -30,8 +35,10 @@ class AdminController extends Controller
                 ->where('action', 'clock_in')
                 ->distinct('user_id')
                 ->count('user_id'),
+            'absents' => $this->getAbsentCount(),
             'currently_clocked_in' => $this->getCurrentlyClockedInCount(),
             'pending_issues' => $this->getPendingIssuesCount(),
+            'pending_exceptions' => \App\Models\AttendanceException::where('status', 'pending')->count(),
         ];
 
         // Get recent activity
@@ -150,7 +157,7 @@ class AdminController extends Controller
 
     public function showEmployee(User $user)
     {
-        if ($user->role !== 'staff') {
+        if (!$user->isStaff()) {
             return redirect()->route('admin.users.index')->with('error', 'User not found.');
         }
 
@@ -212,6 +219,15 @@ class AdminController extends Controller
             ->count();
     }
 
+    private function getAbsentCount()
+    {
+        return User::where('role', 'staff')
+            ->whereDoesntHave('attendanceLogs', function ($query) {
+                $query->whereDate('timestamp', today())
+                      ->where('action', 'clock_in');
+            })
+            ->count();
+    }
 
     private function getTodayAttendance()
     {

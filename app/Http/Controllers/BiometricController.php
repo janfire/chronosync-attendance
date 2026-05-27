@@ -25,10 +25,22 @@ class BiometricController extends Controller
         $this->zktecoService = $zktecoService;
     }
 
-    public function showEnrollment()
+    public function showEnrollment(User $user = null)
     {
-        // Check if there's pending registration data OR if user is logged in
-        if (!session()->has('pending_registration') && !Auth::check()) {
+        if ($user) {
+            if (!Auth::check() || !Auth::user()->canManageUsers()) {
+                return redirect()->route('login')->with('error', 'Please login as an administrator to enroll this employee.');
+            }
+
+            if (!$user->isStaff()) {
+                return redirect()->route('admin.users.index')->with('error', 'Only staff users can be enrolled here.');
+            }
+
+            session(['pending_enrollment_user_id' => $user->id]);
+        }
+
+        // Check if there's pending registration data, pending enrollment data, or if user is logged in
+        if (!session()->has('pending_registration') && !session()->has('pending_enrollment_user_id') && !Auth::check()) {
             return redirect()->route('register')->with('error', 'Please complete registration or login first.');
         }
 
@@ -84,7 +96,15 @@ class BiometricController extends Controller
 
     private function getUserContext(): array
     {
-        // PRIORITY FIX: Check for pending registration FIRST.
+        if (session()->has('pending_enrollment_user_id')) {
+            $enrollUser = User::find(session('pending_enrollment_user_id'));
+            if ($enrollUser) {
+                return [$enrollUser->name, $enrollUser->id];
+            }
+            session()->forget('pending_enrollment_user_id');
+        }
+
+        // PRIORITY FIX: Check for pending registration first.
         // This allows an Admin to be logged in but still enroll a NEW user.
         if (session()->has('pending_registration')) {
             $registrationData = session('pending_registration');
@@ -137,6 +157,14 @@ class BiometricController extends Controller
      */
     private function handleAuthenticatedUserFacialEnrollment(array $facialEncoding): void
     {
+        if (session()->has('pending_enrollment_user_id')) {
+            $targetUser = User::find(session('pending_enrollment_user_id'));
+            if ($targetUser && Auth::user()->canManageUsers() && $targetUser->isStaff()) {
+                $this->handleExistingUserFacialEnrollment($facialEncoding, $targetUser);
+                return;
+            }
+        }
+
         $user = Auth::user();
         $biometric = BiometricData::where('user_id', $user->id)->first();
 
@@ -156,6 +184,30 @@ class BiometricController extends Controller
         }
         
         Log::info('Facial enrollment completed for authenticated user', ['user_id' => $user->id]);
+    }
+
+    private function handleExistingUserFacialEnrollment(array $facialEncoding, User $user): void
+    {
+        $biometric = BiometricData::where('user_id', $user->id)->first();
+
+        $enrollmentData = [
+            'facial_encoding' => $facialEncoding,
+            'facial_status' => 'captured',
+            'facial_captured_at' => now(),
+            'user_name' => $user->name,
+        ];
+
+        if ($biometric) {
+            $biometric->update($enrollmentData);
+            session(['biometric_id' => $biometric->id]);
+        } else {
+            $biometric = BiometricData::create(array_merge($enrollmentData, [
+                'user_id' => $user->id,
+            ]));
+        }
+
+        session(['biometric_id' => $biometric->id]);
+        Log::info('Facial enrollment completed for existing staff user', ['target_user_id' => $user->id, 'biometric_id' => $biometric->id]);
     }
 
     /**
@@ -463,27 +515,48 @@ class BiometricController extends Controller
     public function completeEnrollment(Request $request)
     {
         Log::info('completeEnrollment called', [
-            'has_session' => session()->has('pending_registration'),
+            'has_pending_registration' => session()->has('pending_registration'),
+            'has_pending_enrollment' => session()->has('pending_enrollment_user_id'),
             'authenticated' => Auth::check(), 
         ]);
 
-        // Check for pending registration FIRST
-        // This allows Admins to complete enrollment for OTHERS
-        if (session()->has('pending_registration')) {
+        if (session()->has('pending_registration') || session()->has('pending_enrollment_user_id')) {
             // Proceed to standard flow below...
         } elseif (Auth::check()) {
-            // Only handle as "Authenticated User Enrollment" (Self-Enrollment) 
-            // if there is NO pending registration for someone else.
             return $this->handleAuthenticatedUserEnrollment($request);
         }
 
-        // Validate pending registration exists
-        if (!session()->has('pending_registration')) {
-            Log::warning('No pending registration in session');
+        if (!session()->has('pending_registration') && !session()->has('pending_enrollment_user_id')) {
+            Log::warning('No pending registration or enrollment target in session');
             return redirect()->route('register')->with('error', 'No pending registration found.');
         }
 
-        // Validate biometric enrollment is complete
+        if (session()->has('pending_enrollment_user_id')) {
+            $targetUser = User::find(session('pending_enrollment_user_id'));
+            if (!$targetUser) {
+                session()->forget('pending_enrollment_user_id');
+                session()->forget('biometric_id');
+                return redirect()->route('admin.users.index')->with('error', 'Selected employee not found.');
+            }
+
+            $biometric = $this->validateBiometricEnrollment($targetUser);
+            if ($biometric instanceof \Illuminate\Http\RedirectResponse) {
+                return $biometric;
+            }
+
+            $duplicateCheck = $this->checkForDuplicateFace($biometric);
+            if ($duplicateCheck instanceof \Illuminate\Http\RedirectResponse) {
+                return $duplicateCheck;
+            }
+
+            session()->forget('pending_enrollment_user_id');
+            session()->forget('biometric_id');
+
+            return redirect()->route('admin.staff.show', $targetUser->id)
+                ->with('success', 'Facial recognition enrollment completed for ' . $targetUser->name . '.');
+        }
+
+        // Validate biometric enrollment is complete for pending registration
         $biometric = $this->validateBiometricEnrollment();
         if ($biometric instanceof \Illuminate\Http\RedirectResponse) {
             return $biometric; // Return redirect if validation failed
@@ -526,13 +599,20 @@ class BiometricController extends Controller
      * 
      * @return BiometricData|\Illuminate\Http\RedirectResponse
      */
-    private function validateBiometricEnrollment()
+    private function validateBiometricEnrollment(User $user = null)
     {
-        $biometric = BiometricData::where('facial_status', 'captured')
-            ->whereNull('user_id')
-            ->first();
+        $query = BiometricData::where('facial_status', 'captured');
+
+        if ($user) {
+            $query->where('user_id', $user->id);
+        } else {
+            $query->whereNull('user_id');
+        }
+
+        $biometric = $query->first();
 
         Log::info('Biometric data check', [
+            'target_user' => $user ? $user->id : null,
             'found' => $biometric ? true : false,
             'has_encoding' => $biometric && $biometric->facial_encoding ? true : false,
             'biometric_id' => $biometric ? $biometric->id : null,
@@ -540,6 +620,7 @@ class BiometricController extends Controller
 
         if (!$biometric || !$biometric->facial_encoding) {
             Log::warning('Biometric enrollment incomplete', [
+                'target_user' => $user ? $user->id : null,
                 'biometric_exists' => $biometric ? true : false,
                 'has_encoding' => $biometric && $biometric->facial_encoding ? true : false,
             ]);

@@ -32,10 +32,28 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/attendance/qr/generate', [AttendanceController::class, 'generateQRCode'])->name('attendance.qr.generate')->middleware('throttle:20,1');
     Route::get('/attendance/clock', [AttendanceController::class, 'showClockPage'])->name('attendance.clock');
     Route::post('/attendance/verify', [AttendanceController::class, 'verifyAndClock'])->name('attendance.verify')->middleware('throttle:60,1');
+    Route::post('/attendance/exception/request', [\App\Http\Controllers\AttendanceExceptionController::class, 'store'])->name('attendance.exception.request')->middleware('auth');
     Route::post('/attendance/verify-fingerprint', [AttendanceController::class, 'verifyFingerprint'])->name('attendance.verify.fingerprint')->middleware('throttle:60,1');
     Route::get('/attendance/logs', [AttendanceController::class, 'getAttendanceLogs'])->name('attendance.logs');
     Route::get('/attendance/summary/{user_id}', [AttendanceController::class, 'showSummary'])->name('attendance.summary')->middleware('signed');
     Route::post('/attendance/manual-clock-out', [AttendanceController::class, 'manualClockOut'])->name('attendance.manual-clock-out')->middleware('throttle:10,1');
+
+    // Biometric Routes (public registration and tenant-authenticated enrollment)
+    Route::get('/biometric/enrollment/{user?}', [BiometricController::class, 'showEnrollment'])->name('biometric.enrollment');
+    Route::post('/biometric/facial/enroll', [BiometricController::class, 'storeFacialData'])->name('biometric.facial.enroll')->middleware('throttle:60,1');
+
+    Route::get('/biometric/webauthn/register/options', [WebAuthnController::class, 'registerOptions'])->name('biometric.registration.options');
+    Route::post('/biometric/webauthn/register/verify', [WebAuthnController::class, 'registerVerify'])->name('biometric.verify.registration');
+    Route::get('/biometric/webauthn/login/options', [WebAuthnController::class, 'loginOptions'])->name('biometric.webauthn.login.options');
+    Route::post('/biometric/webauthn/login/verify', [WebAuthnController::class, 'loginVerify'])->name('biometric.webauthn.login.verify');
+
+    Route::post('/biometric/fingerprint/enroll', [BiometricController::class, 'enrollFingerprint'])->name('biometric.fingerprint.enroll')->middleware('throttle:60,1');
+    Route::delete('/biometric/fingerprint', [BiometricController::class, 'deleteFingerprint'])->name('biometric.fingerprint.delete');
+    Route::delete('/biometric/facial/{user}', [BiometricController::class, 'deleteFacialDataForUser'])->name('biometric.facial.delete.user')->middleware(['admin']);
+    Route::post('/biometric/facial/verify', [BiometricController::class, 'verifyFacialData'])->name('biometric.facial.verify')->middleware('throttle:10,1');
+    Route::get('/biometric/templates', [BiometricController::class, 'getTemplates'])->name('biometric.templates');
+    Route::get('/biometric/complete', [BiometricController::class, 'completeEnrollment'])->name('biometric.complete');
+    Route::get('/biometric/status', [BiometricController::class, 'getEnrollmentStatus'])->name('biometric.status');
 
     // Billing Routes (Accessible even if subscription expired)
     Route::middleware(['auth'])->group(function () {
@@ -46,27 +64,10 @@ Route::middleware(['tenant'])->group(function () {
 
     // Protected Routes
     Route::middleware(['auth', 'subscription'])->group(function () {
-        // Biometric Enrollment Routes
-        Route::get('/biometric/enrollment', [BiometricController::class, 'showEnrollment'])->name('biometric.enrollment');
-        Route::post('/biometric/facial/enroll', [BiometricController::class, 'storeFacialData'])->name('biometric.facial.enroll')->middleware('throttle:60,1');
-
-        // Biometric Routes (WebAuthn)
-        Route::get('/biometric/webauthn/register/options', [WebAuthnController::class, 'registerOptions'])->name('biometric.registration.options');
-        Route::post('/biometric/webauthn/register/verify', [WebAuthnController::class, 'registerVerify'])->name('biometric.verify.registration');
-        Route::get('/biometric/webauthn/login/options', [WebAuthnController::class, 'loginOptions'])->name('biometric.webauthn.login.options');
-        Route::post('/biometric/webauthn/login/verify', [WebAuthnController::class, 'loginVerify'])->name('biometric.webauthn.login.verify');
-
-        Route::post('/biometric/fingerprint/enroll', [BiometricController::class, 'enrollFingerprint'])->name('biometric.fingerprint.enroll')->middleware('throttle:60,1');
-        Route::delete('/biometric/fingerprint', [BiometricController::class, 'deleteFingerprint'])->name('biometric.fingerprint.delete');
-        Route::delete('/biometric/facial/{user}', [BiometricController::class, 'deleteFacialDataForUser'])->name('biometric.facial.delete.user')->middleware(['admin']);
-        Route::post('/biometric/facial/verify', [BiometricController::class, 'verifyFacialData'])->name('biometric.facial.verify')->middleware('throttle:10,1');
-        Route::get('/biometric/templates', [BiometricController::class, 'getTemplates'])->name('biometric.templates');
-        Route::get('/biometric/complete', [BiometricController::class, 'completeEnrollment'])->name('biometric.complete');
-        Route::get('/biometric/status', [BiometricController::class, 'getEnrollmentStatus'])->name('biometric.status');
-
         // Admin Routes
         Route::prefix('admin')->middleware(['admin'])->group(function () {
             Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+            Route::get('/guide', [AdminController::class, 'userGuide'])->name('admin.guide');
             Route::get('/staff/{user}', [AdminController::class, 'showEmployee'])->name('admin.staff.show');
             Route::get('/insights', [AdminController::class, 'hrInsights'])->name('admin.insights');
             
@@ -91,6 +92,11 @@ Route::middleware(['tenant'])->group(function () {
             Route::get('/scores', [\App\Http\Controllers\Admin\AttendanceScoreController::class, 'index'])->name('admin.scores.index');
             Route::get('/scores/export', [\App\Http\Controllers\Admin\AttendanceScoreController::class, 'export'])->name('admin.scores.export');
             Route::get('/scores/{user}', [\App\Http\Controllers\Admin\AttendanceScoreController::class, 'show'])->name('admin.scores.show');
+
+            // Attendance Exceptions / Corrections
+            Route::get('/exceptions', [\App\Http\Controllers\AttendanceExceptionController::class, 'index'])->name('admin.exceptions.index');
+            Route::post('/exceptions/{exception}/approve', [\App\Http\Controllers\AttendanceExceptionController::class, 'approve'])->name('admin.exceptions.approve');
+            Route::post('/exceptions/{exception}/reject', [\App\Http\Controllers\AttendanceExceptionController::class, 'reject'])->name('admin.exceptions.reject');
         });
 
         // Profile Routes
