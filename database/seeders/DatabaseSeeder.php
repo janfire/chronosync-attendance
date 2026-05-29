@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create the platform-level administrator account
+        // 1. Create the platform-level administrator account (tenant_id = null)
         User::withoutTenantScope()->create([
             'name'            => 'Platform Admin',
             'email'           => 'admin@zou.ac.zw',
@@ -20,5 +20,11 @@ class DatabaseSeeder extends Seeder
             'employee_number' => 'PLATFORM-ADMIN-001',
             'tenant_id'       => null,
         ]);
+
+        // 2. Create the demo users (initially tenant_id = null)
+        $this->call(UserSeeder::class);
+
+        // 3. Create the demo tenant and associate all demo users with it
+        $this->call(SaaSSeeder::class);
     }
 }

@@ -198,7 +198,7 @@
         </div>
         
         <div class="p-0">
-            <table id="logsTable" class="w-full text-left" style="width:100%">
+            <table id="logsTable" class="w-full text-left admin-data-table display" style="width:100%">
                 <thead class="bg-slate-50/50">
                     <tr>
                         <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Employee</th>
@@ -277,11 +277,7 @@
                 },
                 "info": "Showing _START_ to _END_ of _TOTAL_ records"
             },
-            "dom": '<"px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-50"lf>rt<"px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4"ip>',
-            "initComplete": function() {
-                // Style the search box manually to match theme
-                $('.dataTables_filter input').addClass('w-full md:w-64 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none');
-            }
+            "dom": '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
         });
     });
 </script>

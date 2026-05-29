@@ -75,48 +75,73 @@
      <!-- Filters removed as DataTables handles search/filter -->
 
     <!-- Users Table Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-visible">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">System Users</h3>
                 <p class="text-xs text-gray-500 mt-1">Manage all registered users</p>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="exportUsers()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors flex items-center space-x-2">
-                    <i class="fas fa-download"></i>
-                    <span>Export CSV</span>
-                </button>
-                <a href="{{ route('admin.users.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium">
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ route('admin.users.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium shadow-sm">
                     <i class="fas fa-plus"></i>
                     <span>Create User</span>
                 </a>
+                <div class="relative" id="export-menu-wrapper">
+                    <button type="button" id="export-menu-button" onclick="toggleExportMenu(event)" class="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm transition-colors flex items-center space-x-2 font-medium">
+                        <i class="fas fa-file-export text-emerald-600"></i>
+                        <span>Export</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </button>
+                    <div id="export-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-lg border border-gray-200 shadow-lg z-30 py-1">
+                        <button type="button" onclick="copyUsersToClipboard(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <i class="fas fa-copy w-4 text-slate-600"></i>
+                            <span>Copy</span>
+                        </button>
+                        <button type="button" onclick="printUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <i class="fas fa-print w-4 text-indigo-600"></i>
+                            <span>Print</span>
+                        </button>
+                        <button type="button" onclick="exportUsersPdf(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <i class="fas fa-file-pdf w-4 text-red-600"></i>
+                            <span>PDF</span>
+                        </button>
+                        <button type="button" onclick="exportUsersExcel(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <i class="fas fa-file-excel w-4 text-emerald-700"></i>
+                            <span>Excel (.xlsx)</span>
+                        </button>
+                        <button type="button" onclick="exportUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <i class="fas fa-download w-4 text-green-600"></i>
+                            <span>CSV</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="overflow-x-auto">
-            <table class="w-full" id="staffTable">
-                <thead class="bg-gray-50">
+        <div class="admin-table-scroll px-1 pb-1">
+            <table class="w-full admin-data-table display" id="staffTable">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors">
-                            <div class="flex items-center space-x-1">
+                        <th>
+                            <div class="flex items-center gap-1.5">
                                 <span>Name</span>
-                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                                <i class="fas fa-sort text-gray-400 text-[10px]"></i>
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee #</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors">
-                            <div class="flex items-center space-x-1">
+                        <th class="hidden md:table-cell">Email</th>
+                        <th class="hidden lg:table-cell">Employee #</th>
+                        <th>Role</th>
+                        <th class="hidden lg:table-cell">
+                            <div class="flex items-center gap-1.5">
                                 <span>Created</span>
-                                <i class="fas fa-sort text-gray-400 text-xs"></i>
+                                <i class="fas fa-sort text-gray-400 text-[10px]"></i>
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody>
                     @forelse($users as $user)
                         @php
                             $avatarColors = [
@@ -143,8 +168,8 @@
                             $isEnrolled = $user->biometricData && $user->biometricData->facial_status == 'captured';
                             $lastActivity = $user->attendanceLogs()->latest('timestamp')->first();
                         @endphp
-                        <tr class="hover:bg-emerald-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                        <tr>
+                            <td class="whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="h-10 w-10 rounded-full {{ $avatarColor }} flex items-center justify-center text-white font-semibold mr-3 shadow-sm">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
@@ -157,13 +182,13 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="hidden md:table-cell whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $user->email }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-mono text-gray-900">{{ $user->employee_number }}</div>
+                            <td class="hidden lg:table-cell whitespace-nowrap">
+                                <div class="text-sm font-mono text-gray-700">{{ $user->employee_number }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap">
                                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full {{ $roleColor }} border flex items-center w-fit">
                                     @if($user->role->value === 'super_admin')
                                         <i class="fas fa-crown mr-1 text-xs"></i>
@@ -177,11 +202,11 @@
                                     {{ $roleLabel }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="hidden lg:table-cell whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $user->created_at->format('M j, Y') }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->created_at->diffForHumans() }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap">
                                 @if($user->role->value === 'staff')
                                     @if($isEnrolled)
                                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 flex items-center w-fit">
@@ -198,36 +223,36 @@
                                     <span class="text-xs text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-3">
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="text-emerald-600 hover:text-gray-900 transition-colors" title="Edit User">
-                                        <i class="fas fa-edit"></i>
+                            <td class="whitespace-nowrap">
+                                <div class="table-action-group">
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="table-action-btn table-action-btn--edit" title="Edit User">
+                                        <i class="fas fa-edit text-sm"></i>
                                     </a>
                                     @if($user->role->value === 'staff')
-                                        <a href="{{ route('admin.staff.show', $user) }}" class="text-green-600 hover:text-green-900 transition-colors" title="View Profile">
-                                            <i class="fas fa-eye"></i>
+                                        <a href="{{ route('admin.staff.show', $user) }}" class="table-action-btn table-action-btn--view" title="View Profile">
+                                            <i class="fas fa-eye text-sm"></i>
                                         </a>
                                     @endif
                                     @if($isEnrolled)
-                                        <form action="{{ route('biometric.facial.delete.user', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete facial data for {{ addslashes($user->name) }}? They will need to re-enroll.');">
+                                        <form action="{{ route('biometric.facial.delete.user', $user) }}" method="POST" class="inline js-confirm-submit" data-confirm-title="Delete Facial Data?" data-confirm-text="Are you sure you want to delete facial data for {{ addslashes($user->name) }}? They will need to re-enroll." data-confirm-button="Yes, Delete">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-orange-500 hover:text-orange-700 transition-colors" title="Delete Facial Data">
-                                                <i class="fas fa-user-times"></i>
+                                            <button type="submit" class="table-action-btn table-action-btn--warn" title="Delete Facial Data">
+                                                <i class="fas fa-user-times text-sm"></i>
                                             </button>
                                         </form>
                                     @endif
                                     @if($user->id !== Auth::id())
-                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($user->name) }}? This action cannot be undone.');">
+                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline js-confirm-submit" data-confirm-title="Delete User?" data-confirm-text="Are you sure you want to delete {{ addslashes($user->name) }}? This action cannot be undone." data-confirm-button="Yes, Delete">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 transition-colors" title="Delete User">
-                                                <i class="fas fa-trash"></i>
+                                            <button type="submit" class="table-action-btn table-action-btn--danger" title="Delete User">
+                                                <i class="fas fa-trash text-sm"></i>
                                             </button>
                                         </form>
                                     @else
-                                        <span class="text-gray-300 cursor-not-allowed" title="Cannot delete yourself">
-                                            <i class="fas fa-trash"></i>
+                                        <span class="table-action-btn table-action-btn--disabled" title="Cannot delete yourself">
+                                            <i class="fas fa-trash text-sm"></i>
                                         </span>
                                     @endif
                                 </div>
@@ -269,46 +294,180 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#staffTable').DataTable({
-            "pageLength": 10,
-            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-            "order": [[ 4, "desc" ]], // Order by Created At
-            "language": {
-                "search": "<i class='fas fa-search text-gray-400'></i>",
-                "searchPlaceholder": "Search users...",
-                "paginate": {
-                    "previous": "<i class='fas fa-chevron-left'></i>",
-                    "next": "<i class='fas fa-chevron-right'></i>"
-                }
-            },
-            "dom": '<"flex items-center justify-between mb-4"lf>rt<"flex items-center justify-between mt-4"ip>',
-            "drawCallback": function(settings) {
-                 // Re-apply any custom logic on draw if needed
-            }
-        });
+    let usersTable;
+
+    function showNotice(title, text, icon = 'info') {
+        if (typeof Swal !== 'undefined' && Swal.fire) {
+            Swal.fire({
+                title,
+                text,
+                icon,
+                confirmButtonColor: '#059669'
+            });
+            return;
+        }
+
+        alert(text);
+    }
+
+    function closeExportMenu() {
+        const exportMenu = document.getElementById('export-menu');
+        if (exportMenu) exportMenu.classList.add('hidden');
+    }
+
+    function toggleExportMenu(event) {
+        if (event) event.stopPropagation();
+        const exportMenu = document.getElementById('export-menu');
+        if (exportMenu) exportMenu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (event) => {
+        const exportMenu = document.getElementById('export-menu');
+        const exportMenuWrapper = document.getElementById('export-menu-wrapper');
+        if (!exportMenu || !exportMenuWrapper) return;
+        if (exportMenuWrapper.contains(event.target)) return;
+        closeExportMenu();
     });
 
+    // Register delete confirmation first so later script errors cannot disable it.
+    document.addEventListener('submit', (event) => {
+        const formElement = event.target.closest('form.js-confirm-submit');
+        if (!formElement) return;
+
+        if (formElement.dataset.confirmed === 'true') {
+            delete formElement.dataset.confirmed;
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const title = formElement.dataset.confirmTitle || 'Are you sure?';
+        const text = formElement.dataset.confirmText || 'This action cannot be undone.';
+        const confirmButtonText = formElement.dataset.confirmButton || 'Yes, Continue';
+
+        if (typeof Swal !== 'undefined' && Swal.fire) {
+            Swal.fire({
+                title,
+                text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText,
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                formElement.dataset.confirmed = 'true';
+                formElement.requestSubmit();
+            });
+            return;
+        }
+
+        if (window.confirm(text)) {
+            formElement.dataset.confirmed = 'true';
+            formElement.requestSubmit();
+        }
+    }, true);
+
+    if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.DataTable) {
+        window.jQuery(function() {
+            usersTable = window.jQuery('#staffTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+                order: [[4, 'desc']],
+                stripeClasses: ['even', 'odd'],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search users...',
+                    lengthMenu: 'Show _MENU_ users',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ users',
+                    infoEmpty: 'No users to show',
+                    infoFiltered: '(filtered from _MAX_ total users)',
+                    paginate: {
+                        previous: '<i class="fas fa-chevron-left"></i>',
+                        next: '<i class="fas fa-chevron-right"></i>'
+                    },
+                    processing: '<i class="fas fa-spinner fa-spin mr-2"></i>Loading users...'
+                },
+                dom: '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>',
+                drawCallback: function() {
+                    // Keep responsive classes after DataTables redraws.
+                }
+            });
+        });
+    }
+
+    function getExportRows() {
+        const rows = [];
+        const seen = new Set();
+
+        const parseRowNode = (rowNode) => {
+            if (!rowNode) return null;
+            const cells = rowNode.querySelectorAll('td');
+            if (cells.length < 6) return null;
+
+            const emptyStateCell = cells[0];
+            if (emptyStateCell && emptyStateCell.getAttribute('colspan') === '7') {
+                return null;
+            }
+
+            const name = cells[0].querySelector('.text-sm.font-medium.text-gray-900')?.textContent?.trim() || cells[0].textContent.trim().split('\n')[0];
+            const email = cells[1].textContent.trim();
+            const empNumber = cells[2].textContent.trim();
+            const role = cells[3].textContent.trim().replace(/\s+/g, ' ');
+            const created = cells[4].querySelector('.text-sm.font-medium.text-gray-900')?.textContent?.trim() || cells[4].textContent.trim().split('\n')[0];
+            const status = cells[5].textContent.trim().replace(/\s+/g, ' ') || '-';
+
+            if (!name || !email) return null;
+
+            return { name, email, empNumber, role, created, status };
+        };
+
+        if (usersTable) {
+            usersTable.rows({ search: 'applied' }).every(function () {
+                const rowNode = this.node();
+                const row = parseRowNode(rowNode);
+                if (!row) return;
+                const key = `${row.email}::${row.empNumber}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                rows.push(row);
+            });
+        }
+
+        // Fallback for pages where DataTables is unavailable or failed to initialize.
+        if (!rows.length) {
+            document.querySelectorAll('#staffTable tbody tr').forEach((rowNode) => {
+                const row = parseRowNode(rowNode);
+                if (!row) return;
+                const key = `${row.email}::${row.empNumber}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                rows.push(row);
+            });
+        }
+
+        return rows;
+    }
+
     function exportUsers() {
-        // Simple export - warns if data is hidden
-        alert("This export only includes the current page of data. For full export, use backend implementation.");
-        // Get all visible records
-        const rows = document.querySelectorAll('#staffTable tbody tr');
+        const rows = getExportRows();
+        if (!rows.length) {
+            showNotice('No Data', 'No rows available to export.', 'warning');
+            return;
+        }
+
+        const escapeCsv = (value) => String(value ?? '').replace(/"/g, '""');
         let csv = 'Name,Email,Employee Number,Role,Created At,Status\n';
         
         rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            if (cells.length < 6) return;
-            
-            const name = cells[0].textContent.trim().split('\n')[0];
-            const email = cells[1].textContent.trim();
-            const empNumber = cells[2].textContent.trim();
-            const role = cells[3].textContent.trim();
-            const created = cells[4].textContent.trim().split('\n')[0];
-            const status = cells[5].textContent.trim() || '-';
-            
-            csv += `"${name}","${email}","${empNumber}","${role}","${created}","${status}"\n`;
+            csv += `"${escapeCsv(row.name)}","${escapeCsv(row.email)}","${escapeCsv(row.empNumber)}","${escapeCsv(row.role)}","${escapeCsv(row.created)}","${escapeCsv(row.status)}"\n`;
         });
         
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -317,6 +476,166 @@
         a.href = url;
         a.download = 'users_export_' + new Date().toISOString().split('T')[0] + '.csv';
         a.click();
+    }
+
+    function exportUsersExcel() {
+        const rows = getExportRows();
+        if (!rows.length) {
+            showNotice('No Data', 'No rows available to export.', 'warning');
+            return;
+        }
+
+        if (typeof XLSX === 'undefined') {
+            showNotice('Export Error', 'Excel export library failed to load. Please refresh and try again.', 'error');
+            return;
+        }
+
+        const workbookData = rows.map(row => ({
+            Name: row.name,
+            Email: row.email,
+            'Employee Number': row.empNumber,
+            Role: row.role,
+            'Created At': row.created,
+            Status: row.status
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(workbookData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+        XLSX.writeFile(workbook, 'users_export_' + new Date().toISOString().split('T')[0] + '.xlsx');
+    }
+
+    function exportUsersPdf() {
+        const rows = getExportRows();
+        if (!rows.length) {
+            showNotice('No Data', 'No rows available to export.', 'warning');
+            return;
+        }
+
+        if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+            showNotice('Export Error', 'PDF export library failed to load. Please refresh and try again.', 'error');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        const columns = ['Name', 'Email', 'Employee Number', 'Role', 'Created At', 'Status'];
+        const body = rows.map(row => [row.name, row.email, row.empNumber, row.role, row.created, row.status]);
+        const dateLabel = new Date().toLocaleString();
+
+        doc.setFontSize(14);
+        doc.text('System Users Export', 14, 15);
+        doc.setFontSize(10);
+        doc.text('Generated: ' + dateLabel, 14, 22);
+
+        doc.autoTable({
+            head: [columns],
+            body,
+            startY: 28,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: [16, 185, 129] }
+        });
+
+        doc.save('users_export_' + new Date().toISOString().split('T')[0] + '.pdf');
+    }
+
+    function printUsers() {
+        const rows = getExportRows();
+        if (!rows.length) {
+            showNotice('No Data', 'No rows available to print.', 'warning');
+            return;
+        }
+
+        const dateLabel = new Date().toLocaleString();
+        let tableRowsHtml = '';
+        rows.forEach((row) => {
+            tableRowsHtml += `<tr>
+                <td>${row.name}</td>
+                <td>${row.email}</td>
+                <td>${row.empNumber}</td>
+                <td>${row.role}</td>
+                <td>${row.created}</td>
+                <td>${row.status}</td>
+            </tr>`;
+        });
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>System Users Print View</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+                    h1 { margin: 0 0 8px; font-size: 20px; }
+                    p { margin: 0 0 16px; color: #4b5563; font-size: 12px; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 12px; text-align: left; }
+                    th { background: #ecfdf5; color: #065f46; font-weight: 700; }
+                    tr:nth-child(even) { background: #f9fafb; }
+                </style>
+            </head>
+            <body>
+                <h1>System Users</h1>
+                <p>Generated: ${dateLabel}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Employee Number</th>
+                            <th>Role</th>
+                            <th>Created At</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRowsHtml}</tbody>
+                </table>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    }
+
+    function copyUsersToClipboard() {
+        const rows = getExportRows();
+        if (!rows.length) {
+            showNotice('No Data', 'No rows available to copy.', 'warning');
+            return;
+        }
+
+        const header = ['Name', 'Email', 'Employee Number', 'Role', 'Created At', 'Status'].join('\t');
+        const lines = rows.map(row => [row.name, row.email, row.empNumber, row.role, row.created, row.status].join('\t'));
+        const payload = [header, ...lines].join('\n');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(payload)
+                .then(() => showNotice('Copied', 'Users copied to clipboard.', 'success'))
+                .catch(() => fallbackCopyToClipboard(payload));
+            return;
+        }
+
+        fallbackCopyToClipboard(payload);
+    }
+
+    function fallbackCopyToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showNotice('Copied', 'Users copied to clipboard.', 'success');
+        } catch (error) {
+            showNotice('Copy Failed', 'Unable to copy automatically. Please try again.', 'error');
+        } finally {
+            document.body.removeChild(textArea);
+        }
     }
 </script>
 @endpush

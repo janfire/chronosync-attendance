@@ -19,7 +19,7 @@ class UserManagementController extends Controller
             abort(403, 'You do not have permission to access this page.');
         }
 
-        $baseQuery = User::query();
+        $baseQuery = User::where('role', '!=', UserRole::PLATFORM_ADMIN);
 
         // Search functionality
         if ($request->has('search') && $request->get('search')) {
@@ -38,7 +38,7 @@ class UserManagementController extends Controller
 
         // Calculate statistics efficiently using database queries
         $stats = [
-            'total_users' => User::count(),
+            'total_users' => User::where('role', '!=', UserRole::PLATFORM_ADMIN)->count(),
             'super_admins' => User::where('role', 'super_admin')->count(),
             'admins' => User::where('role', 'admin')->count(),
             'general_users' => User::where('role', 'general_user')->count(),

@@ -254,7 +254,7 @@
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm" id="reportsTable">
+            <table class="w-full text-left text-sm admin-data-table display" id="reportsTable">
                 <thead class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-wider">
                     <tr>
                         <th class="px-6 py-4">User Details</th>
@@ -309,14 +309,15 @@
             "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
             "order": [[ 2, "desc" ]], // Order by Hours column
             "language": {
-                "search": "<i class='fas fa-search text-gray-400'></i>",
+                "search": "",
                 "searchPlaceholder": "Search reports...",
+                "lengthMenu": "Show _MENU_ rows",
                 "paginate": {
                     "previous": "<i class='fas fa-chevron-left'></i>",
                     "next": "<i class='fas fa-chevron-right'></i>"
                 }
             },
-            "dom": '<"flex items-center justify-between mb-4"lf>rt<"flex items-center justify-between mt-4"ip>'
+            "dom": '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
         });
     });
 </script>

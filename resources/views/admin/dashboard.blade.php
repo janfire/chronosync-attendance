@@ -136,7 +136,7 @@
                         </div>
                     </div>
                     <div class="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-                        <table id="activityTable" class="min-w-full text-sm text-left text-gray-500 display" style="width:100%">
+                        <table id="activityTable" class="min-w-full admin-data-table display text-sm text-left text-gray-500" style="width:100%">
                             <thead class="text-[11px] text-gray-600 uppercase tracking-[0.15em] bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left">User</th>
@@ -215,18 +215,15 @@
             "lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
             "order": [[ 2, "desc" ]], // Order by Time column by default
             "language": {
-                "search": "<i class='fas fa-search text-gray-400'></i>",
+                "search": "",
                 "searchPlaceholder": "Search activity...",
+                "lengthMenu": "Show _MENU_ entries",
                 "paginate": {
                     "previous": "<i class='fas fa-chevron-left'></i>",
                     "next": "<i class='fas fa-chevron-right'></i>"
                 }
             },
-            "dom": '<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"lf>rt<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4"ip>',
-            "initComplete": function(settings, json) {
-                $('.dataTables_filter input').addClass('w-full sm:w-80 px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none');
-                $('.dataTables_length select').addClass('px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none');
-            }
+            "dom": '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
         });
 
     });

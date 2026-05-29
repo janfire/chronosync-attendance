@@ -60,9 +60,9 @@ class SaaSSeeder extends Seeder
             ]
         );
 
-        // 3. Associate all existing users with this tenant
+        // 3. Associate all existing users with this tenant (excluding platform admins)
         // We use DB::table to bypass the trait's global scope during seeding
-        DB::table('users')->update(['tenant_id' => $tenant->id]);
+        DB::table('users')->where('role', '!=', 'platform_admin')->update(['tenant_id' => $tenant->id]);
         
         // Also associate other tables if they have data
         DB::table('attendance_logs')->update(['tenant_id' => $tenant->id]);
