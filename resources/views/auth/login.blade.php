@@ -128,6 +128,25 @@
             }
         }
     </script>
+    
+    <!-- Session Keep-Alive -->
+    <script>
+        (function() {
+            // Ping every 15 minutes (in milliseconds)
+            const interval = 15 * 60 * 1000;
+            setInterval(() => {
+                fetch("{{ route('session.keep-alive') }}")
+                    .then(response => {
+                        if (!response.ok) {
+                            console.warn('Session keep-alive ping failed with status:', response.status);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Session keep-alive ping failed:', error);
+                    });
+            }, interval);
+        })();
+    </script>
 </body>
 </html>
 

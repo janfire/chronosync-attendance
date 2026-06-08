@@ -19,9 +19,15 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
 // SaaS Onboarding Routes
 Route::get('/get-started', [\App\Http\Controllers\OnboardingController::class, 'showSignup'])->name('onboarding.signup');
 Route::post('/get-started', [\App\Http\Controllers\OnboardingController::class, 'register'])->name('onboarding.register');
+Route::post('/get-started/check-subdomain', [\App\Http\Controllers\OnboardingController::class, 'checkSubdomain'])->name('onboarding.check_subdomain');
 
 Route::middleware(['tenant'])->group(function () {
     Route::redirect('/', '/attendance/clock');
+
+    // Session Keep-Alive Route
+    Route::get('/session-keep-alive', function () {
+        return response()->json(['status' => 'active']);
+    })->name('session.keep-alive');
 
     // Registration Routes
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');

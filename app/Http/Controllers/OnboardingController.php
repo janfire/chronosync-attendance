@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\TenantProvisioningService;
 use Illuminate\Http\Request;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WorkspaceWelcomeMail;
 
@@ -19,6 +20,37 @@ class OnboardingController extends Controller
     public function showSignup()
     {
         return view('landing.signup');
+    }
+
+    /**
+     * AJAX: Check subdomain availability and suggest alternatives.
+     */
+    public function checkSubdomain(Request $request)
+    {
+        $company = (string) $request->input('company_name', '');
+
+        $slug = preg_replace('/[^a-z0-9]+/','-', strtolower($company));
+        $slug = trim($slug, '-');
+        $slug = substr($slug, 0, 50);
+        if ($slug === '') {
+            $slug = 'workspace';
+        }
+
+        // Find an available candidate (append -1, -2, ... if needed)
+        for ($i = 0; $i < 100; $i++) {
+            $candidate = $slug . ($i > 0 ? "-{$i}" : '');
+            $exists = Tenant::where('subdomain', $candidate)->exists();
+            if (! $exists) {
+                return response()->json([
+                    'available' => true,
+                    'subdomain' => $candidate,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'errors' => ['subdomain' => ['No available subdomain found for this company name.']],
+        ], 422);
     }
 
     public function register(Request $request)

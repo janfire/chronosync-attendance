@@ -116,8 +116,8 @@
                     <p class="text-sm font-semibold text-emerald-700">Workspace created successfully!</p>
                     <p class="mt-3 text-gray-700">Your workspace is ready at:</p>
                     <p id="workspaceUrl" class="mt-2 font-medium text-gray-900 break-words"></p>
-                    <p class="mt-3 text-gray-500 text-sm">Use this URL to share with your users. Redirecting to your dashboard now.</p>
-                    <p class="mt-4 text-xs text-gray-400" id="redirectCountdown">Redirecting in 5 seconds...</p>
+                    <p class="mt-3 text-gray-500 text-sm">When you are ready, proceed to your dashboard to continue.</p>
+                    <button id="proceedBtn" type="button" class="mt-6 w-full rounded-2xl bg-[#0f2a1d] py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-900 transition">Proceed to Dashboard</button>
                 </div>
             </div>
         </div>
@@ -137,7 +137,7 @@
         const subdomainInput = document.getElementById('subdomain');
         const errorContainer = document.getElementById('errorContainer');
         const workspaceUrl = document.getElementById('workspaceUrl');
-        const redirectCountdown = document.getElementById('redirectCountdown');
+        const proceedBtn = document.getElementById('proceedBtn');
 
         function slugify(value) {
             return value.toString().toLowerCase().trim()
@@ -162,7 +162,7 @@
             companyName.focus();
         });
 
-        companyNextBtn.addEventListener('click', () => {
+        companyNextBtn.addEventListener('click', async () => {
             if (!companyName.value.trim() || !companyEmail.value.trim()) {
                 showError('Company name and email are required.');
                 return;
@@ -170,8 +170,50 @@
 
             errorContainer.classList.add('hidden');
             updateSubdomain();
-            step2.classList.add('hidden');
-            step3.classList.remove('hidden');
+
+            // Ask server for an available subdomain (may suggest a suffix if needed)
+            try {
+                const res = await fetch("{{ route('onboarding.check_subdomain') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({ company_name: companyName.value }),
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    subdomainInput.value = data.subdomain;
+
+                    // Show a non-blocking confirmation about the chosen subdomain
+                    errorContainer.className = 'rounded-2xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-700';
+                    errorContainer.innerHTML = `Using subdomain <strong>${data.subdomain}</strong> for your workspace.`;
+                    errorContainer.classList.remove('hidden');
+
+                    step2.classList.add('hidden');
+                    step3.classList.remove('hidden');
+                } else if (res.status === 422) {
+                    const data = await res.json();
+                    const errors = data.errors || {};
+                    const list = document.createElement('ul');
+                    list.className = 'list-disc list-inside space-y-1';
+                    Object.values(errors).flat().forEach(message => {
+                        const item = document.createElement('li');
+                        item.textContent = message;
+                        list.appendChild(item);
+                    });
+                    errorContainer.innerHTML = '';
+                    errorContainer.appendChild(list);
+                    errorContainer.className = 'rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700';
+                    errorContainer.classList.remove('hidden');
+                } else {
+                    throw new Error('Unexpected server response.');
+                }
+            } catch (err) {
+                showError(err.message || 'Failed to check subdomain.');
+            }
         });
 
         backToCompanyBtn.addEventListener('click', () => {
@@ -213,16 +255,9 @@
                     step4.classList.remove('hidden');
                     workspaceUrl.textContent = data.workspace_url;
 
-                    let seconds = 5;
-                    redirectCountdown.textContent = `Redirecting in ${seconds} seconds...`;
-                    const interval = setInterval(() => {
-                        seconds -= 1;
-                        redirectCountdown.textContent = `Redirecting in ${seconds} seconds...`;
-                        if (seconds <= 0) {
-                            clearInterval(interval);
-                            window.location.href = data.redirect_url;
-                        }
-                    }, 1000);
+                    proceedBtn.addEventListener('click', () => {
+                        window.location.href = data.redirect_url;
+                    });
                 } else if (response.status === 422) {
                     const data = await response.json();
                     const errors = data.errors || {};
