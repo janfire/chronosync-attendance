@@ -22,7 +22,17 @@ class ReportService
             'early_out_before' => '15:50',
         ]);
 
-        $this->holidays = SystemSetting::get('holidays', []);
+        $holidays = SystemSetting::get('holidays', []);
+        $this->holidays = [];
+        if (is_array($holidays)) {
+            foreach ($holidays as $holiday) {
+                if (is_array($holiday) && isset($holiday['date'])) {
+                    $this->holidays[] = $holiday['date'];
+                } elseif (is_string($holiday)) {
+                    $this->holidays[] = $holiday;
+                }
+            }
+        }
     }
 
     /**

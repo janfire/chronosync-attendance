@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
@@ -192,32 +193,94 @@ class UserManagementController extends Controller
 
     public function destroy(User $user)
     {
-        // Check if user can manage users
         if (!Auth::user()->canManageUsers()) {
             abort(403, 'You do not have permission to delete users.');
         }
 
         $currentUser = Auth::user();
-        
-        // Prevent self-deletion
+        $result = $this->attemptDeleteUser($currentUser, $user);
+
+        if ($result !== true) {
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', $result);
+        }
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', "User '{$user->name}' deleted successfully.");
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        if (!Auth::user()->canManageUsers()) {
+            abort(403, 'You do not have permission to delete users.');
+        }
+
+        $validated = $request->validate([
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $currentUser = Auth::user();
+        $users = User::whereIn('id', $validated['user_ids'])
+            ->where('role', '!=', UserRole::PLATFORM_ADMIN)
+            ->get();
+
+        $deletedNames = [];
+        $skipped = [];
+
+        DB::transaction(function () use ($users, $currentUser, &$deletedNames, &$skipped) {
+            foreach ($users as $user) {
+                $userName = $user->name;
+                $result = $this->attemptDeleteUser($currentUser, $user);
+
+                if ($result === true) {
+                    $deletedNames[] = $userName;
+                } else {
+                    $skipped[] = "{$userName}: {$result}";
+                }
+            }
+        });
+
+        if (count($deletedNames) === 0) {
+            $message = $skipped[0] ?? 'No users were deleted.';
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', $message);
+        }
+
+        $successMessage = count($deletedNames) === 1
+            ? "User '{$deletedNames[0]}' deleted successfully."
+            : count($deletedNames) . ' users deleted successfully.';
+
+        if (count($skipped) > 0) {
+            $successMessage .= ' Skipped ' . count($skipped) . ' user(s) due to permissions or restrictions.';
+        }
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', $successMessage);
+    }
+
+    /**
+     * @return true|string True on success, or an error message string.
+     */
+    private function attemptDeleteUser(User $currentUser, User $user): bool|string
+    {
+        if ($user->role === UserRole::PLATFORM_ADMIN) {
+            return 'Platform admin accounts cannot be deleted.';
+        }
+
         if ($user->id === $currentUser->id) {
-            return redirect()
-                ->route('admin.users.index')
-                ->with('error', 'You cannot delete your own account.');
+            return 'You cannot delete your own account.';
         }
 
-        // Check if current user can delete this user
         if (!$this->canManageUser($currentUser, $user)) {
-            return redirect()
-                ->route('admin.users.index')
-                ->with('error', 'You do not have permission to delete this user.');
+            return 'You do not have permission to delete this user.';
         }
 
-        $userName = $user->name;
-        
-        // Send email notification before deletion
         try {
-            // Prepare data array to avoid serialization issues with deleted models
             $userData = [
                 'name' => $user->name,
                 'email' => $user->email,
@@ -228,15 +291,12 @@ class UserManagementController extends Controller
             \Illuminate\Support\Facades\Mail::to('masiyatino9@gmail.com')
                 ->send(new \App\Mail\UserDeletionAlert($userData, $currentUser->name));
         } catch (\Exception $e) {
-            // Log error but continue with deletion
             \Illuminate\Support\Facades\Log::error('Failed to send user deletion email: ' . $e->getMessage());
         }
 
         $user->delete();
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('success', "User '{$userName}' deleted successfully.");
+        return true;
     }
 
     /**

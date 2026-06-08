@@ -49,41 +49,16 @@
         <div class="glass-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row max-h-[90vh]">
             
             <!-- Left Side: Branding -->
-            <div class="lg:w-5/12 bg-[#0f2a1d] text-white p-8 relative overflow-hidden flex flex-col justify-between">
+            <div class="lg:w-5/12 bg-[#0f2a1d] text-white p-8 relative overflow-hidden flex flex-col justify-center items-center text-center">
                 <div class="absolute inset-0 opacity-10 bg-pattern"></div>
                 
                 <!-- Logo Section -->
-                <div class="relative z-10">
-                    <div class="flex items-center mb-8">
-                        <div class="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0"><i class="fas fa-clock text-2xl"></i></div>
+                <div class="relative z-10 w-full">
+                    <div class="flex flex-col items-center justify-center space-y-4">
                         <div>
                             <h1 class="font-bold text-xl leading-tight">ChronoSync Attendance</h1>
-                            <p class="text-blue-200 text-xs tracking-wider uppercase">Staff Portal</p>
                         </div>
                     </div>
-
-                    <div class="space-y-6">
-                        <h2 class="text-3xl font-bold tracking-tight">Welcome <br/> to the Future.</h2>
-                        <p class="text-emerald-100/80 leading-relaxed text-sm">
-                            Access our secure biometric attendance system. Creating an account is the first step to seamless unified identity management.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Features List -->
-                <div class="relative z-10 mt-8 space-y-4">
-                    <div class="flex items-center text-emerald-100/90 text-sm">
-                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-3 backdrop-blur-sm">
-                            <i class="fas fa-shield-alt text-xs"></i>
-                        </div>
-                        <span>Secure Enterprise Login</span>
-                    </div>
-
-                </div>
-
-                <!-- Footer -->
-                <div class="relative z-10 mt-8">
-                    <p class="text-xs text-blue-300/60">&copy; {{ date('Y') }} Zimbabwe Open University</p>
                 </div>
             </div>
 

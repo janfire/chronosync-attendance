@@ -22,12 +22,12 @@
     @vite(['resources/js/attendance-clock.js'])
     <style>
         :root {
-            --navy: #0f2a1d; /* TaxEase Dark Green */
+            --navy: #0f2a1d; /* dark panel color, matches register page base */
             --navy-mid: #16402b; 
-            --navy-light: #25704b; 
-            --blue: #6abf94; /* TaxEase Accent Green */
-            --blue-bright: #42a975;
-            --cyan: #2e8b5d; 
+            --navy-light: #0f766e; 
+            --blue: #10b981; /* register page emerald accent */
+            --blue-bright: #047857;
+            --cyan: #065f46; 
             --purple: #1d563a;
             --purple-light: #9dd8ba;
             --gold: #f59e0b;
@@ -77,7 +77,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 1080px;
+            max-width: 760px;
             min-height: 100%;
             display: flex;
             align-items: center;
@@ -90,8 +90,8 @@
             grid-template-columns: 1fr;
             background: rgba(255, 255, 255, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem; /* matches rounded-2xl */
-            overflow: hidden;
+            border-radius: 1.5rem;
+            overflow: visible;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* matches shadow-2xl */
             backdrop-filter: blur(10px);
             min-height: 0;
@@ -99,22 +99,44 @@
 
         @media (min-width: 1024px) {
             .card {
-                grid-template-columns: 420px 1fr;
-                min-height: 640px;
-                max-height: 90vh;
+                grid-template-columns: 30% 70%;
+                min-height: 520px;
+                max-height: none;
+                max-width: 760px;
+            }
+            .info-cards {
+                display: none;
+            }
+            .panel-left {
+                gap: 1rem;
+                padding: 1.25rem 1.35rem;
+            }
+            .live-time {
+                margin-top: 0.85rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .card {
+                grid-template-columns: 28% 72%;
+                max-width: 840px;
             }
         }
 
         /* ─── LEFT PANEL ─── */
         .panel-left {
-            background: var(--navy);
+            /* Soften the left panel color so content reads easier on laptops */
+            background: linear-gradient(180deg, var(--navy-mid) 0%, rgba(15,42,29,0.88) 100%);
             border-right: 1px solid rgba(255,255,255,0.06);
-            padding: clamp(1.5rem, 4vw, 2.5rem);
+            padding: clamp(1rem, 3vw, 1.8rem);
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 1rem;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            min-height: 0;
+            border-top-left-radius: 1.5rem;
+            border-bottom-left-radius: 1.5rem;
         }
 
         /* Decorative elements removed to match register.blade.php solid blue background */
@@ -138,18 +160,18 @@
         }
 
         .brand-text h1 {
-            font-size: 1.1rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: var(--white);
             letter-spacing: -0.02em;
-            line-height: 1.2;
+            line-height: 1.15;
         }
 
         .brand-text p {
-            font-size: 0.625rem;
+            font-size: 0.62rem;
             font-weight: 500;
-            color: rgba(148, 183, 255, 0.6);
-            letter-spacing: 0.12em;
+            color: rgba(167, 253, 208, 0.7);
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             margin-top: 2px;
         }
@@ -158,7 +180,7 @@
         .live-time {
             position: relative;
             z-index: 1;
-            padding: 1.25rem 1.5rem;
+            padding: 0.75rem 0.9rem;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 16px;
@@ -166,17 +188,17 @@
 
         .live-time .time-digits {
             font-family: var(--font-mono);
-            font-size: clamp(2.5rem, 6vw, 3.5rem);
-            font-weight: 500;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 600;
             color: var(--white);
             letter-spacing: -0.02em;
-            line-height: 1;
+            line-height: 1.05;
         }
 
         .live-time .time-date {
-            font-size: 0.8rem;
-            color: rgba(148, 183, 255, 0.6);
-            margin-top: 0.375rem;
+            font-size: 0.72rem;
+            color: rgba(148, 183, 255, 0.65);
+            margin-top: 0.3rem;
             font-weight: 400;
         }
 
@@ -190,7 +212,7 @@
         .info-cards {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.55rem;
             position: relative;
             z-index: 1;
             flex: 1;
@@ -199,8 +221,8 @@
         .info-card {
             display: flex;
             align-items: flex-start;
-            gap: 1rem;
-            padding: 1rem 1.25rem;
+            gap: 0.6rem;
+            padding: 0.55rem 0.75rem;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.06);
             border-radius: 14px;
@@ -213,13 +235,13 @@
         }
 
         .info-icon {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.125rem;
+            font-size: 0.9rem;
             flex-shrink: 0;
         }
 
@@ -227,20 +249,20 @@
         .info-icon.purple { background: rgba(124, 58, 237, 0.2); color: var(--purple-light); }
 
         .info-text h3 {
-            font-size: 0.875rem;
+            font-size: 0.78rem;
             font-weight: 600;
             color: var(--white);
             margin-bottom: 2px;
         }
 
         .info-text p {
-            font-size: 0.75rem;
-            color: rgba(148, 183, 255, 0.55);
-            line-height: 1.4;
+            font-size: 0.66rem;
+            color: rgba(148, 183, 255, 0.58);
+            line-height: 1.35;
         }
 
         .panel-footer {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: rgba(100, 130, 180, 0.5);
             position: relative;
             z-index: 1;
@@ -250,11 +272,13 @@
         /* ─── RIGHT PANEL ─── */
         .panel-right {
             background: var(--white);
-            padding: clamp(1.5rem, 4vw, 2.5rem);
+            padding: clamp(0.75rem, 2vw, 1.25rem);
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            border-top-right-radius: 1.5rem;
+            border-bottom-right-radius: 1.5rem;
         }
 
         /* ── Selection Screen ── */
@@ -266,7 +290,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: clamp(1.5rem, 4vw, 2.5rem);
+            padding: clamp(1rem, 3vw, 1.8rem);
             transition: opacity 0.3s ease, transform 0.3s ease;
             flex: 1;
         }
@@ -281,7 +305,7 @@
         }
 
         .selection-screen h2 {
-            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            font-size: clamp(1rem, 2.3vw, 1.4rem);
             font-weight: 700;
             color: var(--navy);
             text-align: center;
@@ -289,20 +313,20 @@
         }
 
         .selection-screen > p {
-            font-size: 0.875rem;
+            font-size: 0.82rem;
             color: var(--gray-500);
             text-align: center;
             margin-top: 0.5rem;
-            max-width: 340px;
+            max-width: 310px;
         }
 
         .method-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: 0.75rem;
             width: 100%;
-            max-width: 420px;
-            margin-top: 2rem;
+            max-width: 360px;
+            margin-top: 1.5rem;
         }
 
         @media (max-width: 380px) {
@@ -313,20 +337,31 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 1.5rem 1rem;
+            padding: 0.85rem 0.75rem;
             background: var(--white);
             border: 1.5px solid var(--gray-100);
-            border-radius: 18px;
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            transition: transform 0.18s cubic-bezier(0.2,0,0.2,1), box-shadow 0.18s;
             text-align: center;
-            gap: 0.875rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            gap: 0.55rem;
+            box-shadow: 0 6px 16px rgba(16,24,40,0.06);
+            min-height: 110px;
+            display: inline-flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
         }
 
         .method-btn:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 18px 40px rgba(16,24,40,0.12);
+        }
+
+        .method-btn:focus-visible {
+            outline: 3px solid rgba(66, 165, 130, 0.18);
+            outline-offset: 6px;
             transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.1);
         }
 
         .method-btn.face:hover {
@@ -340,14 +375,14 @@
         }
 
         .method-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.75rem;
-            transition: transform 0.25s;
+            font-size: 1.05rem;
+            transition: transform 0.18s;
         }
 
         .method-btn:hover .method-icon { transform: scale(1.1); }
@@ -356,16 +391,25 @@
         .method-icon.purple { background: rgba(124,58,237,0.08); color: var(--purple); }
 
         .method-btn h3 {
-            font-size: 0.9375rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: var(--navy);
+            margin-bottom: 0;
         }
 
         .method-btn span {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: var(--gray-500);
-            font-weight: 400;
+            font-weight: 500;
         }
+
+        /* Stronger primary visual for facial scan */
+        .method-btn.face { border-color: rgba(66,165,130,0.12); }
+        .method-btn.face .method-icon { box-shadow: inset 0 -6px 18px rgba(66,165,130,0.03); }
+        .method-btn.face h3 { color: #117a52; }
+
+        /* Subtle variant for fingerprint */
+        .method-btn.finger { border-color: rgba(124,58,237,0.06); }
 
         .qr-link {
             margin-top: 1.5rem;
@@ -386,8 +430,8 @@
         .active-header {
             display: none;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.25rem;
+            gap: 0.65rem;
+            margin-bottom: 1rem;
         }
 
         .active-header.visible { display: flex; }
@@ -413,7 +457,7 @@
         }
 
         .active-header h2 {
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--navy);
             letter-spacing: -0.02em;
@@ -433,12 +477,12 @@
         .camera-wrap {
             position: relative;
             width: 100%;
-            max-width: 440px;
-            border-radius: 20px;
+            max-width: 300px;
+            border-radius: 16px;
             overflow: hidden;
             background: var(--navy);
             aspect-ratio: 4/3;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.08);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06);
             margin: 0 auto;
         }
 
@@ -502,17 +546,17 @@
 
         .cam-status-badge {
             position: absolute;
-            bottom: 14px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.65);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 100px;
-            padding: 0.4rem 1rem;
+            padding: 0.32rem 0.9rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             white-space: nowrap;
         }
 
@@ -530,19 +574,19 @@
         }
 
         .cam-status-badge span {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: rgba(255,255,255,0.85);
             font-weight: 500;
             font-family: var(--font-mono);
         }
 
         .cam-hint {
-            margin-top: 1rem;
-            font-size: 0.8rem;
+            margin-top: 0.85rem;
+            font-size: 0.78rem;
             color: var(--gray-500);
             display: flex;
             align-items: center;
-            gap: 0.375rem;
+            gap: 0.35rem;
         }
 
         .cam-hint i { color: var(--gold); }
@@ -561,8 +605,8 @@
 
         .fp-ring-wrap {
             position: relative;
-            width: 180px;
-            height: 180px;
+            width: 120px;
+            height: 120px;
         }
 
         .fp-ring {
@@ -591,7 +635,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
+            font-size: 3.4rem;
             color: rgba(124, 58, 237, 0.25);
             animation: breathe 3s ease-in-out infinite;
         }
@@ -602,14 +646,14 @@
         }
 
         #fingerprint-container h3 {
-            font-size: 1.25rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--navy);
             letter-spacing: -0.02em;
         }
 
         #fingerprint-container p {
-            font-size: 0.875rem;
+            font-size: 0.82rem;
             color: var(--gray-500);
         }
 

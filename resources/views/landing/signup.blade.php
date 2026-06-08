@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Get Started - {{ config('app.name') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -26,120 +27,223 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body class="min-h-screen flex items-center justify-center p-6 bg-gray-50 relative">
     <div class="bg-pattern"></div>
-    <div class="max-w-4xl w-full flex rounded-3xl overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] bg-white min-h-[600px] relative z-10">
-        <!-- Left Side: Branding/Marketing -->
-        <div class="hidden lg:flex lg:w-1/3 bg-[#0f2a1d] p-12 flex-col justify-between text-white relative overflow-hidden">
-            <div class="relative z-10">
-                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-8 shadow-lg shadow-emerald-500/20">
-                    <i class="fas fa-clock text-xl"></i>
+    <div class="max-w-lg w-full rounded-3xl overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] bg-white min-h-[560px] relative z-10">
+        <div class="w-full p-6 lg:p-8">
+            <div class="mb-8 text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500 text-white mb-4">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <h2 class="text-3xl font-extrabold leading-tight mb-4">Start your 14-day free trial.</h2>
-                <p class="text-emerald-200/70 text-sm leading-relaxed">
-                    Join hundreds of Zimbabwean businesses automating their attendance with facial recognition.
-                </p>
-            </div>
-
-            <div class="space-y-6 relative z-10">
-                <div class="flex items-center space-x-4">
-                    <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <i class="fas fa-check text-xs text-emerald-400"></i>
-                    </div>
-                    <span class="text-xs font-medium text-white/80">No credit card required</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <i class="fas fa-check text-xs text-emerald-400"></i>
-                    </div>
-                    <span class="text-xs font-medium text-white/80">Unlimited employees (Corporate)</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                        <i class="fas fa-check text-xs text-emerald-400"></i>
-                    </div>
-                    <span class="text-xs font-medium text-white/80">Pay via EcoCash/ZIPIT</span>
-                </div>
-            </div>
-
-            <!-- Abstract Background Shapes -->
-            <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute -top-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
-        </div>
-
-        <!-- Right Side: Form -->
-        <div class="w-full lg:w-2/3 p-8 lg:p-12 overflow-y-auto">
-            <div class="mb-8">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600 mb-3">ChronoSync</p>
                 <h1 class="text-2xl font-bold text-gray-900 mb-2">Create your workspace</h1>
-                <p class="text-gray-500 text-sm">Enter your company details to get started.</p>
             </div>
 
-            @if ($errors->any())
-                <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-sm animate-shake">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
+            <div id="step-1" class="space-y-5">
+                <div class="space-y-3 rounded-3xl border border-gray-100 bg-gray-50 p-5 text-left">
+                    <h2 class="text-lg font-semibold text-gray-900">Welcome to Workspace Creation</h2>
+                    <p class="text-gray-600 text-sm leading-6">This process creates a new ChronoSync workspace for your company. You'll enter company details, and we'll generate your workspace subdomain automatically.</p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li>• We'll create a dedicated workspace for your company.</li>
+                        <li>• Your workspace URL is generated for you.</li>
+                        <li>• After completion, you'll be taken to your dashboard.</li>
                     </ul>
                 </div>
-            @endif
+                <button id="nextBtn" class="w-full py-3 rounded-2xl bg-[#0f2a1d] text-white font-semibold shadow-sm hover:bg-emerald-900 transition">Next</button>
+            </div>
 
-            <form action="{{ route('onboarding.register') }}" method="POST" class="space-y-6">
+            <form id="onboardingForm" action="{{ route('onboarding.register') }}" method="POST" class="space-y-5">
                 @csrf
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Company Info -->
+                <div id="step-2" class="hidden space-y-6">
+                    <div class="space-y-3">
+                        <h2 class="text-lg font-semibold text-gray-900">Company details</h2>
+                        <p class="text-gray-500 text-sm">Enter your company name and email. This email will be used to log in.</p>
+                    </div>
+
+                    <div id="errorContainer" class="hidden rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700"></div>
+
                     <div class="space-y-4">
-                        <h3 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Company Details</h3>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Company Name</label>
-                            <input type="text" name="company_name" value="{{ old('company_name') }}" required placeholder="e.g. Acme Zimbabwe" class="w-full p-3 bg-gray-50 border @error('company_name') border-rose-500 @else border-gray-100 @enderror rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Company Name</label>
+                            <input id="companyName" type="text" name="company_name" value="{{ old('company_name') }}" required placeholder="e.g. Acme Zimbabwe" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Desired Subdomain</label>
-                            <div class="flex items-center">
-                                <input type="text" name="subdomain" value="{{ old('subdomain') }}" required placeholder="acme" class="flex-1 p-3 bg-gray-50 border @error('subdomain') border-rose-500 @else border-gray-100 @enderror rounded-l-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                                <span class="bg-gray-100 border-y border-r border-gray-100 p-3 text-sm text-gray-500 rounded-r-xl">.attenda.zw</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Company Email</label>
-                            <input type="email" name="email" value="{{ old('email') }}" required placeholder="contact@acme.co.zw" class="w-full p-3 bg-gray-50 border @error('email') border-rose-500 @else border-gray-100 @enderror rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Company Email</label>
+                            <input id="companyEmail" type="email" name="email" value="{{ old('email') }}" required placeholder="contact@acme.co.zw" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10">
                         </div>
                     </div>
 
-                    <!-- Admin Info -->
-                    <div class="space-y-4">
-                        <h3 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Account Admin</h3>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Full Name</label>
-                            <input type="text" name="admin_name" value="{{ old('admin_name') }}" required placeholder="John Doe" class="w-full p-3 bg-gray-50 border @error('admin_name') border-rose-500 @else border-gray-100 @enderror rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Admin Email</label>
-                            <input type="email" name="admin_email" value="{{ old('admin_email') }}" required placeholder="john@acme.co.zw" class="w-full p-3 bg-gray-50 border @error('admin_email') border-rose-500 @else border-gray-100 @enderror rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Password</label>
-                            <input type="password" name="password" required class="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Confirm Password</label>
-                            <input type="password" name="password_confirmation" required class="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                        </div>
+                    <input type="hidden" name="subdomain" id="subdomain" value="">
+
+                    <div class="flex justify-end">
+                        <button id="companyNextBtn" type="button" class="rounded-2xl bg-[#0f2a1d] py-3 px-6 text-sm font-semibold text-white shadow-sm hover:bg-emerald-900 transition">Next</button>
                     </div>
                 </div>
 
-                <div class="pt-6 border-t border-gray-50">
-                    <button type="submit" class="w-full py-4 bg-[#0f2a1d] text-white font-bold rounded-2xl shadow-xl shadow-emerald-900/10 hover:bg-emerald-900 transform hover:-translate-y-0.5 transition-all">
-                        Create Workspace
-                    </button>
-                    <p class="text-[10px] text-gray-400 text-center mt-4 px-8 leading-relaxed">
-                        By clicking "Create Workspace", you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#" class="underline">Privacy Policy</a>. No payment information is required to start your trial.
-                    </p>
+                <div id="step-3" class="hidden space-y-6">
+                <div class="space-y-3">
+                    <h2 class="text-lg font-semibold text-gray-900">Account owner</h2>
+                    <p class="text-gray-500 text-sm">Enter the administrator name and password for your workspace.</p>
                 </div>
-            </form>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Full Name</label>
+                        <input type="text" name="admin_name" value="{{ old('admin_name') }}" required placeholder="Mubatsiri Masiya" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Password</label>
+                        <input type="password" name="password" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Confirm Password</label>
+                        <input type="password" name="password_confirmation" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button id="backToCompanyBtn" type="button" class="rounded-2xl border border-gray-200 bg-white py-3 px-6 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">Back</button>
+                    <button type="submit" class="rounded-2xl bg-[#0f2a1d] py-3 px-6 text-sm font-semibold text-white shadow-sm hover:bg-emerald-900 transition">Create Workspace</button>
+                </div>
+            </div>
+        </form>
+
+            <div id="step-4" class="hidden space-y-6 text-center">
+                <div class="rounded-3xl border border-emerald-100 bg-emerald-50 p-6">
+                    <p class="text-sm font-semibold text-emerald-700">Workspace created successfully!</p>
+                    <p class="mt-3 text-gray-700">Your workspace is ready at:</p>
+                    <p id="workspaceUrl" class="mt-2 font-medium text-gray-900 break-words"></p>
+                    <p class="mt-3 text-gray-500 text-sm">Use this URL to share with your users. Redirecting to your dashboard now.</p>
+                    <p class="mt-4 text-xs text-gray-400" id="redirectCountdown">Redirecting in 5 seconds...</p>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const step3 = document.getElementById('step-3');
+        const step4 = document.getElementById('step-4');
+        const nextBtn = document.getElementById('nextBtn');
+        const companyNextBtn = document.getElementById('companyNextBtn');
+        const backToCompanyBtn = document.getElementById('backToCompanyBtn');
+        const onboardingForm = document.getElementById('onboardingForm');
+        const companyName = document.getElementById('companyName');
+        const companyEmail = document.getElementById('companyEmail');
+        const subdomainInput = document.getElementById('subdomain');
+        const errorContainer = document.getElementById('errorContainer');
+        const workspaceUrl = document.getElementById('workspaceUrl');
+        const redirectCountdown = document.getElementById('redirectCountdown');
+
+        function slugify(value) {
+            return value.toString().toLowerCase().trim()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .substring(0, 50) || 'workspace';
+        }
+
+        function updateSubdomain() {
+            const slug = slugify(companyName.value || 'workspace');
+            subdomainInput.value = slug;
+        }
+
+        function showError(message) {
+            errorContainer.innerHTML = `<p>${message}</p>`;
+            errorContainer.classList.remove('hidden');
+        }
+
+        nextBtn.addEventListener('click', () => {
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            companyName.focus();
+        });
+
+        companyNextBtn.addEventListener('click', () => {
+            if (!companyName.value.trim() || !companyEmail.value.trim()) {
+                showError('Company name and email are required.');
+                return;
+            }
+
+            errorContainer.classList.add('hidden');
+            updateSubdomain();
+            step2.classList.add('hidden');
+            step3.classList.remove('hidden');
+        });
+
+        backToCompanyBtn.addEventListener('click', () => {
+            step3.classList.add('hidden');
+            step2.classList.remove('hidden');
+        });
+
+        companyName.addEventListener('input', updateSubdomain);
+
+        onboardingForm.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !step2.classList.contains('hidden')) {
+                event.preventDefault();
+                companyNextBtn.click();
+            }
+        });
+
+        onboardingForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            errorContainer.classList.add('hidden');
+            errorContainer.innerHTML = '';
+
+            const formData = new FormData(onboardingForm);
+            const payload = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(onboardingForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    step3.classList.add('hidden');
+                    step4.classList.remove('hidden');
+                    workspaceUrl.textContent = data.workspace_url;
+
+                    let seconds = 5;
+                    redirectCountdown.textContent = `Redirecting in ${seconds} seconds...`;
+                    const interval = setInterval(() => {
+                        seconds -= 1;
+                        redirectCountdown.textContent = `Redirecting in ${seconds} seconds...`;
+                        if (seconds <= 0) {
+                            clearInterval(interval);
+                            window.location.href = data.redirect_url;
+                        }
+                    }, 1000);
+                } else if (response.status === 422) {
+                    const data = await response.json();
+                    const errors = data.errors || {};
+                    const list = document.createElement('ul');
+                    list.className = 'list-disc list-inside space-y-1';
+                    Object.values(errors).flat().forEach(message => {
+                        const item = document.createElement('li');
+                        item.textContent = message;
+                        list.appendChild(item);
+                    });
+                    errorContainer.innerHTML = '';
+                    errorContainer.appendChild(list);
+                    errorContainer.classList.remove('hidden');
+                } else {
+                    throw new Error('Unable to create workspace. Please try again.');
+                }
+            } catch (error) {
+                errorContainer.textContent = error.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

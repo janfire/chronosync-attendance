@@ -35,7 +35,7 @@ class TenantProvisioningService
             // 2. Create Admin User
             $admin = User::create([
                 'name'            => $data['admin_name'],
-                'email'           => $data['admin_email'],
+                'email'           => $data['email'],
                 'password'        => Hash::make($data['password']),
                 'role'            => UserRole::SUPER_ADMIN, // The company owner is super_admin for their tenant
                 'employee_number' => 'ADMIN-001',

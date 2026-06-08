@@ -75,14 +75,14 @@
      <!-- Filters removed as DataTables handles search/filter -->
 
     <!-- Users Table Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-visible">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-3">
-            <div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 users-table-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
                 <h3 class="text-lg font-semibold text-gray-900">System Users</h3>
                 <p class="text-xs text-gray-500 mt-1">Manage all registered users</p>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <a href="{{ route('admin.users.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium shadow-sm">
+            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <a href="{{ route('admin.users.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center gap-2 text-sm font-medium shadow-sm">
                     <i class="fas fa-plus"></i>
                     <span>Create User</span>
                 </a>
@@ -117,11 +117,33 @@
                 </div>
             </div>
         </div>
+
+        <div id="bulk-actions-bar" class="hidden px-6 py-2.5 bg-red-50 border-b border-red-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-red-800">
+                <span id="bulk-selected-count">0</span> user(s) selected
+            </p>
+            <button
+                type="button"
+                id="bulk-delete-btn"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+                <i class="fas fa-trash"></i>
+                <span>Delete selected</span>
+            </button>
+        </div>
         
-        <div class="admin-table-scroll px-1 pb-1">
+        <form id="bulk-delete-form" method="POST" action="{{ route('admin.users.bulk-destroy') }}" class="hidden">
+            @csrf
+            <div id="bulk-delete-inputs"></div>
+        </form>
+
+        <div class="admin-table-scroll px-4 pb-4">
             <table class="w-full admin-data-table display" id="staffTable">
                 <thead>
                     <tr>
+                        <th class="col-select">
+                            <input type="checkbox" id="select-all-users" class="admin-table-checkbox" title="Select all on this page" aria-label="Select all users on this page">
+                        </th>
                         <th>
                             <div class="flex items-center gap-1.5">
                                 <span>Name</span>
@@ -138,7 +160,7 @@
                             </div>
                         </th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -167,8 +189,20 @@
 
                             $isEnrolled = $user->biometricData && $user->biometricData->facial_status == 'captured';
                             $lastActivity = $user->attendanceLogs()->latest('timestamp')->first();
+                            $canDelete = $user->id !== Auth::id() && Auth::user()->role->canManage($user->role);
                         @endphp
                         <tr>
+                            <td class="col-select">
+                                @if($canDelete)
+                                    <input
+                                        type="checkbox"
+                                        class="admin-table-checkbox user-row-checkbox"
+                                        value="{{ $user->id }}"
+                                        data-user-name="{{ $user->name }}"
+                                        aria-label="Select {{ $user->name }}"
+                                    >
+                                @endif
+                            </td>
                             <td class="whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="h-10 w-10 rounded-full {{ $avatarColor }} flex items-center justify-center text-white font-semibold mr-3 shadow-sm">
@@ -223,7 +257,7 @@
                                     <span class="text-xs text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap">
+                            <td class="whitespace-nowrap col-actions">
                                 <div class="table-action-group">
                                     <a href="{{ route('admin.users.edit', $user) }}" class="table-action-btn table-action-btn--edit" title="Edit User">
                                         <i class="fas fa-edit text-sm"></i>
@@ -260,7 +294,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <div class="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                                         <i class="fas fa-users text-gray-400 text-3xl"></i>
@@ -375,12 +409,111 @@
         }
     }, true);
 
+    const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    const bulkDeleteForm = document.getElementById('bulk-delete-form');
+    const bulkDeleteInputs = document.getElementById('bulk-delete-inputs');
+    const bulkSelectedCount = document.getElementById('bulk-selected-count');
+    const bulkActionsBar = document.getElementById('bulk-actions-bar');
+    const selectAllUsers = document.getElementById('select-all-users');
+
+    const getVisibleRowCheckboxes = () => {
+        if (usersTable) {
+            return usersTable.rows({ page: 'current' }).nodes().toArray()
+                .flatMap((row) => [...row.querySelectorAll('.user-row-checkbox')]);
+        }
+
+        const table = document.getElementById('staffTable');
+        return table ? [...table.querySelectorAll('tbody .user-row-checkbox')] : [];
+    };
+
+    const updateBulkDeleteState = () => {
+        const checked = document.querySelectorAll('.user-row-checkbox:checked');
+        const count = checked.length;
+
+        if (bulkSelectedCount) bulkSelectedCount.textContent = String(count);
+        if (bulkActionsBar) {
+            bulkActionsBar.classList.toggle('hidden', count === 0);
+        }
+
+        const visible = getVisibleRowCheckboxes();
+        if (!selectAllUsers) return;
+
+        if (visible.length === 0) {
+            selectAllUsers.checked = false;
+            selectAllUsers.indeterminate = false;
+            return;
+        }
+
+        selectAllUsers.checked = visible.every((checkbox) => checkbox.checked);
+        selectAllUsers.indeterminate = count > 0 && !selectAllUsers.checked;
+    };
+
+    document.addEventListener('change', (event) => {
+        if (event.target.classList.contains('user-row-checkbox')) {
+            updateBulkDeleteState();
+        }
+
+        if (event.target.id === 'select-all-users') {
+            const isChecked = event.target.checked;
+            getVisibleRowCheckboxes().forEach((checkbox) => {
+                checkbox.checked = isChecked;
+            });
+            updateBulkDeleteState();
+        }
+    });
+
+    bulkDeleteBtn?.addEventListener('click', () => {
+        const checked = [...document.querySelectorAll('.user-row-checkbox:checked')];
+        if (!checked.length || !bulkDeleteForm || !bulkDeleteInputs) {
+            return;
+        }
+
+        const names = checked.map((checkbox) => checkbox.dataset.userName).filter(Boolean);
+        const preview = names.length <= 3
+            ? names.join(', ')
+            : `${names.slice(0, 3).join(', ')} and ${names.length - 3} more`;
+        const confirmText = `You are about to delete ${checked.length} user(s): ${preview}. This action cannot be undone.`;
+
+        const submitBulkDelete = () => {
+            bulkDeleteInputs.innerHTML = '';
+            checked.forEach((checkbox) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'user_ids[]';
+                input.value = checkbox.value;
+                bulkDeleteInputs.appendChild(input);
+            });
+            bulkDeleteForm.submit();
+        };
+
+        if (typeof Swal !== 'undefined' && Swal.fire) {
+            Swal.fire({
+                title: 'Delete Selected Users?',
+                text: confirmText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) submitBulkDelete();
+            });
+            return;
+        }
+
+        if (window.confirm(confirmText)) submitBulkDelete();
+    });
+
     if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.DataTable) {
         window.jQuery(function() {
             usersTable = window.jQuery('#staffTable').DataTable({
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
-                order: [[4, 'desc']],
+                order: [[5, 'desc']],
+                columnDefs: [
+                    { orderable: false, searchable: false, targets: [0, 7] }
+                ],
                 stripeClasses: ['even', 'odd'],
                 language: {
                     search: '',
@@ -397,11 +530,17 @@
                 },
                 dom: '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>',
                 drawCallback: function() {
-                    // Keep responsive classes after DataTables redraws.
+                    if (selectAllUsers) {
+                        selectAllUsers.checked = false;
+                        selectAllUsers.indeterminate = false;
+                    }
+                    updateBulkDeleteState();
                 }
             });
         });
     }
+
+    updateBulkDeleteState();
 
     function getExportRows() {
         const rows = [];
@@ -410,19 +549,19 @@
         const parseRowNode = (rowNode) => {
             if (!rowNode) return null;
             const cells = rowNode.querySelectorAll('td');
-            if (cells.length < 6) return null;
+            if (cells.length < 7) return null;
 
             const emptyStateCell = cells[0];
-            if (emptyStateCell && emptyStateCell.getAttribute('colspan') === '7') {
+            if (emptyStateCell && emptyStateCell.getAttribute('colspan') === '8') {
                 return null;
             }
 
-            const name = cells[0].querySelector('.text-sm.font-medium.text-gray-900')?.textContent?.trim() || cells[0].textContent.trim().split('\n')[0];
-            const email = cells[1].textContent.trim();
-            const empNumber = cells[2].textContent.trim();
-            const role = cells[3].textContent.trim().replace(/\s+/g, ' ');
-            const created = cells[4].querySelector('.text-sm.font-medium.text-gray-900')?.textContent?.trim() || cells[4].textContent.trim().split('\n')[0];
-            const status = cells[5].textContent.trim().replace(/\s+/g, ' ') || '-';
+            const name = cells[1].querySelector('.text-sm.font-medium.text-gray-900')?.textContent?.trim() || cells[1].textContent.trim().split('\n')[0];
+            const email = cells[2].textContent.trim();
+            const empNumber = cells[3].textContent.trim();
+            const role = cells[4].textContent.trim().replace(/\s+/g, ' ');
+            const created = cells[5].querySelector('.text-sm.font-medium.text-gray-900')?.textContent?.trim() || cells[5].textContent.trim().split('\n')[0];
+            const status = cells[6].textContent.trim().replace(/\s+/g, ' ') || '-';
 
             if (!name || !email) return null;
 

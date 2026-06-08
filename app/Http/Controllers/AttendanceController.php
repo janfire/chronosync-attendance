@@ -170,7 +170,7 @@ class AttendanceController extends Controller
 
         // Generate redirect URL to the custom, secure summary profile page
         $isMobile = $this->isMobileDevice($request);
-        $redirectUrl = URL::signedRoute('attendance.summary', ['user_id' => $user->id]);
+        $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), ['user_id' => $user->id]);
         
         // Auto-logout if user is logged in (kiosk mode) to protect privacy outside the dashboard
         if (Auth::check()) {
@@ -349,7 +349,7 @@ class AttendanceController extends Controller
             // Do not log a failure. Instead, seamlessly redirect them to their profile.
             
             $isMobile = $this->isMobileDevice($request);
-            $redirectUrl = \Illuminate\Support\Facades\URL::signedRoute('attendance.summary', [
+            $redirectUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), [
                 'user_id' => $user->id,
                 'prompt_clockout' => 1
             ]);

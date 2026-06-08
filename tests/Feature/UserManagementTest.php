@@ -79,4 +79,33 @@ class UserManagementTest extends TestCase
         $response->assertRedirect(route('admin.users.index'));
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
+
+    public function test_admin_can_bulk_delete_users()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $userOne = User::factory()->create(['role' => 'staff']);
+        $userTwo = User::factory()->create(['role' => 'staff']);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.bulk-destroy'), [
+            'user_ids' => [$userOne->id, $userTwo->id],
+        ]);
+
+        $response->assertRedirect(route('admin.users.index'));
+        $this->assertDatabaseMissing('users', ['id' => $userOne->id]);
+        $this->assertDatabaseMissing('users', ['id' => $userTwo->id]);
+    }
+
+    public function test_admin_cannot_bulk_delete_themselves()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $staff = User::factory()->create(['role' => 'staff']);
+
+        $response = $this->actingAs($admin)->post(route('admin.users.bulk-destroy'), [
+            'user_ids' => [$admin->id, $staff->id],
+        ]);
+
+        $response->assertRedirect(route('admin.users.index'));
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+        $this->assertDatabaseMissing('users', ['id' => $staff->id]);
+    }
 }

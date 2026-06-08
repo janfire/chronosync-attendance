@@ -42,6 +42,40 @@
         /* Admin tables & DataTables */
         .admin-table-scroll {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .users-table-card .dataTables_wrapper {
+            width: 100%;
+        }
+
+        .users-table-card .admin-dt-toolbar,
+        .users-table-card .admin-dt-footer {
+            margin: 0;
+        }
+
+        .admin-table-checkbox {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 0.25rem;
+            border: 1px solid #d1d5db;
+            accent-color: #059669;
+            cursor: pointer;
+        }
+
+        table.admin-data-table th.col-select,
+        table.admin-data-table td.col-select {
+            width: 2.75rem;
+            padding-left: 1rem;
+            padding-right: 0.5rem;
+            text-align: center;
+        }
+
+        table.admin-data-table th.col-actions,
+        table.admin-data-table td.col-actions {
+            min-width: 9rem;
+            padding-right: 1.5rem;
+            white-space: nowrap;
         }
 
         table.admin-data-table {
@@ -324,10 +358,7 @@
                             <span class="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-semibold">{{ $pending }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('admin.scores.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.scores.*') ? 'active' : '' }}">
-                        <i class="fas fa-star w-4 text-gray-500"></i>
-                        <span class="font-medium">Scores & Grades</span>
-                    </a>
+
                     <a href="{{ route('attendance.qr') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('attendance.qr') ? 'active' : '' }}">
                         <i class="fas fa-qrcode w-4 text-gray-500"></i>
                         <span class="font-medium">QR Code</span>
@@ -355,10 +386,10 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <div class="max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div class="flex-1 flex flex-col overflow-hidden min-h-0">
+            <div class="max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
                 <!-- Top Bar -->
-                <header class="bg-white border border-gray-200 rounded-2xl px-6 py-4 mt-4 shadow-sm">
+                <header class="bg-white border border-gray-200 rounded-2xl px-6 py-4 mt-4 shadow-sm shrink-0">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <button id="sidebarToggle" type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
@@ -399,7 +430,7 @@
                 </header>
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto py-6">
+            <main class="flex-1 min-h-0 overflow-y-auto py-6">
                 @if(session('success'))
                     <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
                         {{ session('success') }}

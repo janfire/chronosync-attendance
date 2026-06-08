@@ -26,9 +26,8 @@ class OnboardingController extends Controller
         $validated = $request->validate([
             'company_name' => 'required|string|max:255',
             'subdomain'    => 'required|alpha_dash|unique:tenants,subdomain|max:50',
-            'email'        => 'required|email|max:255',
+            'email'        => 'required|email|unique:users,email|max:255',
             'admin_name'   => 'required|string|max:255',
-            'admin_email'  => 'required|email|unique:users,email',
             'password'     => 'required|min:8|confirmed',
         ]);
 
@@ -57,6 +56,16 @@ class OnboardingController extends Controller
         } catch (\Exception $e) {
             // Log the error but don't crash the onboarding flow
             logger()->error('Failed to send workspace welcome email: ' . $e->getMessage());
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'workspace_url' => $workspaceUrl,
+                'redirect_url' => $redirectUrl,
+                'subdomain' => $subdomain,
+                'company_name' => $result['tenant']->company_name,
+            ]);
         }
 
         return redirect()->to($redirectUrl)->with('success', "Welcome to your new workspace, {$result['tenant']->company_name}!");

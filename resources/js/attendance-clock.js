@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const imageData = elements.canvas.toDataURL('image/jpeg', 0.8);
 
             isProcessing = true;
+            let result; // Declare outside try so finally block can access it
             try {
                 const position = await getCurrentPosition();
 
@@ -176,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                 });
 
-                const result = await response.json();
+                result = await response.json();
 
                 if (result.success) {
                     handleSuccess(result);
@@ -292,8 +293,18 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (dot) dot.style.background = 'var(--error)';
                         }
                     } else {
-                        // Handle other errors
-                        console.error('Verification failed:', result.error);
+                        // Handle other errors - extract error message from various possible locations
+                        console.error('=== FACIAL VERIFICATION ERROR ===');
+                        console.error('Full response object:', result);
+                        console.error('Response JSON:', JSON.stringify(result, null, 2));
+                        console.error('result.error:', result.error);
+                        console.error('result.message:', result.message);
+                        console.error('result.errors?.message:', result.errors?.message);
+                        const errorMsg = result.error || result.message || result.errors?.message || 'Verification failed. Please try again.';
+                        console.log('Extracted error message:', errorMsg);
+                        console.log('errorMsg type:', typeof errorMsg);
+                        console.log('errorMsg is empty:', errorMsg === 'Verification failed. Please try again.');
+                        
                         if (badgeContainer) {
                             const badgeText = badgeContainer.querySelector('span');
                             if (badgeText) badgeText.textContent = "Verification failed.";
@@ -301,10 +312,32 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (dot) dot.style.background = 'var(--error)';
                         }
                         
-                        // Reset processing after a short delay for other errors
-                        setTimeout(() => {
-                            isProcessing = false;
-                        }, 2000);
+                        // Pause detection and show error
+                        clearInterval(faceDetectionInterval);
+                        isProcessing = false;
+                        
+                        if (typeof Swal !== 'undefined') {
+                            console.log('Showing Swal with error:', errorMsg);
+                            Swal.fire({
+                                title: 'Cannot Clock In',
+                                text: errorMsg,
+                                icon: 'error',
+                                confirmButtonColor: '#ef4444',
+                                confirmButtonText: 'OK',
+                                allowOutsideClick: false,
+                                didOpen: () => console.log('Swal dialog opened')
+                            }).then(() => {
+                                console.log('User clicked OK, resuming detection');
+                                isProcessing = false;
+                                startFaceDetection();
+                            });
+                        } else {
+                            console.warn('SweetAlert2 not available, using alert()');
+                            alert(errorMsg);
+                            setTimeout(() => {
+                                startFaceDetection();
+                            }, 1000);
+                        }
                     }
                 }
             } catch (e) {
@@ -363,6 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 continue;
             }
 
+            let result; // Declare outside try so we can check it
             try {
                 // identifyFingerprint waits up to 10s for a finger
                 updateZKStatus('scanning');
@@ -387,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                 });
 
-                const result = await response.json();
+                result = await response.json();
 
                 if (result.success) {
                     handleSuccess(result);
@@ -475,13 +509,42 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         }
                     } else {
-                        showResult('error', 'Not Recognized', result.error || 'Fingerprint not found.');
+                        // Handle non-registration errors - extract error from various possible locations
+                        console.error('=== FINGERPRINT VERIFICATION ERROR ===');
+                        console.error('Full response:', result);
+                        console.error('Response JSON:', JSON.stringify(result, null, 2));
+                        console.error('result.error:', result.error);
+                        console.error('result.message:', result.message);
+                        console.error('result.errors?.message:', result.errors?.message);
+                        const errorMsg = result.error || result.message || result.errors?.message || 'Verification failed. Please try again.';
+                        console.log('Extracted fingerprint error:', errorMsg);
+                        console.log('errorMsg type:', typeof errorMsg);
+                        console.log('errorMsg is empty:', errorMsg === 'Verification failed. Please try again.');
+                        
+                        isProcessing = false;
+                        
+                        if (typeof Swal !== 'undefined') {
+                            console.log('Showing Swal dialog with fingerprint error:', errorMsg);
+                            Swal.fire({
+                                title: 'Cannot Clock In',
+                                text: errorMsg,
+                                icon: 'error',
+                                confirmButtonColor: '#ef4444',
+                                confirmButtonText: 'OK',
+                                allowOutsideClick: false,
+                                didOpen: () => console.log('Fingerprint error Swal opened')
+                            }).then(() => {
+                                console.log('User acknowledged fingerprint error');
+                                updateZKStatus('ready');
+                            });
+                            return;
+                        } else {
+                            console.warn('SweetAlert2 not available for fingerprint, using alert()');
+                            alert(errorMsg);
+                            await new Promise(r => setTimeout(r, 500));
+                            updateZKStatus('ready');
+                        }
                     }
-                    
-                    // Wait a bit before retrying
-                    await new Promise(r => setTimeout(r, 2000));
-                    hideResult();
-                    updateZKStatus('ready');
                 }
 
             } catch (e) {

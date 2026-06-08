@@ -80,6 +80,8 @@ Route::middleware(['tenant'])->group(function () {
                 'update' => 'admin.users.update',
                 'destroy' => 'admin.users.destroy',
             ]);
+            Route::post('users/bulk-destroy', [\App\Http\Controllers\UserManagementController::class, 'bulkDestroy'])
+                ->name('admin.users.bulk-destroy');
 
             // Advanced Reports Routes
             Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('admin.reports.index');
@@ -87,11 +89,6 @@ Route::middleware(['tenant'])->group(function () {
             Route::post('/reports/settings', [\App\Http\Controllers\ReportController::class, 'updateSettings'])->name('admin.reports.settings.update');
             Route::get('/reports/fetch-holidays', [\App\Http\Controllers\ReportController::class, 'fetchHolidays'])->name('admin.reports.fetch.holidays');
             Route::get('/reports/export', [\App\Http\Controllers\ReportController::class, 'exportMonthly'])->name('admin.reports.export');
-
-            // Scores & Grades Routes
-            Route::get('/scores', [\App\Http\Controllers\Admin\AttendanceScoreController::class, 'index'])->name('admin.scores.index');
-            Route::get('/scores/export', [\App\Http\Controllers\Admin\AttendanceScoreController::class, 'export'])->name('admin.scores.export');
-            Route::get('/scores/{user}', [\App\Http\Controllers\Admin\AttendanceScoreController::class, 'show'])->name('admin.scores.show');
 
             // Attendance Exceptions / Corrections
             Route::get('/exceptions', [\App\Http\Controllers\AttendanceExceptionController::class, 'index'])->name('admin.exceptions.index');

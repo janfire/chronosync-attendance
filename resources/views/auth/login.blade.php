@@ -31,42 +31,14 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: url('{{ asset('images/background-pattern.png') }}');">
     
-    <div class="w-full max-w-4xl">
-        <div class="glass-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row h-auto min-h-[600px]">
-            
-            <!-- Left Side: Branding -->
-            <div class="lg:w-5/12 bg-[#0f2a1d] text-white p-8 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute inset-0 opacity-10 bg-pattern"></div>
+    <div class="w-full max-w-sm">
+        <div class="glass-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col h-auto">
+            <!-- Login Form -->
+            <div class="w-full max-w-sm mx-auto bg-white flex flex-col justify-center p-5 relative">
                 
-                <!-- Logo Section -->
-                <div class="relative z-10">
-                    <div class="flex items-center mb-8">
-                        <div class="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0"><i class="fas fa-clock text-2xl"></i></div>
-                        <div>
-                            <h1 class="font-bold text-xl leading-tight">ChronoSync Attendance</h1>
-                            <p class="text-blue-200 text-xs tracking-wider uppercase">Admin Portal</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6 mt-12">
-                        <h2 class="text-3xl font-bold tracking-tight">Access <br/> Control Center.</h2>
-                        <p class="text-emerald-100/80 leading-relaxed text-sm">
-                            Manage users, view insights, and configure the attendance system from one secure dashboard.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="relative z-10 mt-8">
-                    <p class="text-xs text-blue-300/60">&copy; {{ date('Y') }} Zimbabwe Open University</p>
-                </div>
-            </div>
-
-            <!-- Right Side: Login Form -->
-            <div class="lg:w-7/12 bg-white flex flex-col justify-center p-8 lg:p-12 relative">
-                
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">Welcome Back</h2>
+                <div class="mb-4 text-center text-sm uppercase tracking-[0.32em] text-gray-400">ChronoSync</div>
+                <div class="mb-6 text-center">
+                    <h2 class="text-xl font-bold text-gray-800">Welcome Back</h2>
                     <p class="text-gray-500 text-sm mt-1">Please enter your credentials to continue.</p>
                 </div>
 
@@ -96,27 +68,20 @@
                             </div>
                             <input type="email" name="email" value="{{ old('email') }}" required autofocus
                                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
-                                   placeholder="admin@example.com">
+                                   placeholder="Enter the user account.">
                         </div>
                     </div>
 
                     <!-- Password -->
                     <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">Password</label>
-                            @if (Route::has('password.request'))
-                                <a class="text-xs text-emerald-600 hover:text-emerald-800" href="{{ route('password.request') }}">
-                                    Forgot Password?
-                                </a>
-                            @endif
-                        </div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Password</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i class="fas fa-lock"></i>
                             </div>
                             <input type="password" name="password" id="password" required 
                                    class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
-                                   placeholder="Enter your password">
+                                   placeholder="Enter the password.">
                             <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                 <i class="fas fa-eye text-xs"></i>
                             </button>
@@ -125,16 +90,20 @@
 
                     <div class="pt-2">
                         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center">
-                            <i class="fas fa-sign-in-alt mr-2 text-sm"></i> Sign In
+                            <i class="fas fa-sign-in-alt mr-2 text-sm"></i> Log In
                         </button>
                     </div>
                 </form>
-                
-                <div class="mt-8 text-center border-t border-gray-100 pt-6">
-                    <p class="text-sm text-gray-500">Don't have an admin account?</p>
-                    <a href="{{ route('register') }}" class="inline-flex items-center mt-2 text-emerald-600 font-semibold text-sm hover:text-emerald-800 transition-colors">
-                        Register as Staff <i class="fas fa-arrow-right text-xs ml-1"></i>
-                    </a>
+
+                <div class="mt-4 flex justify-end">
+                    @if (Route::has('password.request'))
+                        <a class="text-xs text-emerald-600 hover:text-emerald-800" href="{{ route('password.request') }}">Forget Password</a>
+                    @endif
+                </div>
+
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    <span>Don't have an admin account?</span>
+                    <a href="{{ route('register') }}" class="ml-2 text-emerald-600 font-semibold hover:text-emerald-800">Register as Staff</a>
                 </div>
             </div>
         </div>
