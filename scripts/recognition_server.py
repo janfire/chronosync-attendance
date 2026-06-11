@@ -10,7 +10,7 @@ import time
 import numpy as np
 import cv2
 import face_recognition
-from PIL import Image
+from PIL import Image, ImageOps
 PORT = 5001
 HOST = "localhost"
 
@@ -60,8 +60,12 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
             self._send_response({'error': 'No image provided'}, 400)
             return
 
+        # is_enrollment=True  → CNN face detector + 10-jitter averaging (high quality, slower)
+        # is_enrollment=False → HOG face detector + 1-jitter            (fast path for scanning)
+        is_enrollment = bool(request.get('is_enrollment', False))
+
         try:
-            result = self.process_image(image_data)
+            result = self.process_image(image_data, is_enrollment=is_enrollment)
             self._send_response(result)
         except Exception as e:
             self._send_response({'error': str(e)}, 500)
@@ -103,7 +107,7 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             self._send_response({'error': str(e)}, 500)
 
-    def process_image(self, base64_data):
+    def process_image(self, base64_data, is_enrollment=False):
         # Decode base64
         if ',' in base64_data:
             base64_data = base64_data.split(',', 1)[1]
@@ -123,19 +127,50 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
                 resample = Image.LANCZOS
             image_pil = image_pil.resize(new_size, resample)
 
-        # Convert to RGB
-        image = np.array(image_pil.convert('RGB'))
+        # --- Luminance normalization ---
+        # Compensates for webcam exposure variance (bright daylight vs fluorescent office).
+        # autocontrast stretches the luminance histogram without altering color relationships,
+        # making encodings more consistent across different lighting conditions.
+        image_pil = image_pil.convert('RGB')  # Ensure RGB before autocontrast
+        image_pil = ImageOps.autocontrast(image_pil, cutoff=1)
 
-        # Detect faces
-        face_locations = face_recognition.face_locations(image, model="hog")
+        # Convert to numpy array for face_recognition
+        image = np.array(image_pil)
+
+        # --- Detector selection ---
+        # Enrollment: CNN model — handles tilted faces, glasses, partial occlusion.
+        #             Much more precise bounding box = better landmark alignment = better encoding.
+        # Scanning:   HOG model — ~20x faster, sufficient for frontal live captures.
+        if is_enrollment:
+            face_locations = face_recognition.face_locations(image, model="cnn")
+        else:
+            face_locations = face_recognition.face_locations(image, model="hog", number_of_times_to_upsample=2)
 
         if len(face_locations) == 0:
             return {'error': 'No face detected'}
         if len(face_locations) > 1:
             return {'error': 'Multiple faces detected'}
 
-        # Encode
-        face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters=1)
+        # --- Minimum face-size guard ---
+        # A face bounding box smaller than 80x80px indicates the user is too far from the
+        # camera. The resulting encoding is too noisy to store as a reliable template.
+        top, right, bottom, left = face_locations[0]
+        face_h = bottom - top
+        face_w = right - left
+        if face_h < 80 or face_w < 80:
+            return {
+                'error': (
+                    f'Face is too small ({face_w}x{face_h}px). '
+                    'Please move closer to the camera for a better capture.'
+                )
+            }
+
+        # --- Encoding ---
+        # Enrollment: num_jitters=10 runs 10 random perturbations and averages them,
+        #             producing a stable centroid-like template (slower but done only once).
+        # Scanning:   num_jitters=1 — fast single-shot, acceptable for live comparison.
+        num_jitters = 10 if is_enrollment else 1
+        face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters=num_jitters)
         
         if len(face_encodings) == 0:
             return {'error': 'Could not encode face'}

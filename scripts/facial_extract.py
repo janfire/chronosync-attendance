@@ -135,19 +135,20 @@ except ImportError as e:
     sys.exit(1)
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageOps
 except ImportError as e:
     error_msg = f"Failed to import PIL: {e}"
     print(json.dumps({'error': error_msg}), file=sys.stderr)
     sys.exit(1)
 
-def extract_facial_features_from_base64(base64_data):
+def extract_facial_features_from_base64(base64_data, is_enrollment=False):
     """
     Extract facial features from base64-encoded image data.
-    Optimized for speed with reduced model complexity.
 
     Args:
         base64_data (str): Base64-encoded image data (with or without data URI prefix)
+        is_enrollment (bool): When True, uses high-quality settings (CNN + 10-jitter).
+                              When False, uses fast settings (HOG + 1-jitter).
 
     Returns:
         dict: JSON-serializable result with facial encoding or error
@@ -168,27 +169,25 @@ def extract_facial_features_from_base64(base64_data):
         if max(image_pil.size) > max_size:
             ratio = max_size / max(image_pil.size)
             new_size = (int(image_pil.size[0] * ratio), int(image_pil.size[1] * ratio))
-            # Use LANCZOS resampling (Image.LANCZOS for older PIL, Image.Resampling.LANCZOS for newer)
             try:
                 image_pil = image_pil.resize(new_size, Image.Resampling.LANCZOS)
             except AttributeError:
-                # Fallback for older PIL versions
                 image_pil = image_pil.resize(new_size, Image.LANCZOS)
         
         # Convert PIL image to RGB numpy array (face_recognition expects RGB)
         image = np.array(image_pil.convert('RGB'))
         
-        return _process_image_for_encoding(image)
+        return _process_image_for_encoding(image, is_enrollment=is_enrollment)
     except Exception as e:
         return {'error': f'Processing failed: {str(e)}'}
 
-def extract_facial_features(image_path):
+def extract_facial_features(image_path, is_enrollment=False):
     """
     Extract facial features from an image file path.
-    Optimized for speed with reduced model complexity.
 
     Args:
         image_path (str): Path to the image file
+        is_enrollment (bool): When True, uses high-quality settings (CNN + 10-jitter).
 
     Returns:
         dict: JSON-serializable result with facial encoding or error
@@ -197,25 +196,40 @@ def extract_facial_features(image_path):
         # Load image using face_recognition (handles various formats)
         image = face_recognition.load_image_file(image_path)
         
-        return _process_image_for_encoding(image)
+        return _process_image_for_encoding(image, is_enrollment=is_enrollment)
     except Exception as e:
         return {'error': f'Processing failed: {str(e)}'}
 
-def _process_image_for_encoding(image):
+def _process_image_for_encoding(image, is_enrollment=False):
     """
     Common processing logic for extracting facial encoding from a numpy image array.
-    
+
     Args:
         image: numpy array representing the image (RGB format)
-    
+        is_enrollment (bool): When True, uses CNN + 10-jitter for a stable enrollment template.
+                              When False, uses HOG + 1-jitter for fast attendance scanning.
+
     Returns:
         dict: JSON-serializable result with facial encoding or error
     """
     try:
+        # --- Luminance normalization ---
+        # Compensates for webcam exposure variance (bright daylight vs fluorescent office).
+        # autocontrast stretches the luminance histogram without altering colour relationships,
+        # making encodings more consistent across lighting conditions.
+        image_pil = Image.fromarray(image)
+        image_pil = ImageOps.autocontrast(image_pil, cutoff=1)
+        image = np.array(image_pil)
 
-        # Use faster HOG model instead of CNN for speed
-        # Detect face locations (returns list of tuples: top, right, bottom, left)
-        face_locations = face_recognition.face_locations(image, model="hog", number_of_times_to_upsample=1)
+        # --- Detector selection ---
+        # Enrollment: CNN model — handles tilted faces, glasses, partial occlusion.
+        #             Much more precise bounding box = better landmark alignment = better encoding.
+        # Scanning:   HOG model — ~20x faster, sufficient for frontal live captures.
+        #             upsample=2 improves detection of faces that are slightly further away.
+        if is_enrollment:
+            face_locations = face_recognition.face_locations(image, model="cnn")
+        else:
+            face_locations = face_recognition.face_locations(image, model="hog", number_of_times_to_upsample=2)
 
         # Validate single face detection
         if len(face_locations) == 0:
@@ -223,9 +237,25 @@ def _process_image_for_encoding(image):
         elif len(face_locations) > 1:
             return {'error': 'Multiple faces detected - please ensure only one person is in frame'}
 
-        # Extract 128-dimensional facial encoding with optimized settings
-        # This is the mathematical representation of facial features
-        face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters=1)
+        # --- Minimum face-size guard ---
+        # A bounding box smaller than 80x80px means the user is too far from the camera.
+        # Encoding from such a small region is too noisy for a reliable template.
+        top, right, bottom, left = face_locations[0]
+        face_h = bottom - top
+        face_w = right - left
+        if face_h < 80 or face_w < 80:
+            return {
+                'error': (
+                    f'Face is too small ({face_w}x{face_h}px). '
+                    'Please move closer to the camera for a better capture.'
+                )
+            }
+
+        # --- Encoding ---
+        # Enrollment: num_jitters=10 averages 10 perturbations → stable centroid template.
+        # Scanning:   num_jitters=1  → fast single-shot, acceptable for live comparison.
+        num_jitters = 10 if is_enrollment else 1
+        face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters=num_jitters)
 
         if len(face_encodings) == 0:
             return {'error': 'Could not encode facial features - try different lighting/angle'}
@@ -235,9 +265,9 @@ def _process_image_for_encoding(image):
 
         return {
             'success': True,
-            'facial_encoding': encoding,  # 128-float array
-            'face_location': face_locations[0],  # (top, right, bottom, left)
-            'encoding_dimensions': len(encoding)  # Should be 128
+            'facial_encoding': encoding,       # 128-float array
+            'face_location': face_locations[0], # (top, right, bottom, left)
+            'encoding_dimensions': len(encoding) # Should be 128
         }
     except Exception as e:
         return {'error': f'Processing failed: {str(e)}'}
@@ -289,18 +319,18 @@ def compare_faces(known_encoding, unknown_image_path, tolerance=0.6):
 # Command-line interface for Laravel Process execution
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(json.dumps({'error': 'Usage: python facial_extract.py <action> [image_path_or_stdin] [additional_args]'}))
+        print(json.dumps({'error': 'Usage: python facial_extract.py <action> [image_path] [mode: enroll|scan]'}))
         sys.exit(1)
 
     action = sys.argv[1]
-    
+
     # Read image input from args first (preferred for stability), then stdin
     image_input = None
-    
+
     # Check if a file path or data was passed as an argument
     if len(sys.argv) >= 3:
         image_input = sys.argv[2]
-    
+
     # If no argument, checks stdin
     elif not sys.stdin.isatty():
         # Data is being piped via stdin
@@ -314,18 +344,20 @@ if __name__ == "__main__":
         print(json.dumps({'error': 'No image data provided (neither stdin nor command line argument)'}))
         sys.exit(1)
 
+    # Optional mode argument passed as 4th arg by PHP: 'enroll' or 'scan'.
+    # Defaults to 'scan' for backward compatibility with any direct CLI calls.
+    mode = sys.argv[3] if len(sys.argv) >= 4 else 'scan'
+    is_enrollment = (mode == 'enroll')
+
     if action == 'extract':
-        # Enrollment: extract features from image
         # Check if input is base64 data (starts with data: or is long base64 string) or file path
         if image_input.startswith('data:') or (len(image_input) > 100 and not os.path.exists(image_input)):
-            # Treat as base64 data
-            result = extract_facial_features_from_base64(image_input)
+            result = extract_facial_features_from_base64(image_input, is_enrollment=is_enrollment)
         else:
-            # Treat as file path
             if not os.path.exists(image_input):
                 print(json.dumps({'error': f'Image file not found: {image_input}'}))
                 sys.exit(1)
-            result = extract_facial_features(image_input)
+            result = extract_facial_features(image_input, is_enrollment=is_enrollment)
 
     elif action == 'compare':
         # Verification: compare against stored encoding

@@ -61,8 +61,9 @@ class BiometricController extends Controller
         try {
             Log::info('Facial enrollment started');
 
-            // Extract facial encoding from image
-            $encodingResult = $this->facialRecognition->extractEncodingFromBase64($request->facial_image);
+            // Extract facial encoding from image — use high-quality enrollment mode
+            // (CNN face detector + 10-jitter averaging for a stable, centered template)
+            $encodingResult = $this->facialRecognition->extractEncodingFromBase64($request->facial_image, true);
             $facialEncoding = $encodingResult['encoding'];
 
             // Determine user context
@@ -131,7 +132,7 @@ class BiometricController extends Controller
             $facialEncoding,
             $existingUserId, // Exclude current user if logged in
             null,
-            \App\Services\FacialRecognitionService::DEFAULT_TOLERANCE,
+            \App\Services\FacialRecognitionService::ENROLLMENT_TOLERANCE, // Wider gate for enrolment duplicate detection
             true // Only enrolled users
         );
         
@@ -215,14 +216,19 @@ class BiometricController extends Controller
      */
     private function handlePendingRegistrationFacialEnrollment(array $facialEncoding, string $userName): void
     {
+        // Scope the orphan lookup to this specific pending registration's user name.
+        // Without this, a previous interrupted registration could leave an orphan row
+        // that would be silently overwritten by the next person who reaches enrollment.
         $existingBiometric = BiometricData::where('facial_status', 'captured')
             ->whereNull('user_id')
+            ->where('user_name', $userName) // Only reuse OUR OWN pending record
+            ->latest()
             ->first();
 
         $enrollmentData = [
-            'facial_encoding' => $facialEncoding,
+            'facial_encoding'    => $facialEncoding,
             'facial_captured_at' => now(),
-            'user_name' => $userName,
+            'user_name'          => $userName,
         ];
 
         if ($existingBiometric) {
@@ -230,13 +236,13 @@ class BiometricController extends Controller
             session(['biometric_id' => $existingBiometric->id]);
         } else {
             $biometric = BiometricData::create(array_merge($enrollmentData, [
-                'user_id' => null,
+                'user_id'       => null,
                 'facial_status' => 'captured',
             ]));
             session(['biometric_id' => $biometric->id]);
         }
-        
-        Log::info('Facial enrollment stored for pending registration');
+
+        Log::info('Facial enrollment stored for pending registration', ['user_name' => $userName]);
     }
 
 

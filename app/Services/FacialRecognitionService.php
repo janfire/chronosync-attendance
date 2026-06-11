@@ -9,43 +9,70 @@ use Illuminate\Support\Facades\Log;
 
 class FacialRecognitionService
 {
-    public const DEFAULT_TOLERANCE = 0.45;
+    /**
+     * Matching tolerance used during attendance scanning.
+     * Tightened from 0.45 → 0.38 to significantly reduce look-alike false positives.
+     * Independent benchmarks show genuine same-person pairs rarely exceed 0.35 in
+     * controlled indoor/frontal conditions; different-person pairs rarely fall below 0.42.
+     */
+    public const DEFAULT_TOLERANCE = 0.38;
+
+    /**
+     * Slightly wider tolerance used during enrollment duplicate checks.
+     * Allows catching look-alikes attempting to register under a different name,
+     * while still being tighter than the original 0.45 default.
+     */
+    public const ENROLLMENT_TOLERANCE = 0.42;
+
+    /**
+     * Minimum confidence percentage (as a 0–1 fraction) a match must reach
+     * before it is accepted, even if it passes the distance threshold.
+     * Prevents borderline distances (e.g. 0.37 at threshold 0.38 = 2.6% confidence)
+     * from being treated as reliable matches.
+     */
+    public const MIN_CONFIDENCE_FLOOR = 0.15;
 
     /**
      * Extract a 128-d facial encoding from a base64 image using the Python pipeline.
      *
      * @param  string  $base64Image
+     * @param  bool    $isEnrollment  When true, uses high-quality settings (CNN model, 10 jitters).
+     *                                When false (scanning), uses fast settings (HOG model, 1 jitter).
      * @return array{encoding: array<int, float>, face_location: mixed}
      */
-    public function extractEncodingFromBase64(string $base64Image): array
+    public function extractEncodingFromBase64(string $base64Image, bool $isEnrollment = false): array
     {
         // Try the persistent server first (Fast Mode)
         try {
-            return $this->extractViaServer($base64Image);
+            return $this->extractViaServer($base64Image, $isEnrollment);
         } catch (\Throwable $e) {
             // Log the error but don't stop - fallback to CLI (Slow Mode)
-            // In production, you might want to log this to know the server is down
+            Log::warning('Recognition server unavailable, falling back to CLI.', ['error' => $e->getMessage()]);
         }
 
         // Fallback: standard CLI execution (Slow Mode)
-        return $this->extractViaCli($base64Image);
+        return $this->extractViaCli($base64Image, $isEnrollment);
     }
 
-    protected function extractViaServer(string $base64Image): array
+    protected function extractViaServer(string $base64Image, bool $isEnrollment = false): array
     {
         $host = config('services.recognition.host', 'http://localhost:5001');
         
         $payload = json_encode([
-            'action' => 'extract',
-            'image' => $base64Image
+            'action'        => 'extract',
+            'image'         => $base64Image,
+            'is_enrollment' => $isEnrollment, // Signals Python to use high-quality settings
         ]);
+
+        // Enrollment takes longer due to CNN + 10-jitter; allow extra time
+        $timeout = $isEnrollment ? 30 : 5;
 
         $options = [
             'http' => [
                 'header'  => "Content-type: application/json\r\nContent-Length: " . strlen($payload) . "\r\n",
                 'method'  => 'POST',
                 'content' => $payload,
-                'timeout' => 5, // 5 seconds timeout
+                'timeout' => $timeout,
             ]
         ];
 
@@ -68,7 +95,7 @@ class FacialRecognitionService
         ];
     }
 
-    protected function extractViaCli(string $base64Image): array
+    protected function extractViaCli(string $base64Image, bool $isEnrollment = false): array
     {
         // Use temporary file instead of pipe to avoid "Broken pipe" errors on Windows/Linux
         // when the process exits early or buffers fill up.
@@ -110,14 +137,18 @@ class FacialRecognitionService
             
             // Pass temp file path as argument
             // Increased timeout to 60 seconds to allow for Python cold start (importing libraries)
+            // Enrollment takes much longer (CNN + 10-jitter); bump timeout accordingly
+            $timeout = $isEnrollment ? 120 : 60;
+
             try {
-                $result = Process::timeout(60)
+                $result = Process::timeout($timeout)
                     ->env($env)
                     ->run([
                         $pythonBin,
                         base_path('scripts/facial_extract.py'),
                         'extract',
-                        $tempFile // Pass file path as argument
+                        $tempFile,                          // Pass file path as argument
+                        $isEnrollment ? 'enroll' : 'scan', // Mode flag for Python
                     ]);
             } catch (\Illuminate\Process\Exceptions\ProcessTimedOutException $e) {
                 throw new \RuntimeException('The facial recognition system is taking too long to respond. Please try again or check if the implementation is efficient enough.');
@@ -245,9 +276,8 @@ class FacialRecognitionService
         // Sticking to get() for speed on reasonable datasets.
         $enrolledFaces = $query->toBase()->get(); // toBase() skips model hydration for raw speed on iteration
 
-        $bestMatch = null;
         $bestBiometric = null;
-        $minDistance = $tolerance; // Start with tolerance - anything worse is not a match
+        $minDistance = $tolerance; // Start with tolerance — anything worse is not a match
 
         foreach ($enrolledFaces as $biometric) {
             // Manually decode since we used toBase()
@@ -257,49 +287,53 @@ class FacialRecognitionService
                 continue;
             }
 
-            // Inline distance calculation for critical path speed
-            // Skip sqrt() for comparison to be faster? 
-            // Distance check: sqrt(sum) <= minDistance  <=>  sum <= minDistance^2
-            // avoiding sqrt() call in the loop saves CPU cycles.
-            
+            // Inline distance calculation for critical path speed.
+            // Distance check: sqrt(sum) <= minDistance  <=>  sum <= minDistance²
+            // Avoids sqrt() on every iteration — only called when a candidate match is found.
             $sum = 0.0;
             $limitSq = $minDistance * $minDistance;
-            
+
             foreach ($storedEncoding as $index => $value) {
                 $diff = (float)$value - (float)($newEncoding[$index] ?? 0.0);
                 $sum += $diff * $diff;
-                
-                // Early exit if we already exceeded the limit (optimization)
+
+                // Early exit if we already exceeded the squared limit (optimization)
                 if ($sum > $limitSq) {
-                    break; 
+                    break;
                 }
             }
 
             if ($sum <= $limitSq) {
-                // We found a new best match (or equal best)
-                // Recalculate true distance only when we find a match
+                // Candidate passed the distance gate — compute the true distance
                 $trueDistance = sqrt($sum);
-                
-                $minDistance = $trueDistance;
-                $bestBiometric = $biometric;
+
+                // Dual-gate: also require the match to exceed the minimum confidence floor.
+                // This prevents borderline matches (e.g. distance=0.37, tolerance=0.38 → 2.6% confidence)
+                // from being accepted as reliable identifications.
+                $confidence = $this->confidenceFromDistance($trueDistance, $tolerance);
+                if ($confidence >= self::MIN_CONFIDENCE_FLOOR) {
+                    $minDistance    = $trueDistance;
+                    $bestBiometric  = $biometric;
+                }
             }
         }
 
         if ($bestBiometric) {
-            // Lazy load the user name only if we found a match (avoids joins/eager loading on all records)
+            // Lazy-load user name only on a confirmed match (avoids joins/eager loading on all records)
             $userName = $bestBiometric->user_name;
             if (!$userName && $bestBiometric->user_id) {
                 $user = \App\Models\User::find($bestBiometric->user_id);
                 $userName = $user ? $user->name : 'Unknown';
             }
 
-            Log::info("Facial Match Found: User {$userName} (ID: {$bestBiometric->user_id}) with distance {$minDistance} (Tolerance: {$tolerance})");
+            $confidence = $this->confidenceFromDistance($minDistance, $tolerance);
+            Log::info("Facial Match Found: User {$userName} (ID: {$bestBiometric->user_id}) — distance={$minDistance}, confidence={$confidence}, tolerance={$tolerance}");
 
             return [
-                'user_id' => $bestBiometric->user_id,
-                'user_name' => $userName ?? 'Unknown',
-                'distance' => $minDistance,
-                'confidence' => $this->confidenceFromDistance($minDistance, $tolerance),
+                'user_id'    => $bestBiometric->user_id,
+                'user_name'  => $userName ?? 'Unknown',
+                'distance'   => $minDistance,
+                'confidence' => $confidence,
             ];
         }
 
