@@ -1,1 +1,7 @@
-node_modules
+/node_modules
+/vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+.phpunit.cache

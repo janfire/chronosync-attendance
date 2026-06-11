@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\BiometricData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -28,34 +29,39 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        // Get statistics
-        $stats = [
-            'total_employees' => User::where('role', 'staff')->count(),
-            'today_attendance' => AttendanceLog::whereDate('timestamp', today())
-                ->where('action', 'clock_in')
-                ->distinct('user_id')
-                ->count('user_id'),
-            'absents' => $this->getAbsentCount(),
-            'currently_clocked_in' => $this->getCurrentlyClockedInCount(),
-            'pending_issues' => $this->getPendingIssuesCount(),
-            'pending_exceptions' => \App\Models\AttendanceException::where('status', 'pending')->count(),
-        ];
+        $tenantId = Auth::user()->tenant_id;
 
-        // Get recent activity
+        // Cache dashboard stats per tenant for 60 seconds.
+        // These are read-only counts that change at most once per scan — no need
+        // to recalculate on every page load. Flush automatically every minute.
+        $stats = Cache::remember("dashboard_stats_{$tenantId}", 60, function () {
+            return [
+                'total_employees'    => User::where('role', 'staff')->count(),
+                'today_attendance'   => AttendanceLog::whereDate('timestamp', today())
+                    ->where('action', 'clock_in')
+                    ->distinct('user_id')
+                    ->count('user_id'),
+                'absents'            => $this->getAbsentCount(),
+                'currently_clocked_in' => $this->getCurrentlyClockedInCount(),
+                'pending_issues'     => $this->getPendingIssuesCount(),
+                'pending_exceptions' => \App\Models\AttendanceException::where('status', 'pending')->count(),
+            ];
+        });
+
+        // Recent activity does NOT get cached — it should always be live
         $recentActivity = AttendanceLog::with('user')
             ->whereDate('timestamp', today())
             ->orderBy('timestamp', 'desc')
             ->limit(20)
             ->get();
 
-        // Get recent failed attempts (security alerts)
+        // Recent failed attempts (security alerts)
         $failedAttempts = \App\Models\FailedAttendanceLog::with('user')
             ->whereDate('attempted_at', today())
             ->orderBy('attempted_at', 'desc')
             ->limit(5)
             ->get();
 
-        // Get today's attendance
         $todayAttendance = $this->getTodayAttendance();
 
         return view('admin.dashboard', compact('stats', 'recentActivity', 'todayAttendance', 'failedAttempts'));
@@ -102,7 +108,7 @@ class AdminController extends Controller
             $query->where('action', $action);
         }
 
-        $logs = $query->orderBy('timestamp', 'desc')->get(); // DataTables handles pagination
+        $logs = $query->orderBy('timestamp', 'desc')->limit(500)->get(); // Cap at 500 — DataTables handles client-side filtering
 
         return view('admin.insights', compact(
             'teamStats', 
@@ -145,12 +151,14 @@ class AdminController extends Controller
 
         $employees = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        // Calculate statistics
-        $allEmployees = User::where('role', 'staff')->with('biometricData')->get();
-        $enrolledCount = $allEmployees->filter(function($emp) {
-            return $emp->biometricData && $emp->biometricData->facial_status == 'captured';
-        })->count();
-        $notEnrolledCount = $allEmployees->count() - $enrolledCount;
+        // Calculate enrollment stats using direct count queries instead of loading all records.
+        // Previously this loaded every staff member into memory just to count two numbers.
+        $totalStaff = User::where('role', 'staff')->count();
+        $enrolledCount = BiometricData::whereNotNull('user_id')
+            ->where('facial_status', 'captured')
+            ->distinct('user_id')
+            ->count('user_id');
+        $notEnrolledCount = $totalStaff - $enrolledCount;
 
         return view('admin.employees', compact('employees', 'enrolledCount', 'notEnrolledCount'));
     }
@@ -231,27 +239,38 @@ class AdminController extends Controller
 
     private function getTodayAttendance()
     {
-        // Get all employees with their clock in/out times for today
-        $employees = User::where('role', 'staff')->get();
+        // Single query: fetch all of today's logs for staff users, grouped by user.
+        // This replaces the previous N+1 pattern (1 query per employee × 2 per action = 2N+1 queries).
+        $employees = User::where('role', 'staff')->orderBy('name')->get();
+
+        // Load today's first clock-in and last clock-out per user in two bulk queries
+        $clockIns = AttendanceLog::whereDate('timestamp', today())
+            ->where('action', 'clock_in')
+            ->orderBy('timestamp')
+            ->get()
+            ->keyBy('user_id'); // Keyed by user_id — O(1) lookup per employee
+
+        $clockOuts = AttendanceLog::whereDate('timestamp', today())
+            ->where('action', 'clock_out')
+            ->orderByDesc('timestamp')
+            ->get()
+            ->keyBy('user_id');
+
         $attendance = [];
-
         foreach ($employees as $employee) {
-            $clockIn = AttendanceLog::where('user_id', $employee->id)
-                ->whereDate('timestamp', today())
-                ->where('action', 'clock_in')
-                ->first();
+            $clockIn  = $clockIns->get($employee->id);
+            $clockOut = $clockOuts->get($employee->id);
 
-            $clockOut = AttendanceLog::where('user_id', $employee->id)
-                ->whereDate('timestamp', today())
-                ->where('action', 'clock_out')
-                ->where('timestamp', '>', $clockIn?->timestamp ?? '1900-01-01')
-                ->first();
+            // Only include clock-out records that came after the clock-in
+            if ($clockIn && $clockOut && $clockOut->timestamp <= $clockIn->timestamp) {
+                $clockOut = null;
+            }
 
             $attendance[] = [
-                'employee' => $employee,
-                'clock_in' => $clockIn,
-                'clock_out' => $clockOut,
-                'status' => $this->getAttendanceStatus($clockIn, $clockOut),
+                'employee'     => $employee,
+                'clock_in'     => $clockIn,
+                'clock_out'    => $clockOut,
+                'status'       => $this->getAttendanceStatus($clockIn, $clockOut),
                 'hours_worked' => $this->calculateHours($clockIn, $clockOut),
             ];
         }

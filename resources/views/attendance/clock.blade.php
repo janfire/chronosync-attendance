@@ -850,7 +850,6 @@
                 <div class="bg-pattern"></div>
                 <!-- Brand -->
                 <div class="brand">
-                    <div class="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0"><i class="fas fa-clock text-2xl"></i></div>
                     <div class="brand-text">
                         <h1>ChronoSync Attendance</h1>
                         <p>Unified Biometric System</p>
@@ -881,7 +880,7 @@
                     </div>
                 </div>
 
-                <div class="panel-footer">&copy; {{ date('Y') }} Zimbabwe Open University</div>
+                <div class="panel-footer">&copy; {{ date('Y') }}</div>
             </div>
 
             <!-- ═══ RIGHT PANEL ═══ -->

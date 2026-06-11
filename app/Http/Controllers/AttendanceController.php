@@ -156,13 +156,14 @@ class AttendanceController extends Controller
      */
     private function processAttendanceForUser($user, Request $request, string $source)
     {
-        // Determine clock action
-        $action = $this->determineClockAction($user);
+        // Fetch the user's latest log once and reuse it across both determineClockAction
+        // and validateBusinessRules — previously each method ran its own identical query.
+        [$action, $lastLog] = $this->determineClockAction($user);
 
-        // Validate business rules
-        $businessRuleCheck = $this->validateBusinessRules($user, $action, $request, $source);
+        // Validate business rules, passing the already-fetched log to avoid re-querying
+        $businessRuleCheck = $this->validateBusinessRules($user, $action, $lastLog, $request, $source);
         if ($businessRuleCheck !== null) {
-            return $businessRuleCheck; // Return error response
+            return $businessRuleCheck;
         }
 
         // Log attendance
@@ -171,7 +172,7 @@ class AttendanceController extends Controller
         // Generate redirect URL to the custom, secure summary profile page
         $isMobile = $this->isMobileDevice($request);
         $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), ['user_id' => $user->id]);
-        
+
         // Auto-logout if user is logged in (kiosk mode) to protect privacy outside the dashboard
         if (Auth::check()) {
             Auth::guard('web')->logout();
@@ -182,12 +183,12 @@ class AttendanceController extends Controller
             : "Goodbye, {$user->name}! You have successfully clocked out. Have a great day!";
 
         return ApiResponse::success([
-            'action' => $action,
-            'user_name' => $user->name,
-            'timestamp' => now()->format('Y-m-d H:i:s'),
-            'method' => $source === 'facial_recognition' ? 'Facial Recognition' : 'Fingerprint',
+            'action'       => $action,
+            'user_name'    => $user->name,
+            'timestamp'    => now()->format('Y-m-d H:i:s'),
+            'method'       => $source === 'facial_recognition' ? 'Facial Recognition' : 'Fingerprint',
             'redirect_url' => $redirectUrl,
-            'is_mobile' => $isMobile
+            'is_mobile'    => $isMobile
         ], $message);
     }
 
@@ -319,30 +320,32 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Determine whether to clock in or clock out
+     * Determine whether to clock in or clock out.
+     * Returns both the resolved action AND the raw log record so callers
+     * can reuse it without issuing a second identical query.
+     *
+     * @return array{0: string, 1: \App\Models\AttendanceLog|null}
      */
-    private function determineClockAction($user): string
+    private function determineClockAction($user): array
     {
         $lastLog = AttendanceLog::where('user_id', $user->id)
             ->whereDate('timestamp', today())
             ->latest('timestamp')
             ->first();
 
-        return (!$lastLog || $lastLog->action === 'clock_out') ? 'clock_in' : 'clock_out';
+        $action = (!$lastLog || $lastLog->action === 'clock_out') ? 'clock_in' : 'clock_out';
+
+        return [$action, $lastLog];
     }
 
     /**
-     * Validate business rules (rapid clocking, minimum shift duration)
-     * 
+     * Validate business rules (rapid clocking, minimum shift duration).
+     * Accepts the pre-fetched $lastLog from determineClockAction to avoid a duplicate query.
+     *
      * @return null|\Illuminate\Http\JsonResponse
      */
-    private function validateBusinessRules($user, string $action, Request $request, string $source)
+    private function validateBusinessRules($user, string $action, $lastLog, Request $request, string $source)
     {
-        $lastLog = AttendanceLog::where('user_id', $user->id)
-            ->whereDate('timestamp', today())
-            ->latest('timestamp')
-            ->first();
-
         // Prompt for clock out if they scan while already clocked in
         // (This replaces the old "rapid clocking" rule and the "already clocked out" rule)
         if ($lastLog && $lastLog->action === 'clock_in') {
