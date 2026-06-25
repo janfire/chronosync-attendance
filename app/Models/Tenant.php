@@ -13,12 +13,15 @@ class Tenant extends Model
         'billing_email', 'billing_name', 'billing_phone',
         'ecocash_number', 'zipit_account',
         'trial_ends_at', 'subscription_starts_at', 'subscription_expires_at',
+        'trial_reminder_sent_at', 'subscription_reminder_sent_at',
     ];
 
     protected $casts = [
-        'trial_ends_at'           => 'datetime',
-        'subscription_starts_at'  => 'datetime',
-        'subscription_expires_at' => 'datetime',
+        'trial_ends_at'                   => 'datetime',
+        'subscription_starts_at'          => 'datetime',
+        'subscription_expires_at'         => 'datetime',
+        'trial_reminder_sent_at'          => 'datetime',
+        'subscription_reminder_sent_at'   => 'datetime',
     ];
 
     // =====================

@@ -44,9 +44,9 @@ class LoginController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
-            // Platform admin → redirect to superadmin finance hub
+            // Platform admin → redirect to platform admin dashboard
             if ($user->role === UserRole::PLATFORM_ADMIN) {
-                return redirect()->route('superadmin.finance.pending')->with('success', 'Welcome back, ' . $user->name . '!');
+                return redirect()->route('superadmin.dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
             }
 
             // Check if user is admin or super_admin, redirect accordingly

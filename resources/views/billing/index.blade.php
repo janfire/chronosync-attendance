@@ -4,8 +4,39 @@
 
 @section('content')
 <div class="p-6">
+
+    {{-- Expiry / suspension alert banner --}}
+    @if(!$tenant->canAccess())
+        <div class="mb-8 flex items-start gap-4 bg-white border-l-4 border-rose-500 rounded-2xl px-5 py-4 shadow-sm">
+            <div class="w-9 h-9 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                <i class="fas fa-lock text-sm"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-gray-900">Subscription Expired — Access Suspended</p>
+                <p class="text-sm text-gray-500 mt-0.5">Your account has been suspended due to a lapsed subscription. Generate an invoice, pay via EcoCash or ZIPIT, then upload your proof below.</p>
+            </div>
+        </div>
+    @elseif($tenant->subscription_expires_at && $tenant->subscription_expires_at->diffInDays(now(), false) >= -7)
+        <div class="mb-8 flex items-start gap-4 bg-white border-l-4 border-amber-400 rounded-2xl px-5 py-4 shadow-sm">
+            <div class="w-9 h-9 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                <i class="fas fa-clock text-sm"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-gray-900">Subscription expires {{ $tenant->subscription_expires_at->diffForHumans() }}</p>
+                <p class="text-sm text-gray-500 mt-0.5">Renew now to avoid any interruption to your service. Use the button below to generate your invoice.</p>
+            </div>
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="mb-6 flex items-center gap-3 bg-white border-l-4 border-emerald-500 rounded-2xl px-5 py-4 shadow-sm">
+            <i class="fas fa-check-circle text-emerald-500 shrink-0"></i>
+            <span class="text-sm font-medium text-gray-700">{{ session('success') }}</span>
+        </div>
+    @endif
+
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Billing & Subscription</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Billing &amp; Subscription</h1>
         <p class="text-gray-500">Manage your company's plan and payment history.</p>
     </div>
 
@@ -60,6 +91,34 @@
                         Change Plan
                     </button>
                     <p class="text-[10px] text-gray-400 text-center mt-2 italic">Self-service plan switching coming soon.</p>
+
+                    {{-- Renew / Generate Invoice CTA --}}
+                    @php
+                        $pendingInvoice = $invoices->firstWhere('status', 'pending');
+                        $showRenew = !$tenant->isActive()
+                            || ($tenant->subscription_expires_at && $tenant->subscription_expires_at->diffInDays(now(), false) >= -7);
+                    @endphp
+
+                    @if($showRenew)
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            @if($pendingInvoice)
+                                <a href="{{ route('billing.invoice', $pendingInvoice->id) }}"
+                                   class="block w-full py-3 text-center bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all">
+                                    <i class="fas fa-file-invoice-dollar mr-2"></i> View Pending Invoice
+                                </a>
+                                <p class="text-[10px] text-gray-400 text-center mt-2">Invoice {{ $pendingInvoice->invoice_number }} awaiting payment.</p>
+                            @else
+                                <form action="{{ route('billing.renew') }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                            class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all">
+                                        <i class="fas fa-sync-alt mr-2"></i> Generate Renewal Invoice
+                                    </button>
+                                </form>
+                                <p class="text-[10px] text-gray-400 text-center mt-2">A new invoice will be created instantly.</p>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

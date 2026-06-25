@@ -12,6 +12,20 @@ use Illuminate\Support\Facades\Route;
 
 // SuperAdmin Routes (Global Management)
 Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(function () {
+    Route::get('/dashboard',      [\App\Http\Controllers\Admin\PlatformAdminController::class, 'dashboard'])->name('superadmin.dashboard');
+
+    // Tenant list & DataTables AJAX
+    Route::get('/tenants',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenants'])->name('superadmin.tenants');
+    Route::get('/tenants/data',     [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsData'])->name('superadmin.tenants.data');
+    Route::get('/tenants/summary',  [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsSummary'])->name('superadmin.tenants.summary');
+
+    // Per-tenant actions
+    Route::post('/tenants/{tenant}/activate',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'activateTenant'])->name('superadmin.tenants.activate');
+    Route::post('/tenants/{tenant}/suspend',           [\App\Http\Controllers\Admin\PlatformAdminController::class, 'suspendTenant'])->name('superadmin.tenants.suspend');
+    Route::post('/tenants/{tenant}/reset-subscription',[\App\Http\Controllers\Admin\PlatformAdminController::class, 'resetTenantSubscription'])->name('superadmin.tenants.reset-subscription');
+    Route::delete('/tenants/{tenant}',                 [\App\Http\Controllers\Admin\PlatformAdminController::class, 'destroyTenant'])->name('superadmin.tenants.destroy');
+
+    // Finance
     Route::get('/finance/pending', [\App\Http\Controllers\Admin\FinanceController::class, 'pendingInvoices'])->name('superadmin.finance.pending');
     Route::post('/finance/invoice/{invoice}/confirm', [\App\Http\Controllers\Admin\FinanceController::class, 'confirmPayment'])->name('superadmin.finance.confirm');
 });
@@ -64,6 +78,7 @@ Route::middleware(['tenant'])->group(function () {
     // Billing Routes (Accessible even if subscription expired)
     Route::middleware(['auth'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+        Route::post('/billing/renew', [BillingController::class, 'renew'])->name('billing.renew');
         Route::get('/billing/invoice/{invoice}', [BillingController::class, 'show'])->name('billing.invoice');
         Route::post('/billing/invoice/{invoice}/proof', [BillingController::class, 'uploadProof'])->name('billing.upload-proof');
     });

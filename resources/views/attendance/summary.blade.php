@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
     <title>Attendance Summary - ChronoSync Attendance System</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -76,7 +77,12 @@
                 
                 <div class="relative z-10 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0"><i class="fas fa-clock text-2xl"></i></div>
+                        <div class="relative h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg border border-white/10 overflow-hidden shrink-0">
+                            <svg class="w-7 h-7 text-white relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 19 A 8 8 0 1 1 16 5" stroke-opacity="0.5" />
+                                <path d="M16 8 A 3.5 3.5 0 0 0 9 8 C 9 12 16 11 16 15 A 3.5 3.5 0 0 1 9 15" />
+                            </svg>
+                        </div>
                         <h1 class="text-white font-bold tracking-tight">ChronoSync Attendance</h1>
                     </div>
                     

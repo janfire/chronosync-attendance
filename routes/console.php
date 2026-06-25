@@ -15,3 +15,9 @@ Schedule::command('attendance:summarize --period=weekly')
 // Monthly summary on last day of month at 23:55
 Schedule::command('attendance:summarize --period=monthly')
     ->lastDayOfMonth('23:55');
+
+// Daily billing lifecycle: warnings, invoice generation, suspensions, overdue marking
+Schedule::command('billing:process')
+    ->dailyAt('08:00')
+    ->withoutOverlapping()
+    ->runInBackground();

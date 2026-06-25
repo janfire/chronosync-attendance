@@ -6,11 +6,11 @@
 @section('content')
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 mb-1 font-medium">Total Users</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_users'] }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Total Users</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_users'] }}</p>
                     <p class="text-xs text-gray-400 mt-1">All accounts</p>
                 </div>
                 <div class="h-12 w-12 bg-emerald-100 rounded-xl flex items-center justify-center">
@@ -19,10 +19,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 mb-1 font-medium">Super Admins</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Super Admins</p>
                     <p class="text-2xl font-bold text-purple-600">{{ $stats['super_admins'] }}</p>
                     <p class="text-xs text-gray-400 mt-1">Full access</p>
                 </div>
@@ -32,10 +32,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 mb-1 font-medium">Admins</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Admins</p>
                     <p class="text-2xl font-bold text-emerald-600">{{ $stats['admins'] }}</p>
                     <p class="text-xs text-gray-400 mt-1">Limited access</p>
                 </div>
@@ -45,10 +45,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 mb-1 font-medium">General Users</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">General Users</p>
                     <p class="text-2xl font-bold text-green-600">{{ $stats['general_users'] }}</p>
                     <p class="text-xs text-gray-400 mt-1">Standard access</p>
                 </div>
@@ -58,10 +58,10 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 mb-1 font-medium">Staff</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Staff</p>
                     <p class="text-2xl font-bold text-orange-600">{{ $stats['staff'] }}</p>
                     <p class="text-xs text-gray-400 mt-1">Basic access</p>
                 </div>
@@ -75,11 +75,11 @@
      <!-- Filters removed as DataTables handles search/filter -->
 
     <!-- Users Table Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 users-table-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 users-table-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="min-w-0">
-                <h3 class="text-lg font-semibold text-gray-900">System Users</h3>
-                <p class="text-xs text-gray-500 mt-1">Manage all registered users</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">System Users</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage all registered users</p>
             </div>
             <div class="flex items-center gap-2 shrink-0 flex-wrap">
                 <a href="{{ route('admin.users.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors inline-flex items-center gap-2 text-sm font-medium shadow-sm">
@@ -87,29 +87,29 @@
                     <span>Create User</span>
                 </a>
                 <div class="relative" id="export-menu-wrapper">
-                    <button type="button" id="export-menu-button" onclick="toggleExportMenu(event)" class="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm transition-colors flex items-center space-x-2 font-medium">
+                    <button type="button" id="export-menu-button" onclick="toggleExportMenu(event)" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition-colors flex items-center space-x-2 font-medium">
                         <i class="fas fa-file-export text-emerald-600"></i>
                         <span>Export</span>
                         <i class="fas fa-chevron-down text-xs text-gray-500"></i>
                     </button>
-                    <div id="export-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-lg border border-gray-200 shadow-lg z-30 py-1">
-                        <button type="button" onclick="copyUsersToClipboard(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                    <div id="export-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-30 py-1">
+                        <button type="button" onclick="copyUsersToClipboard(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                             <i class="fas fa-copy w-4 text-slate-600"></i>
                             <span>Copy</span>
                         </button>
-                        <button type="button" onclick="printUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <button type="button" onclick="printUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                             <i class="fas fa-print w-4 text-indigo-600"></i>
                             <span>Print</span>
                         </button>
-                        <button type="button" onclick="exportUsersPdf(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <button type="button" onclick="exportUsersPdf(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                             <i class="fas fa-file-pdf w-4 text-red-600"></i>
                             <span>PDF</span>
                         </button>
-                        <button type="button" onclick="exportUsersExcel(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <button type="button" onclick="exportUsersExcel(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                             <i class="fas fa-file-excel w-4 text-emerald-700"></i>
                             <span>Excel (.xlsx)</span>
                         </button>
-                        <button type="button" onclick="exportUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <button type="button" onclick="exportUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                             <i class="fas fa-download w-4 text-green-600"></i>
                             <span>CSV</span>
                         </button>
@@ -118,8 +118,8 @@
             </div>
         </div>
 
-        <div id="bulk-actions-bar" class="hidden px-6 py-2.5 bg-red-50 border-b border-red-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-red-800">
+        <div id="bulk-actions-bar" class="hidden px-6 py-2.5 bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-900/50 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-red-800 dark:text-red-400">
                 <span id="bulk-selected-count">0</span> user(s) selected
             </p>
             <button
@@ -209,7 +209,7 @@
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
                                         @if($lastActivity)
                                             <div class="text-xs text-gray-500">Last active {{ $lastActivity->timestamp->diffForHumans() }}</div>
                                         @endif
@@ -217,7 +217,7 @@
                                 </div>
                             </td>
                             <td class="hidden md:table-cell whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                <div class="text-sm text-gray-900 dark:text-gray-300">{{ $user->email }}</div>
                             </td>
                             <td class="hidden lg:table-cell whitespace-nowrap">
                                 <div class="text-sm font-mono text-gray-700">{{ $user->employee_number }}</div>
@@ -237,7 +237,7 @@
                                 </span>
                             </td>
                             <td class="hidden lg:table-cell whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $user->created_at->format('M j, Y') }}</div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->created_at->format('M j, Y') }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->created_at->diffForHumans() }}</div>
                             </td>
                             <td class="whitespace-nowrap">
@@ -296,11 +296,11 @@
                         <tr>
                             <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
-                                    <div class="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                                        <i class="fas fa-users text-gray-400 text-3xl"></i>
+                                    <div class="h-20 w-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                                        <i class="fas fa-users text-gray-400 dark:text-gray-500 text-3xl"></i>
                                     </div>
-                                    <p class="text-sm font-medium text-gray-900 mb-1">No users found</p>
-                                    <p class="text-xs text-gray-500 mb-4">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">No users found</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
                                         @if($search || $roleFilter)
                                             Try adjusting your filters
                                         @else
@@ -308,7 +308,7 @@
                                         @endif
                                     </p>
                                     @if($search || $roleFilter)
-                                        <button onclick="clearFilters()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors mb-2">
+                                        <button onclick="clearFilters()" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition-colors mb-2">
                                             Clear Filters
                                         </button>
                                     @endif

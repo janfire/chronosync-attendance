@@ -4,7 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard') - ChronoSync Attendance System</title>
+    <!-- Dark Mode Configuration & FOUC Prevention -->
+    <script>
+        // Check local storage or system preference immediately
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {} }
+        }
+    </script>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -304,23 +319,91 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+
+        /* Dark Mode Overrides */
+        html.dark .sidebar-item { color: #cbd5e1; }
+        html.dark .sidebar-item.active { color: #60a5fa; background-color: rgba(59, 130, 246, 0.2); }
+        html.dark .sidebar-item i { color: #94a3b8; }
+        html.dark .sidebar-action { background: #1e293b; color: #cbd5e1; }
+        html.dark .sidebar-action:hover { background: #334155; }
+        html.dark .bg-slate-50 { background-color: #0f172a; }
+        html.dark .text-slate-600 { color: #94a3b8; }
+        
+        /* Dark Mode Overrides for Custom DataTables */
+        html.dark .admin-data-table thead th {
+            background: #1e293b;
+            border-bottom-color: #334155;
+            color: #94a3b8;
+        }
+        html.dark .admin-data-table tbody td {
+            border-bottom-color: #1e293b;
+            color: #e2e8f0;
+        }
+        html.dark .admin-data-table tbody tr {
+            background-color: #0f172a !important;
+        }
+        html.dark .admin-data-table tbody tr:hover {
+            background-color: #1e293b !important;
+        }
+        html.dark .admin-data-table.stripe tbody tr.odd {
+            background-color: #1e293b !important;
+        }
+        html.dark .dataTables_wrapper .admin-dt-toolbar,
+        html.dark .dataTables_wrapper .admin-dt-footer {
+            background: #0f172a;
+            border-color: #1e293b;
+        }
+        html.dark .dataTables_wrapper .dataTables_length select,
+        html.dark .dataTables_wrapper .dataTables_filter input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+        html.dark .dataTables_wrapper .dataTables_paginate .paginate_button {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+        }
+        html.dark .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #059669 !important;
+            color: #ffffff !important;
+        }
+        html.dark .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+            background: #334155 !important;
+            color: #f8fafc !important;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     @stack('styles')
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-56 hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-200">
+        <aside id="sidebar" class="w-56 hidden lg:flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-200">
             <!-- Logo Section -->
-            <div class="p-5 border-b border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50">
-                <div class="flex items-center space-x-3">
-                    <div class="relative">
-                        <div class="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0"><i class="fas fa-clock text-2xl"></i></div>
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 transition-colors">
+                <div class="flex items-center space-x-3.5">
+                    <div class="relative shrink-0 group">
+                        <!-- Background glow -->
+                        <div class="absolute inset-0 bg-emerald-500 rounded-xl blur-md opacity-30 group-hover:opacity-60 transition-opacity duration-500"></div>
+                        
+                        <!-- Logo Container -->
+                        <div class="relative h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg border border-white/10 overflow-hidden">
+                            <!-- Abstract Monogram C & S -->
+                            <svg class="w-7 h-7 text-white relative z-10 drop-shadow-sm transform group-hover:scale-105 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <!-- Abstract C -->
+                                <path d="M16 19 A 8 8 0 1 1 16 5" stroke-opacity="0.5" />
+                                <!-- Abstract S -->
+                                <path d="M16 8 A 3.5 3.5 0 0 0 9 8 C 9 12 16 11 16 15 A 3.5 3.5 0 0 1 9 15" />
+                            </svg>
+                        </div>
                     </div>
                     <div>
-                        <h1 class="text-lg font-bold text-gray-900">ChronoSync</h1>
-                        <p class="text-xs text-gray-600 font-medium">Attendance System</p>
+                        <h1 class="text-[1.35rem] leading-none tracking-tight flex items-center text-gray-900 dark:text-white">
+                            <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400">Chrono</span>
+                            <span class="font-light">Sync</span>
+                        </h1>
+                        <p class="text-[0.65rem] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-bold mt-1">Attendance</p>
                     </div>
                 </div>
             </div>
@@ -376,6 +459,14 @@
                 @endunless
 
                 @if(Auth::user()->isPlatformAdmin())
+                    <a href="{{ route('superadmin.dashboard') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
+                        <i class="fas fa-th-large w-4 text-gray-500"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a href="{{ route('superadmin.tenants') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.tenants') ? 'active' : '' }}">
+                        <i class="fas fa-building w-4 text-gray-500"></i>
+                        <span class="font-medium">Tenant Directory</span>
+                    </a>
                     <a href="{{ route('superadmin.finance.pending') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.finance.*') ? 'active' : '' }}">
                         <i class="fas fa-vault w-4 text-gray-500"></i>
                         <span class="font-medium">Finance Ops</span>
@@ -389,39 +480,43 @@
         <div class="flex-1 flex flex-col overflow-hidden min-h-0">
             <div class="max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
                 <!-- Top Bar -->
-                <header class="bg-white border border-gray-200 rounded-2xl px-6 py-4 mt-4 shadow-sm shrink-0">
+                <header class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-6 py-4 mt-4 shadow-sm shrink-0 transition-colors duration-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <button id="sidebarToggle" type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <button id="sidebarToggle" type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <i class="fas fa-bars"></i>
                                 <span class="hidden sm:inline">Hide Sidebar</span>
                             </button>
-                            <button id="sidebarCompactToggle" type="button" title="Toggle compact sidebar" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                            <button id="sidebarCompactToggle" type="button" title="Toggle compact sidebar" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <i class="fas fa-compress"></i>
                             </button>
                             <div>
-                                <h2 class="text-2xl font-semibold text-gray-900">@yield('page-title', 'Dashboard')</h2>
-                                <p class="text-sm text-gray-500 mt-1">{{ now()->format('l, F j, Y') }}</p>
+                                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">@yield('page-title', 'Dashboard')</h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ now()->format('l, F j, Y') }}</p>
                             </div>
                         </div>
 
                         <div class="flex items-center space-x-3">
-                            <div class="text-right mr-2">
-                                <p id="currentTime" class="text-sm font-medium text-gray-900">{{ now()->format('g:i A') }}</p>
-                                <p class="text-xs text-gray-500">Current Time</p>
+                            <button id="themeToggle" type="button" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i id="themeToggleIcon" class="fas fa-moon text-lg"></i>
+                            </button>
+                        
+                            <div class="text-right ml-2 mr-2 hidden sm:block">
+                                <p id="currentTime" class="text-sm font-medium text-gray-900 dark:text-white">{{ now()->format('g:i A') }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Current Time</p>
                             </div>
 
                             <div class="relative">
-                                <button id="userMenuButton" class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 border border-gray-200" aria-haspopup="true" aria-expanded="false">
+                                <button id="userMenuButton" class="inline-flex items-center gap-2 rounded-full bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors" aria-haspopup="true" aria-expanded="false">
                                     <span class="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-semibold">{{ substr(Auth::user()->name ?? 'A', 0, 1) }}</span>
                                     <span class="hidden sm:inline">{{ Auth::user()->name ?? 'Admin' }}</span>
                                 </button>
 
-                                <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50" role="menu" aria-label="User menu">
-                                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</a>
+                                <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-2 z-50" role="menu" aria-label="User menu">
+                                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">My Profile</a>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Logout</button>
+                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Logout</button>
                                     </form>
                                 </div>
                             </div>
@@ -441,6 +536,44 @@
                     <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
                         {{ session('error') }}
                     </div>
+                @endif
+
+                {{-- Subscription expiry warning banner (non-platform-admin only, hidden on billing pages) --}}
+                @if(app()->bound('current_tenant') && !Auth::user()->isPlatformAdmin() && !request()->is('billing*'))
+                    @php $tenant = app('current_tenant'); @endphp
+                    @if(!$tenant->canAccess())
+                        <div class="mb-6 flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
+                            <i class="fas fa-exclamation-circle text-rose-500 mt-0.5 shrink-0"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-rose-800">Subscription Expired — Access Suspended</p>
+                                <p class="text-sm text-rose-600 mt-0.5">
+                                    Go to <a href="{{ route('billing.index') }}" class="underline font-semibold">Billing &amp; Subscription</a> to generate your renewal invoice and submit payment.
+                                </p>
+                            </div>
+                        </div>
+                    @elseif($tenant->trial_ends_at && $tenant->isOnTrial() && $tenant->trial_ends_at->diffInDays(now(), false) >= -7)
+                        <div id="billing-banner" class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                            <i class="fas fa-clock text-amber-500 mt-0.5 shrink-0"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-amber-800">Trial expires {{ $tenant->trial_ends_at->diffForHumans() }}</p>
+                                <p class="text-sm text-amber-600 mt-0.5">
+                                    <a href="{{ route('billing.index') }}" class="underline font-semibold">Visit Billing</a> to set up your subscription before access is interrupted.
+                                </p>
+                            </div>
+                            <button onclick="document.getElementById('billing-banner').remove()" class="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none">&times;</button>
+                        </div>
+                    @elseif($tenant->subscription_expires_at && $tenant->subscription_expires_at->diffInDays(now(), false) >= -7)
+                        <div id="billing-banner" class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                            <i class="fas fa-clock text-amber-500 mt-0.5 shrink-0"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-amber-800">Subscription expires {{ $tenant->subscription_expires_at->diffForHumans() }}</p>
+                                <p class="text-sm text-amber-600 mt-0.5">
+                                    <a href="{{ route('billing.index') }}" class="underline font-semibold">Renew now</a> to avoid any interruption to your service.
+                                </p>
+                            </div>
+                            <button onclick="document.getElementById('billing-banner').remove()" class="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none">&times;</button>
+                        </div>
+                    @endif
                 @endif
 
                 @yield('content')
@@ -547,6 +680,38 @@
                                 if (!userMenuButton.contains(e.target) && !userMenu.contains(e.target)) {
                                     userMenu.classList.add('hidden');
                                 }
+                            });
+                        }
+
+                        // Theme Toggle Logic
+                        const themeToggleBtn = document.getElementById('themeToggle');
+                        const themeToggleIcon = document.getElementById('themeToggleIcon');
+
+                        const updateThemeIcon = (isDark) => {
+                            if (isDark) {
+                                themeToggleIcon.classList.remove('fa-moon');
+                                themeToggleIcon.classList.add('fa-sun');
+                            } else {
+                                themeToggleIcon.classList.remove('fa-sun');
+                                themeToggleIcon.classList.add('fa-moon');
+                            }
+                        };
+
+                        // Initial icon state
+                        updateThemeIcon(document.documentElement.classList.contains('dark'));
+
+                        if (themeToggleBtn) {
+                            themeToggleBtn.addEventListener('click', () => {
+                                document.documentElement.classList.toggle('dark');
+                                const isDark = document.documentElement.classList.contains('dark');
+                                
+                                if (isDark) {
+                                    localStorage.theme = 'dark';
+                                } else {
+                                    localStorage.theme = 'light';
+                                }
+                                
+                                updateThemeIcon(isDark);
                             });
                         }
 

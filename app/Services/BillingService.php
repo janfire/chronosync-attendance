@@ -15,35 +15,49 @@ class BillingService
 {
     /**
      * Generate the monthly invoice for a tenant.
+     * Idempotent: will return an existing invoice if one already exists
+     * for this period (regardless of status), preventing duplicates.
      */
-    public function generateMonthlyInvoice(Tenant $tenant)
+    public function generateMonthlyInvoice(Tenant $tenant): ?Invoice
     {
-        // Don't generate if there's already a pending invoice for the same period
         $periodStart = now()->startOfMonth();
-        $periodEnd = now()->endOfMonth();
+        $periodEnd   = now()->endOfMonth();
 
-        $existing = Invoice::where('tenant_id', $tenant->id)
+        // Return any existing non-cancelled invoice for this period
+        // (covers pending, paid, overdue) to prevent duplicates
+        $existing = Invoice::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
             ->where('period_start', $periodStart->toDateString())
+            ->whereNotIn('status', ['cancelled'])
             ->first();
 
-        if ($existing) return $existing;
+        if ($existing) {
+            return $existing;
+        }
 
         $plan = SubscriptionPlan::where('slug', $tenant->plan)->first();
-        if (!$plan) return null;
+        if (!$plan) {
+            return null;
+        }
 
         $invoice = Invoice::create([
-            'tenant_id' => $tenant->id,
+            'tenant_id'            => $tenant->id,
             'subscription_plan_id' => $plan->id,
-            'invoice_number' => Invoice::generateInvoiceNumber(),
-            'amount_usd' => $plan->price_usd,
-            'period_start' => $periodStart,
-            'period_end' => $periodEnd,
-            'due_date' => now()->addDays(14),
-            'status' => 'pending',
+            'invoice_number'       => Invoice::generateInvoiceNumber(),
+            'amount_usd'           => $plan->price_usd,
+            'period_start'         => $periodStart,
+            'period_end'           => $periodEnd,
+            'due_date'             => now()->addDays(14),
+            'status'               => 'pending',
         ]);
 
-        // Send Email (optional: depends on if we have mail configured)
-        // Mail::to($tenant->email)->send(new InvoiceGenerated($invoice));
+        // Notify tenant that their invoice is ready
+        try {
+            Mail::to($tenant->billing_email ?: $tenant->email)
+                ->send(new InvoiceGenerated($tenant, $invoice));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("InvoiceGenerated mail failed for tenant #{$tenant->id}: {$e->getMessage()}");
+        }
 
         return $invoice;
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceLog;
 use App\Models\User;
 use App\Models\BiometricData;
+use App\Services\AdminDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -16,10 +17,12 @@ class AdminController extends Controller
     // No need for constructor middleware in Laravel 11
 
     protected \App\Services\AnalyticsService $analyticsService;
+    protected \App\Services\AdminDashboardService $adminDashboardService;
 
-    public function __construct(\App\Services\AnalyticsService $analyticsService)
+    public function __construct(\App\Services\AnalyticsService $analyticsService, \App\Services\AdminDashboardService $adminDashboardService)
     {
         $this->analyticsService = $analyticsService;
+        $this->adminDashboardService = $adminDashboardService;
     }
 
     public function userGuide()
@@ -62,9 +65,9 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
-        $todayAttendance = $this->getTodayAttendance();
+        $adminMetrics = $this->adminDashboardService->getMetrics();
+        return view('admin.dashboard', compact('stats', 'recentActivity', 'failedAttempts', 'adminMetrics'));
 
-        return view('admin.dashboard', compact('stats', 'recentActivity', 'todayAttendance', 'failedAttempts'));
     }
 
     public function hrInsights(Request $request)
