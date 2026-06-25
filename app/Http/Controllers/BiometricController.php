@@ -185,6 +185,7 @@ class BiometricController extends Controller
         }
         
         Log::info('Facial enrollment completed for authenticated user', ['user_id' => $user->id]);
+        app(\App\Services\FacialRecognitionService::class)->syncWithPythonServer();
     }
 
     private function handleExistingUserFacialEnrollment(array $facialEncoding, User $user): void
@@ -209,6 +210,7 @@ class BiometricController extends Controller
 
         session(['biometric_id' => $biometric->id]);
         Log::info('Facial enrollment completed for existing staff user', ['target_user_id' => $user->id, 'biometric_id' => $biometric->id]);
+        app(\App\Services\FacialRecognitionService::class)->syncWithPythonServer();
     }
 
     /**
@@ -748,6 +750,9 @@ class BiometricController extends Controller
 
         // Fire the registered event
         event(new \Illuminate\Auth\Events\Registered($user));
+
+        // Sync python server with new user
+        app(\App\Services\FacialRecognitionService::class)->syncWithPythonServer();
 
         return redirect()->route('attendance.clock')
             ->with('success', 'Registration completed successfully! You can now use the kiosk to clock in.');

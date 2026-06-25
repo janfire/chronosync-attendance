@@ -26,13 +26,13 @@ export default class ZKTecoService {
                 this.socket = new WebSocket(this.wsUrl);
 
                 this.socket.onopen = () => {
-                    console.log('Connected to ZK Agent');
+                    // console.log('Connected to ZK Agent');
                     this.isConnected = true;
                     resolve();
                 };
 
                 this.socket.onclose = () => {
-                    console.log('Disconnected from ZK Agent');
+                    // console.log('Disconnected from ZK Agent');
                     this.isConnected = false;
                     this.socket = null;
                 };
@@ -50,7 +50,7 @@ export default class ZKTecoService {
     }
 
     handleMessage(event) {
-        console.log('ZK Agent Message:', event.data);
+        // console.log('ZK Agent Message received');
         try {
             const data = JSON.parse(event.data);
 
@@ -149,7 +149,7 @@ export default class ZKTecoService {
             this.requests.set('open', { resolve, reject });
             try {
                 this.socket.send(JSON.stringify(openCmd));
-                console.log('Sent Open command:', openCmd);
+                // console.log('Sent Open command');
                 // Fallback resolve if no response
                 setTimeout(() => {
                     if (this.requests.has('open')) {
@@ -185,7 +185,7 @@ export default class ZKTecoService {
 
             try {
                 this.socket.send(JSON.stringify(cmd));
-                console.log('Sent Capture (for enroll) command:', cmd);
+                // console.log('Sent Capture command');
 
                 // Simulate progress for UI feedback
                 if (onProgress) {
@@ -214,7 +214,7 @@ export default class ZKTecoService {
 
         // 1. Fetch templates if not already loaded
         if (!this.templates || this.templates.length === 0) {
-            console.log('Fetching templates for client-side matching...');
+            // console.log('Fetching templates for client-side matching...');
             await this.fetchTemplates();
         }
 
@@ -222,13 +222,13 @@ export default class ZKTecoService {
         const captured = await this.captureTemplate();
         if (!captured) throw new Error('Capture failed');
 
-        console.log('Fingerprint captured. Matching against ' + this.templates.length + ' templates...');
+        // console.log('Fingerprint captured.');
 
         // 3. Client-Side 1:N Matching Loop
         let bestMatch = null;
         let highestScore = 0;
 
-        console.log('Starting 1:N matching against ' + this.templates.length + ' templates...');
+        // console.log('Starting 1:N matching...');
 
         for (const user of this.templates) {
             try {
@@ -244,7 +244,7 @@ export default class ZKTecoService {
                 // Note: verifyMatch resolves with: score (number) OR true (boolean) OR false (no match)
                 if (score !== false && score !== null && score !== undefined) {
                     const numericScore = typeof score === 'number' ? score : 0;
-                    console.log(`Match candidate: User ${user.user_id}, Score: ${numericScore}`);
+                    // console.log('Match candidate checked');
 
                     if (numericScore >= highestScore) {
                         highestScore = numericScore;
@@ -262,7 +262,7 @@ export default class ZKTecoService {
         }
 
         if (bestMatch) {
-            console.log('Best Match Found! User ID:', bestMatch.user_id, 'Score:', bestMatch.match_score);
+            // console.log('Best Match Found!');
             return bestMatch;
         }
 
@@ -320,7 +320,7 @@ export default class ZKTecoService {
             const data = await res.json();
             if (data.success) {
                 this.templates = data.data;
-                console.log('Loaded ' + this.templates.length + ' templates.');
+                // console.log('Loaded templates.');
             }
         } catch (e) {
             console.error('Failed to load templates:', e);

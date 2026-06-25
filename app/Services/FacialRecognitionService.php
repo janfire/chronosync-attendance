@@ -95,6 +95,100 @@ class FacialRecognitionService
         ];
     }
 
+    public function syncWithPythonServer(): bool
+    {
+        $host = config('services.recognition.host', 'http://localhost:5001');
+        
+        $enrolledFaces = \App\Models\BiometricData::select(['user_id', 'facial_encoding'])
+            ->whereNotNull('facial_encoding')
+            ->whereNotNull('user_id')
+            ->where('facial_status', 'captured')
+            ->toBase()
+            ->get();
+            
+        $templates = [];
+        foreach ($enrolledFaces as $face) {
+            $templates[(string)$face->user_id] = json_decode($face->facial_encoding);
+        }
+        
+        $payload = json_encode([
+            'action' => 'sync',
+            'templates' => $templates
+        ]);
+        
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/json\r\nContent-Length: " . strlen($payload) . "\r\n",
+                'method'  => 'POST',
+                'content' => $payload,
+                'timeout' => 15,
+            ]
+        ];
+        
+        $context  = stream_context_create($options);
+        $result = @file_get_contents($host, false, $context);
+        
+        if ($result === false) {
+            Log::error('Failed to sync biometric templates with Python server');
+            return false;
+        }
+        
+        Log::info('Successfully synced templates with Python server');
+        return true;
+    }
+
+    public function findBestMatchFromImage(string $base64Image, float $tolerance = self::DEFAULT_TOLERANCE)
+    {
+        $host = config('services.recognition.host', 'http://localhost:5001');
+        
+        $payload = json_encode([
+            'action'    => 'recognize',
+            'image'     => $base64Image,
+            'tolerance' => $tolerance
+        ]);
+
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/json\r\nContent-Length: " . strlen($payload) . "\r\n",
+                'method'  => 'POST',
+                'content' => $payload,
+                'timeout' => 5,
+            ]
+        ];
+
+        $context  = stream_context_create($options);
+        $result = @file_get_contents($host, false, $context);
+
+        if ($result === false) {
+            throw new \RuntimeException('Could not connect to recognition server for matching');
+        }
+
+        $output = json_decode($result, true) ?? [];
+
+        if (isset($output['error']) && $output['error'] === 'FACE_DATABASE_EMPTY') {
+            // Auto-sync and retry!
+            Log::info('Python memory is empty. Auto-syncing templates...');
+            $this->syncWithPythonServer();
+            
+            // Retry the recognition once
+            $result = @file_get_contents($host, false, $context);
+            $output = json_decode($result, true) ?? [];
+        }
+
+        if (empty($output['success'])) {
+            throw new \RuntimeException($output['error'] ?? 'Server returned error during match');
+        }
+
+        if (!$output['match']) {
+            return null; // No match found
+        }
+        
+        return [
+            'user_id' => $output['user_id'],
+            'distance' => $output['distance']
+        ];
+    }
+
     protected function extractViaCli(string $base64Image, bool $isEnrollment = false): array
     {
         // Use temporary file instead of pipe to avoid "Broken pipe" errors on Windows/Linux

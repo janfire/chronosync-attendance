@@ -117,8 +117,18 @@ class LivenessDetector {
                 
                 if (this.blinkCount >= this.requiredBlinks) {
                     this._updateStatus('Liveness confirmed! Capturing...');
+                    
+                    // Calculate bounding box for network payload optimization
+                    let minX = 1.0, minY = 1.0, maxX = 0.0, maxY = 0.0;
+                    for (const pt of landmarks) {
+                        if (pt.x < minX) minX = pt.x;
+                        if (pt.x > maxX) maxX = pt.x;
+                        if (pt.y < minY) minY = pt.y;
+                        if (pt.y > maxY) maxY = pt.y;
+                    }
+                    
                     if (this.onBlinkDetected) {
-                        this.onBlinkDetected();
+                        this.onBlinkDetected({ minX, minY, maxX, maxY });
                     }
                     // Prevent multiple rapid triggers
                     this.blinkCount = 0; 

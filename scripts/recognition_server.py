@@ -6,7 +6,7 @@ import os
 import base64
 from io import BytesIO
 import time
-
+import concurrent.futures
 import numpy as np
 import cv2
 import face_recognition
@@ -16,8 +16,9 @@ HOST = "localhost"
 
 # Global variable to store loaded models (technically face_recognition loads lazily, 
 # but we can force a load by running a dummy image)
-print("Loading Facial Recognition Models... this may take a moment.")
 start_time = time.time()
+# Global dictionary to hold user encodings in RAM for fast 1:N matching
+FACE_DATABASE = {}
 # Create a dummy image to force model loading
 dummy_image = np.zeros((100, 100, 3), dtype=np.uint8)
 try:
@@ -47,10 +48,12 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
         
         if action == 'extract':
             self.handle_extract(request)
-        elif action == 'compare':
-            self.handle_compare(request)
+        elif action == 'sync':
+            self.handle_sync(request)
+        elif action == 'recognize':
+            self.handle_recognize(request)
         elif action == 'status':
-            self._send_response({'status': 'running', 'models_loaded': True})
+            self._send_response({'status': 'running', 'models_loaded': True, 'faces_in_memory': len(FACE_DATABASE)})
         else:
             self._send_response({'error': f'Unknown action: {action}'}, 400)
 
@@ -70,39 +73,72 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             self._send_response({'error': str(e)}, 500)
 
-    def handle_compare(self, request):
-        known_encoding = request.get('known_encoding')
-        image_data = request.get('image')
-        tolerance = request.get('tolerance', 0.6)
+    def handle_sync(self, request):
+        global FACE_DATABASE
+        templates = request.get('templates')
+        if not templates:
+            self._send_response({'error': 'No templates provided'}, 400)
+            return
+            
+        FACE_DATABASE.clear()
+        for user_id_str, enc_list in templates.items():
+            FACE_DATABASE[int(user_id_str)] = np.array(enc_list)
+            
+        print(f"Synced {len(FACE_DATABASE)} faces into memory.")
+        self._send_response({'success': True, 'count': len(FACE_DATABASE)})
 
-        if not known_encoding or not image_data:
-            self._send_response({'error': 'Missing known_encoding or image'}, 400)
+    def handle_recognize(self, request):
+        global FACE_DATABASE
+        image_data = request.get('image')
+        tolerance = float(request.get('tolerance', 0.38)) # Default tolerance from Laravel
+
+        if not image_data:
+            self._send_response({'error': 'No image provided'}, 400)
+            return
+
+        if len(FACE_DATABASE) == 0:
+            self._send_response({'error': 'FACE_DATABASE_EMPTY', 'message': 'Python memory is empty. Please sync templates.'}, 400)
             return
 
         try:
             # Extract features from new image
-            result = self.process_image(image_data)
+            result = self.process_image(image_data, is_enrollment=False)
             
             if 'error' in result:
                 self._send_response(result)
                 return
 
-            unknown_encoding = result['facial_encoding']
+            unknown_encoding = np.array(result['facial_encoding'])
             
-            # Compare
-            matches = face_recognition.compare_faces([known_encoding], unknown_encoding, tolerance=tolerance)
-            distance = face_recognition.face_distance([known_encoding], unknown_encoding)[0]
+            # 1:N Math directly in numpy
+            t0 = time.time()
+            known_ids = list(FACE_DATABASE.keys())
+            known_encodings = list(FACE_DATABASE.values())
             
-            confidence = 1 - min(distance, 1.0)
-
-            response = {
-                'success': True,
-                'match': bool(matches[0]),
-                'distance': float(distance),
-                'confidence': float(confidence),
-                'tolerance_used': tolerance
-            }
-            self._send_response(response)
+            # Calculate euclidean distance (L2 norm) for all faces at once
+            distances = np.linalg.norm(known_encodings - unknown_encoding, axis=1)
+            
+            best_match_index = np.argmin(distances)
+            min_distance = distances[best_match_index]
+            
+            match_time_ms = (time.time() - t0) * 1000
+            
+            if min_distance <= tolerance:
+                best_user_id = known_ids[best_match_index]
+                self._send_response({
+                    'success': True,
+                    'match': True,
+                    'user_id': best_user_id,
+                    'distance': float(min_distance),
+                    'match_time_ms': match_time_ms
+                })
+            else:
+                self._send_response({
+                    'success': True,
+                    'match': False,
+                    'message': 'No matching face found within tolerance',
+                    'match_time_ms': match_time_ms
+                })
 
         except Exception as e:
             self._send_response({'error': str(e)}, 500)
@@ -182,9 +218,47 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
             'encoding_dimensions': len(face_encodings[0])
         }
 
+import threading
+
+class ThreadPoolTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    """
+    TCP Server that processes requests concurrently using ThreadingMixIn, 
+    but safely capped with a BoundedSemaphore to prevent memory exhaustion.
+    """
+    daemon_threads = True
+    
+    def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
+        super().__init__(server_address, RequestHandlerClass, bind_and_activate)
+        
+        # Hardware-aware dynamic scaling with a manual override
+        env_workers = os.environ.get('MAX_FACE_WORKERS')
+        if env_workers and env_workers.isdigit():
+            self.max_workers = int(env_workers)
+        else:
+            # Default to min(CPU Cores, 4) to be safe out-of-the-box
+            cpu_count = os.cpu_count() or 1
+            self.max_workers = min(cpu_count, 4)
+            
+        print(f"Server configured with max_workers={self.max_workers}")
+        self._pool = threading.BoundedSemaphore(value=self.max_workers)
+
+    def process_request(self, request, client_address):
+        """Acquire semaphore before spawning thread. Blocks if at max capacity."""
+        self._pool.acquire()
+        t = threading.Thread(target=self.process_request_thread_with_sem, args=(request, client_address))
+        t.daemon = self.daemon_threads
+        t.start()
+        
+    def process_request_thread_with_sem(self, request, client_address):
+        """Process request and release semaphore when done."""
+        try:
+            self.process_request_thread(request, client_address)
+        finally:
+            self._pool.release()
+
 if __name__ == "__main__":
     print(f"Starting Facial Recognition Server on {HOST}:{PORT}")
-    with socketserver.TCPServer((HOST, PORT), RecognitionHandler) as httpd:
+    with ThreadPoolTCPServer((HOST, PORT), RecognitionHandler) as httpd:
         print("Server running. Press Ctrl+C to stop.")
         try:
             httpd.serve_forever()

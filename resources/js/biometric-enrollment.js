@@ -178,9 +178,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (elements.statusText) elements.statusText.textContent = msg;
                 };
                 
-                livenessDetector.onBlinkDetected = async () => {
+                livenessDetector.onBlinkDetected = async (boundingBox) => {
                     if (isProcessing) return;
-                    await captureAndSendFrame();
+                    await captureAndSendFrame(boundingBox);
                 };
             }
             livenessDetector.init(elements.video).catch(err => {
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, CAPTURE_INTERVAL_MS);
     }
 
-    async function captureAndSendFrame() {
+    async function captureAndSendFrame(boundingBox = null) {
         if (!elements.canvas || !elements.video) return;
 
         isProcessing = true;
@@ -214,11 +214,36 @@ document.addEventListener('DOMContentLoaded', function () {
         if (elements.facialSuccess) elements.facialSuccess.classList.add('hidden');
         if (elements.facialError) elements.facialError.classList.add('hidden');
 
-        elements.canvas.width = elements.video.videoWidth;
-        elements.canvas.height = elements.video.videoHeight;
+        const vWidth = elements.video.videoWidth;
+        const vHeight = elements.video.videoHeight;
+        elements.canvas.width = vWidth;
+        elements.canvas.height = vHeight;
+        
         const ctx = elements.canvas.getContext('2d');
-        ctx.drawImage(elements.video, 0, 0, elements.canvas.width, elements.canvas.height);
-        const imageData = elements.canvas.toDataURL('image/jpeg', 0.9);
+        ctx.drawImage(elements.video, 0, 0, vWidth, vHeight);
+        
+        let imageData;
+        if (boundingBox) {
+            const padX = (boundingBox.maxX - boundingBox.minX) * 0.15;
+            const padY = (boundingBox.maxY - boundingBox.minY) * 0.15;
+            
+            const startX = Math.max(0, (boundingBox.minX - padX) * vWidth);
+            const startY = Math.max(0, (boundingBox.minY - padY) * vHeight);
+            const cropW = Math.min(vWidth - startX, (boundingBox.maxX - boundingBox.minX + 2 * padX) * vWidth);
+            const cropH = Math.min(vHeight - startY, (boundingBox.maxY - boundingBox.minY + 2 * padY) * vHeight);
+            
+            const cropCanvas = document.createElement('canvas');
+            cropCanvas.width = cropW;
+            cropCanvas.height = cropH;
+            cropCanvas.getContext('2d').drawImage(
+                elements.canvas, 
+                startX, startY, cropW, cropH, 
+                0, 0, cropW, cropH
+            );
+            imageData = cropCanvas.toDataURL('image/jpeg', 0.9);
+        } else {
+            imageData = elements.canvas.toDataURL('image/jpeg', 0.9);
+        }
 
         try {
             const response = await fetch(window.routes.facialEnroll, {

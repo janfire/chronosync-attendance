@@ -69,19 +69,24 @@ class AttendanceController extends Controller
         }
 
         try {
-            // Extract facial encoding from image
-            $encodingResult = $this->facialRecognition->extractEncodingFromBase64($request->facial_image);
-            $inputEncoding = $encodingResult['encoding'];
-
-            // Find matching user
-            $matchResult = $this->findMatchingUser($inputEncoding);
+            // Send image directly to Python for extraction + 1:N matching!
+            $matchResult = $this->facialRecognition->findBestMatchFromImage($request->facial_image);
             
-            // Check if it's a JSON response (no user found)
-            if ($matchResult instanceof \Illuminate\Http\JsonResponse) {
-                return $matchResult; // Return the registration prompt response
+            if (!$matchResult) {
+                // Return a proper JSON response with the expected structure
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Face not found in our records. Would you like to register?',
+                    'error' => 'Face not recognized',
+                    'action_required' => 'registration_prompt'
+                ], 200); 
             }
             
-            $user = $matchResult;
+            $user = \App\Models\User::find($matchResult['user_id']);
+
+            if (!$user) {
+                return ApiResponse::error('Matched user record not found in database', 500);
+            }
 
             // Perform common attendance processing
             return $this->processAttendanceForUser($user, $request, 'facial_recognition');

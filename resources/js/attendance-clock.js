@@ -152,9 +152,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 };
                 
-                livenessDetector.onBlinkDetected = async () => {
+                livenessDetector.onBlinkDetected = async (boundingBox) => {
                     if (isProcessing || isClockedIn) return;
-                    await captureAndVerify();
+                    await captureAndVerify(boundingBox);
                 };
             }
             livenessDetector.init(elements.video).catch(err => {
@@ -174,14 +174,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     }
 
-    async function captureAndVerify() {
+    async function captureAndVerify(boundingBox = null) {
         // Capture frame
         const ctx = elements.canvas.getContext('2d');
-        elements.canvas.width = elements.video.videoWidth;
-        elements.canvas.height = elements.video.videoHeight;
+        const vWidth = elements.video.videoWidth;
+        const vHeight = elements.video.videoHeight;
+        
+        elements.canvas.width = vWidth;
+        elements.canvas.height = vHeight;
         ctx.drawImage(elements.video, 0, 0);
 
-        const imageData = elements.canvas.toDataURL('image/jpeg', 0.8);
+        let imageData;
+        if (boundingBox) {
+            const padX = (boundingBox.maxX - boundingBox.minX) * 0.15;
+            const padY = (boundingBox.maxY - boundingBox.minY) * 0.15;
+            
+            const startX = Math.max(0, (boundingBox.minX - padX) * vWidth);
+            const startY = Math.max(0, (boundingBox.minY - padY) * vHeight);
+            const cropW = Math.min(vWidth - startX, (boundingBox.maxX - boundingBox.minX + 2 * padX) * vWidth);
+            const cropH = Math.min(vHeight - startY, (boundingBox.maxY - boundingBox.minY + 2 * padY) * vHeight);
+            
+            const cropCanvas = document.createElement('canvas');
+            cropCanvas.width = cropW;
+            cropCanvas.height = cropH;
+            cropCanvas.getContext('2d').drawImage(
+                elements.canvas, 
+                startX, startY, cropW, cropH, 
+                0, 0, cropW, cropH
+            );
+            imageData = cropCanvas.toDataURL('image/jpeg', 0.85);
+        } else {
+            imageData = elements.canvas.toDataURL('image/jpeg', 0.8);
+        }
 
         isProcessing = true;
         let result; // Declare outside try so finally block can access it
