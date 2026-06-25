@@ -16,6 +16,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     
+    <!-- MediaPipe Face Mesh for Liveness Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/liveness-detector.js') }}"></script>
     <!-- Local assets via Vite -->
     @vite(['resources/css/app.css', 'resources/js/biometric-enrollment.js'])
 

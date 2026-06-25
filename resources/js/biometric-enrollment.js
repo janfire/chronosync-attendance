@@ -148,10 +148,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    let livenessDetector = null;
+
     function stopCamera() {
         if (captureInterval) {
             clearInterval(captureInterval);
             captureInterval = null;
+        }
+        if (livenessDetector) {
+            livenessDetector.stop();
         }
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -166,6 +171,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function startAutoCapture() {
+        if (typeof window.LivenessDetector !== 'undefined') {
+            if (!livenessDetector) {
+                livenessDetector = new window.LivenessDetector();
+                livenessDetector.onStatusChange = (msg) => {
+                    if (elements.statusText) elements.statusText.textContent = msg;
+                };
+                
+                livenessDetector.onBlinkDetected = async () => {
+                    if (isProcessing) return;
+                    await captureAndSendFrame();
+                };
+            }
+            livenessDetector.init(elements.video).catch(err => {
+                console.error("Liveness detector init failed, falling back to interval.", err);
+                startLegacyInterval();
+            });
+        } else {
+            startLegacyInterval();
+        }
+    }
+
+    function startLegacyInterval() {
         if (captureInterval) clearInterval(captureInterval);
 
         captureInterval = setInterval(async () => {

@@ -138,155 +138,169 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    let livenessDetector = null;
+
     function startFaceDetection() {
-        if (faceDetectionInterval) clearInterval(faceDetectionInterval);
-
-        faceDetectionInterval = setInterval(async () => {
-            if (isProcessing || isClockedIn) return;
-
-            // Capture frame
-            const ctx = elements.canvas.getContext('2d');
-            elements.canvas.width = elements.video.videoWidth;
-            elements.canvas.height = elements.video.videoHeight;
-            ctx.drawImage(elements.video, 0, 0);
-
-            const imageData = elements.canvas.toDataURL('image/jpeg', 0.8);
-
-            isProcessing = true;
-            let result; // Declare outside try so finally block can access it
-            try {
-                const position = await getCurrentPosition();
-
-                const badgeContainer = document.querySelector('.cam-status-badge');
-                if (badgeContainer) {
-                    const badgeText = badgeContainer.querySelector('span');
-                    if (badgeText) badgeText.textContent = "Processing data...";
-                }
-
-                const response = await fetch('/attendance/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken()
-                    },
-                    body: JSON.stringify({
-                        facial_image: imageData,
-                        latitude: position?.latitude,
-                        longitude: position?.longitude,
-                        accuracy: position?.accuracy
-                    })
-                });
-
-                result = await response.json();
-
-                if (result.success) {
-                    handleSuccess(result);
+        if (typeof window.LivenessDetector !== 'undefined') {
+            if (!livenessDetector) {
+                livenessDetector = new window.LivenessDetector();
+                livenessDetector.onStatusChange = (msg) => {
+                    const badgeContainer = document.querySelector('.cam-status-badge');
                     if (badgeContainer) {
                         const badgeText = badgeContainer.querySelector('span');
-                        if (badgeText) badgeText.textContent = "Face Verified!";
-                        const dot = badgeContainer.querySelector('.dot');
-                        if (dot) dot.style.background = 'var(--success)';
+                        if (badgeText) badgeText.textContent = msg;
                     }
-                } else {
-                    // Check for registration prompt
-                    if (result.action_required === 'registration_prompt') {
-                        // Pause detection while alert is open
-                        clearInterval(faceDetectionInterval);
+                };
+                
+                livenessDetector.onBlinkDetected = async () => {
+                    if (isProcessing || isClockedIn) return;
+                    await captureAndVerify();
+                };
+            }
+            livenessDetector.init(elements.video).catch(err => {
+                console.error("Liveness detector init failed, falling back to interval.", err);
+                startLegacyInterval();
+            });
+        } else {
+            startLegacyInterval();
+        }
+    }
 
-                        // Use SweetAlert2 if available, otherwise fallback to confirm
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                title: 'Not Recognized',
-                                text: result.message || 'Face not found in our records. Would you like to register?',
-                                icon: 'warning',
-                                showCancelButton: true,
-                                showDenyButton: true,
-                                confirmButtonColor: '#2563eb',
-                                denyButtonColor: '#0ea5e9',
-                                cancelButtonColor: '#ef4444',
-                                confirmButtonText: '<i class="fas fa-user-plus mr-1"></i> Yes, Register Now',
-                                denyButtonText: '<i class="fas fa-user-pen mr-1"></i> Update Biometrics',
-                                cancelButtonText: 'Cancel',
-                                allowOutsideClick: false
-                            }).then((swalResult) => {
-                                if (swalResult.isConfirmed) {
-                                    window.location.href = '/register';
-                                } else if (swalResult.isDenied) {
-                                    Swal.fire({
-                                        title: 'Update Biometrics',
-                                        html: `
-                                            <div style="text-align:left">
-                                                <label style="display:block;margin-bottom:6px;font-weight:600;">Email or Employee Number</label>
-                                                <input id="update-identifier" class="swal2-input" placeholder="e.g. name@zou.ac.zw or EMP001" style="margin:0 0 10px 0;" />
-                                                <label style="display:block;margin-bottom:6px;font-weight:600;">Password</label>
-                                                <input id="update-password" type="password" class="swal2-input" placeholder="Your password" style="margin:0;" />
-                                            </div>
-                                        `,
-                                        icon: 'info',
-                                        showCancelButton: true,
-                                        confirmButtonText: 'Continue',
-                                        cancelButtonText: 'Cancel',
-                                        confirmButtonColor: '#2563eb',
-                                        allowOutsideClick: false,
-                                        preConfirm: async () => {
-                                            const identifier = document.getElementById('update-identifier')?.value?.trim();
-                                            const password = document.getElementById('update-password')?.value ?? '';
+    function startLegacyInterval() {
+        if (faceDetectionInterval) clearInterval(faceDetectionInterval);
+        faceDetectionInterval = setInterval(async () => {
+            if (isProcessing || isClockedIn) return;
+            await captureAndVerify();
+        }, 3000);
+    }
 
-                                            if (!identifier || !password) {
-                                                Swal.showValidationMessage('Please enter your email/employee number and password.');
-                                                return;
-                                            }
+    async function captureAndVerify() {
+        // Capture frame
+        const ctx = elements.canvas.getContext('2d');
+        elements.canvas.width = elements.video.videoWidth;
+        elements.canvas.height = elements.video.videoHeight;
+        ctx.drawImage(elements.video, 0, 0);
 
-                                            try {
-                                                const res = await fetch('/biometric/update-login', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'Accept': 'application/json',
-                                                        'X-CSRF-TOKEN': getCsrfToken()
-                                                    },
-                                                    body: JSON.stringify({ identifier, password })
-                                                });
+        const imageData = elements.canvas.toDataURL('image/jpeg', 0.8);
 
-                                                const json = await res.json().catch(() => ({}));
-                                                if (!res.ok || !json.success) {
-                                                    const msg = json.error || 'Authentication failed. Please check your details.';
-                                                    Swal.showValidationMessage(msg);
-                                                    return;
-                                                }
+        isProcessing = true;
+        let result; // Declare outside try so finally block can access it
+        try {
+            const position = await getCurrentPosition();
 
-                                                return json;
-                                            } catch (e) {
-                                                Swal.showValidationMessage('Network error. Please try again.');
-                                                return;
-                                            }
-                                        }
-                                    }).then((loginResult) => {
-                                        if (loginResult.isConfirmed && loginResult.value?.redirect_url) {
-                                            window.location.href = loginResult.value.redirect_url;
-                                        } else {
-                                            // Resume detection if they cancelled
-                                            isProcessing = false;
-                                            startFaceDetection();
-                                        }
-                                    });
-                                } else {
-                                    // Resume detection if they cancelled
-                                    isProcessing = false;
-                                    startFaceDetection();
-                                }
-                            });
-                        } else {
-                            // Fallback to native confirm
-                            if (confirm(result.message || 'Face not found. Would you like to register now?')) {
+            const badgeContainer = document.querySelector('.cam-status-badge');
+            if (badgeContainer) {
+                const badgeText = badgeContainer.querySelector('span');
+                if (badgeText) badgeText.textContent = "Processing data...";
+            }
+
+            const response = await fetch('/attendance/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    facial_image: imageData,
+                    latitude: position?.latitude,
+                    longitude: position?.longitude,
+                    accuracy: position?.accuracy
+                })
+            });
+
+            result = await response.json();
+
+            if (result.success) {
+                handleSuccess(result);
+                if (badgeContainer) {
+                    const badgeText = badgeContainer.querySelector('span');
+                    if (badgeText) badgeText.textContent = "Face Verified!";
+                    const dot = badgeContainer.querySelector('.dot');
+                    if (dot) dot.style.background = 'var(--success)';
+                }
+            } else {
+                // Check for registration prompt
+                if (result.action_required === 'registration_prompt') {
+                    // Pause detection while alert is open
+                    if (faceDetectionInterval) clearInterval(faceDetectionInterval);
+                    if (livenessDetector) livenessDetector.stop();
+
+                    // Use SweetAlert2 if available, otherwise fallback to confirm
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Not Recognized',
+                            text: result.message || 'Face not found in our records. Would you like to register?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            showDenyButton: true,
+                            confirmButtonColor: '#2563eb',
+                            denyButtonColor: '#0ea5e9',
+                            cancelButtonColor: '#ef4444',
+                            confirmButtonText: '<i class="fas fa-user-plus mr-1"></i> Yes, Register Now',
+                            denyButtonText: '<i class="fas fa-user-pen mr-1"></i> Update Biometrics',
+                            cancelButtonText: 'Cancel',
+                            allowOutsideClick: false
+                        }).then((swalResult) => {
+                            if (swalResult.isConfirmed) {
                                 window.location.href = '/register';
+                            } else if (swalResult.isDenied) {
+                                Swal.fire({
+                                    title: 'Update Biometrics',
+                                    html: `
+                                        <div style="text-align:left">
+                                            <label style="display:block;margin-bottom:6px;font-weight:600;">Email or Employee Number</label>
+                                            <input id="update-identifier" class="swal2-input" placeholder="e.g. name@zou.ac.zw or EMP001" style="margin:0 0 10px 0;" />
+                                            <label style="display:block;margin-bottom:6px;font-weight:600;">Password</label>
+                                            <input id="update-password" type="password" class="swal2-input" placeholder="Your password" style="margin:0;" />
+                                        </div>
+                                    `,
+                                    icon: 'info',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Continue',
+                                    cancelButtonText: 'Cancel',
+                                    confirmButtonColor: '#2563eb',
+                                    allowOutsideClick: false,
+                                    preConfirm: async () => {
+                                        const identifier = document.getElementById('update-identifier')?.value?.trim();
+                                        const password = document.getElementById('update-password')?.value ?? '';
+
+                                        if (!identifier || !password) {
+                                            Swal.showValidationMessage('Please enter your email/employee number and password.');
+                                            return;
+                                        }
+
+                                        try {
+                                            const res = await fetch('/biometric/update-login', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'Accept': 'application/json',
+                                                    'X-CSRF-TOKEN': getCsrfToken()
+                                                },
+                                                body: JSON.stringify({ identifier, password })
+                                            });
+
+                                            const data = await res.json();
+                                            if (!res.ok) {
+                                                throw new Error(data.message || 'Login failed');
+                                            }
+                                            return data;
+                                        } catch (error) {
+                                            Swal.showValidationMessage(`Request failed: ${error}`);
+                                        }
+                                    }
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = '/biometric/enrollment';
+                                    } else {
+                                        // Resume detection if they cancel update
+                                        startFaceDetection();
+                                    }
+                                });
                             } else {
-                                isProcessing = false;
+                                // Resume detection if they click Cancel
                                 startFaceDetection();
                             }
-                        }
-
-                        if (badgeContainer) {
                             const badgeText = badgeContainer.querySelector('span');
                             if (badgeText) badgeText.textContent = "Face not recognized.";
                             const dot = badgeContainer.querySelector('.dot');

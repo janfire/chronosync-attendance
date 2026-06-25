@@ -19,6 +19,10 @@
             verifyLogin: '{{ route("biometric.webauthn.login.verify") }}'
         };
     </script>
+    <!-- MediaPipe Face Mesh for Liveness Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/liveness-detector.js') }}"></script>
     <!-- Load attendance script via Vite (module build) -->
     @vite(['resources/js/attendance-clock.js'])
     <style>
