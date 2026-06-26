@@ -1,31 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Clock In/Out - ChronoSync Attendance System</title>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Add SweetAlert2 CSS and JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        window.routes = {
-            loginOptions: '{{ route("biometric.webauthn.login.options") }}',
-            verifyLogin: '{{ route("biometric.webauthn.login.verify") }}'
-        };
-    </script>
-    <!-- MediaPipe Face Mesh for Liveness Detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
-    <script src="{{ asset('js/liveness-detector.js') }}"></script>
-    <!-- Load attendance script via Vite (module build) -->
-    @vite(['resources/js/attendance-clock.js'])
-    <style>
+import re
+
+file_path = 'resources/views/attendance/clock.blade.php'
+with open(file_path, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# The top part up to `<style>`
+top_part = content.split('<style>')[0]
+
+# The bottom part from `<script>` (line 1000)
+bottom_part = content.split('    <script>\n        // Live clock')[1]
+
+new_middle = """<style>
         body {
             font-family: 'Sora', sans-serif;
             min-height: 100vh;
@@ -304,33 +289,11 @@
         });
 
         // Live clock
+"""
 
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            const s = String(now.getSeconds()).padStart(2, '0');
-            const el = document.getElementById('live-clock');
-            if (el) el.innerHTML = `${h}<span class="time-dot">:</span>${m}<span class="time-dot">:</span>${s}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+final_content = top_part + new_middle + bottom_part
 
-        // Safety: ensure the selection screen is visible by default.
-        // (Prevents a blank right panel if cached JS/CSS toggled classes unexpectedly.)
-        (function ensureDefaultClockUi() {
-            const selection = document.getElementById('selection-screen');
-            const camera = document.getElementById('camera-container');
-            const finger = document.getElementById('fingerprint-container');
-            const indicator = document.getElementById('fingerprint-indicator');
+with open(file_path, 'w', encoding='utf-8') as f:
+    f.write(final_content)
 
-            if (selection) selection.classList.remove('hidden');
-            if (camera) camera.classList.remove('visible');
-            if (finger) finger.classList.remove('visible');
-            if (indicator) indicator.classList.remove('visible');
-        })();
-    </script>
-</body>
-</html>
-
-
+print("Updated successfully")
