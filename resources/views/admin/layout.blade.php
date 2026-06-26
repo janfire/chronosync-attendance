@@ -471,6 +471,17 @@
                         <i class="fas fa-vault w-4 text-gray-500"></i>
                         <span class="font-medium">Finance Ops</span>
                     </a>
+                    <a href="{{ route('superadmin.audit.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.audit.*') ? 'active' : '' }}">
+                        <i class="fas fa-shield-alt w-4 text-gray-500"></i>
+                        <span class="font-medium">System Audit</span>
+                        @php $newErrors = \App\Models\SystemErrorLog::where('status', 'new')->count(); @endphp
+                        @if($newErrors > 0)
+                            <span class="ml-auto flex h-2.5 w-2.5 relative" title="{{ $newErrors }} new system crashes">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                            </span>
+                        @endif
+                    </a>
                 @endif
 
             </nav>

@@ -73,6 +73,7 @@ class FacialRecognitionService
                 'method'  => 'POST',
                 'content' => $payload,
                 'timeout' => $timeout,
+                'ignore_errors' => true,
             ]
         ];
 
@@ -111,8 +112,11 @@ class FacialRecognitionService
             $templates[(string)$face->user_id] = json_decode($face->facial_encoding);
         }
         
+        $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : 'default';
+
         $payload = json_encode([
             'action' => 'sync',
+            'tenant_id' => $tenantId,
             'templates' => $templates
         ]);
         
@@ -122,6 +126,7 @@ class FacialRecognitionService
                 'method'  => 'POST',
                 'content' => $payload,
                 'timeout' => 15,
+                'ignore_errors' => true,
             ]
         ];
         
@@ -141,8 +146,11 @@ class FacialRecognitionService
     {
         $host = config('services.recognition.host', 'http://localhost:5001');
         
+        $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : 'default';
+
         $payload = json_encode([
             'action'    => 'recognize',
+            'tenant_id' => $tenantId,
             'image'     => $base64Image,
             'tolerance' => $tolerance
         ]);
@@ -153,6 +161,7 @@ class FacialRecognitionService
                 'method'  => 'POST',
                 'content' => $payload,
                 'timeout' => 5,
+                'ignore_errors' => true,
             ]
         ];
 
@@ -173,6 +182,11 @@ class FacialRecognitionService
             // Retry the recognition once
             $result = @file_get_contents($host, false, $context);
             $output = json_decode($result, true) ?? [];
+            
+            // If still empty after sync, the tenant truly has no faces enrolled.
+            if (isset($output['error']) && $output['error'] === 'FACE_DATABASE_EMPTY') {
+                return null;
+            }
         }
 
         if (empty($output['success'])) {

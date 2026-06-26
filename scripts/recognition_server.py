@@ -75,20 +75,26 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
 
     def handle_sync(self, request):
         global FACE_DATABASE
+        tenant_id = str(request.get('tenant_id', 'default'))
         templates = request.get('templates')
-        if not templates:
+        if templates is None:
             self._send_response({'error': 'No templates provided'}, 400)
             return
             
-        FACE_DATABASE.clear()
-        for user_id_str, enc_list in templates.items():
-            FACE_DATABASE[int(user_id_str)] = np.array(enc_list)
+        if tenant_id not in FACE_DATABASE:
+            FACE_DATABASE[tenant_id] = {}
+        else:
+            FACE_DATABASE[tenant_id].clear()
             
-        print(f"Synced {len(FACE_DATABASE)} faces into memory.")
-        self._send_response({'success': True, 'count': len(FACE_DATABASE)})
+        for user_id_str, enc_list in templates.items():
+            FACE_DATABASE[tenant_id][int(user_id_str)] = np.array(enc_list)
+            
+        print(f"Synced {len(FACE_DATABASE[tenant_id])} faces into memory for tenant {tenant_id}.")
+        self._send_response({'success': True, 'count': len(FACE_DATABASE[tenant_id])})
 
     def handle_recognize(self, request):
         global FACE_DATABASE
+        tenant_id = str(request.get('tenant_id', 'default'))
         image_data = request.get('image')
         tolerance = float(request.get('tolerance', 0.38)) # Default tolerance from Laravel
 
@@ -96,8 +102,9 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
             self._send_response({'error': 'No image provided'}, 400)
             return
 
-        if len(FACE_DATABASE) == 0:
-            self._send_response({'error': 'FACE_DATABASE_EMPTY', 'message': 'Python memory is empty. Please sync templates.'}, 400)
+        tenant_db = FACE_DATABASE.get(tenant_id, {})
+        if len(tenant_db) == 0:
+            self._send_response({'error': 'FACE_DATABASE_EMPTY', 'message': f'Python memory for tenant {tenant_id} is empty. Please sync templates.'}, 400)
             return
 
         try:
@@ -112,8 +119,8 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
             
             # 1:N Math directly in numpy
             t0 = time.time()
-            known_ids = list(FACE_DATABASE.keys())
-            known_encodings = list(FACE_DATABASE.values())
+            known_ids = list(tenant_db.keys())
+            known_encodings = list(tenant_db.values())
             
             # Calculate euclidean distance (L2 norm) for all faces at once
             distances = np.linalg.norm(known_encodings - unknown_encoding, axis=1)

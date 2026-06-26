@@ -28,6 +28,11 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
     // Finance
     Route::get('/finance/pending', [\App\Http\Controllers\Admin\FinanceController::class, 'pendingInvoices'])->name('superadmin.finance.pending');
     Route::post('/finance/invoice/{invoice}/confirm', [\App\Http\Controllers\Admin\FinanceController::class, 'confirmPayment'])->name('superadmin.finance.confirm');
+    // System Audit
+    Route::get('/audit', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'index'])->name('superadmin.audit.index');
+    Route::get('/audit/{log}', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'show'])->name('superadmin.audit.show');
+    Route::post('/audit/{log}/resolve', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'resolve'])->name('superadmin.audit.resolve');
+    Route::post('/audit/resolve-all', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'resolveAll'])->name('superadmin.audit.resolve-all');
 });
 
 // SaaS Onboarding Routes
@@ -134,4 +139,15 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
     })->name('dashboard')->middleware('auth');
+});
+
+// ==========================================
+// SYSTEM AUDIT TESTING ROUTES
+// ==========================================
+Route::get('/test-crash', function() {
+    throw new \Exception("This is a deliberate test crash to trigger the System Audit feature!");
+});
+
+Route::get('/preview-500', function() {
+    return view('errors.500', ['reference_code' => 'ERR-TEST99']);
 });

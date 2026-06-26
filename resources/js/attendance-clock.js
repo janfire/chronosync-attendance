@@ -329,9 +329,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (badgeText) badgeText.textContent = "Face not recognized.";
                             const dot = badgeContainer.querySelector('.dot');
                             if (dot) dot.style.background = 'var(--error)';
-                        }
-                    } else {
-                        // Handle other errors - extract error message from various possible locations
+                        });
+                    }
+                } else {
+                    // Handle other errors - extract error message from various possible locations
                         console.error('=== FACIAL VERIFICATION ERROR ===');
                         console.error('Full response object:', result);
                         console.error('Response JSON:', JSON.stringify(result, null, 2));
@@ -406,8 +407,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             }
-        }, 3000); // Check every 3 seconds
-    }
+        }
+
 
     // --- FINGERPRINT RECOGNITION ---
 
