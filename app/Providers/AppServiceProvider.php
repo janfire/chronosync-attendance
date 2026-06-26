@@ -4,8 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
-
-
+use Illuminate\Support\Facades\Event;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -21,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register Microsoft Azure Socialite Provider
+        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+            $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
+        });
+
         // Force HTTPS if we are using ngrok
         // Force HTTPS if we are using ngrok (handling both .app and .dev domains)
         if (

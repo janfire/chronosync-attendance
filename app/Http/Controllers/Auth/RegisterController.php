@@ -19,7 +19,15 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), User::rules());
+        $rules = User::rules();
+        // Specifically enforce National ID format for Guests
+        $rules['employee_number'] = ['required', 'string', 'unique:users', 'regex:/^\d{2}-\d{6,7}\s?[A-Za-z]\s?\d{2}$/'];
+        
+        $messages = [
+            'employee_number.regex' => 'The ID Number must be a valid National ID format (e.g. 12-345678 A 12).'
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return redirect()->back()

@@ -136,6 +136,12 @@ Route::middleware(['tenant'])->group(function () {
         ->name('biometric.update-login')
         ->middleware('throttle:10,1');
 
+    // Microsoft Azure AD Routes (For Zou Clients)
+    Route::get('/auth/microsoft/redirect', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'redirect'])->name('auth.microsoft.redirect');
+    Route::get('/auth/microsoft/callback', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'callback'])->name('auth.microsoft.callback');
+    Route::get('/auth/staff/complete', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'showStaffPrompt'])->name('auth.staff.prompt');
+    Route::post('/auth/staff/complete', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'completeStaffPrompt'])->name('auth.staff.complete');
+
     Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
     })->name('dashboard')->middleware('auth');
