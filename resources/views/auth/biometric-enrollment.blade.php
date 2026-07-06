@@ -78,25 +78,43 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: url('{{ asset('images/background-pattern.png') }}');">
     
-    <div class="w-full max-w-5xl">
-        <div class="glass-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row compact-form mx-auto">
-
-            <!-- Left Side - Progress & Instructions -->
-            @include('auth.partials.biometric-progress')
-
-            <!-- Right Side - Biometric Capture -->
-            <div class="lg:w-7/12 bg-white flex flex-col relative h-full">
-                <div class="p-6 sm:p-8 overflow-y-auto custom-scroll h-full">
+    <!-- Container properly sized and scaled down to 75% for sleek look -->
+    <div class="w-full max-w-md" style="zoom: 0.75; -moz-transform: scale(0.75); -moz-transform-origin: center center;">
+        <div class="glass-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+            
+            <div class="w-full bg-white flex flex-col relative flex-1 min-h-0">
+                <div class="p-4 sm:p-6 overflow-y-auto custom-scroll h-full">
                     
+                    <!-- Header -->
+                    <div class="mb-4 text-center">
+                        <div class="flex justify-center items-center space-x-3 mb-3">
+                            <!-- Logo Icon -->
+                            <div class="w-12 h-12 bg-emerald-500 rounded-xl shadow-lg flex items-center justify-center relative overflow-hidden shrink-0">
+                                <span class="text-white/40 font-bold text-3xl absolute -left-0.5">C</span>
+                                <span class="text-white font-bold text-2xl z-10 relative left-1">S</span>
+                            </div>
+                            <!-- Logo Text -->
+                            <div class="flex flex-col text-left">
+                                <div class="text-2xl font-bold tracking-tight leading-none">
+                                    <span class="text-emerald-600">Chrono</span><span class="text-gray-800">Sync</span>
+                                </div>
+                                <div class="text-gray-500 text-[0.6rem] font-bold tracking-[0.25em] mt-1 uppercase">
+                                    Attendance
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="text-xl font-bold text-emerald-600">Biometric Setup</h2>
+                    </div>
+
                     <!-- Display Messages -->
                     @include('auth.partials.messages')
 
                     <!-- Method Selector -->
-                    <div class="mb-8 bg-gray-50 border border-gray-100 p-1.5 rounded-xl flex text-sm font-medium shadow-sm">
-                        <button type="button" id="btn-method-facial" class="flex-1 py-2.5 px-4 rounded-lg bg-white text-emerald-600 shadow-sm border border-gray-200 transition-all font-semibold flex items-center justify-center">
-                            <i class="fas fa-camera mr-2"></i> Facial Recognition
+                    <div class="mb-6 bg-gray-50 border border-gray-100 p-1.5 rounded-xl flex text-sm font-medium shadow-sm">
+                        <button type="button" id="btn-method-facial" class="flex-1 py-2 px-3 rounded-lg bg-white text-emerald-600 shadow-sm border border-gray-200 transition-all font-semibold flex items-center justify-center">
+                            <i class="fas fa-camera mr-2"></i> Facial
                         </button>
-                        <button type="button" id="btn-method-fingerprint" class="flex-1 py-2.5 px-4 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-white/50 transition-all flex items-center justify-center">
+                        <button type="button" id="btn-method-fingerprint" class="flex-1 py-2 px-3 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-white/50 transition-all flex items-center justify-center">
                             <i class="fas fa-fingerprint mr-2"></i> Fingerprint
                         </button>
                     </div>
@@ -111,21 +129,21 @@
                     @include('auth.partials.enrollment-complete')
 
                     <!-- Choice Modal (Hidden by default) -->
-                    <div id="enrollment-choice" class="hidden text-center py-12">
-                        <div class="mb-8">
-                            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-green-50 mb-6 border-4 border-green-100 animate-bounce">
-                                <i class="fas fa-check text-4xl text-green-500"></i>
+                    <div id="enrollment-choice" class="hidden text-center py-8">
+                        <div class="mb-6">
+                            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-50 mb-4 border-4 border-green-100 animate-bounce">
+                                <i class="fas fa-check text-3xl text-green-500"></i>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Facial Data Captured!</h2>
-                            <p class="text-gray-500 max-w-xs mx-auto">The face has been successfully enrolled. You can now add a fingerprint for extra security.</p>
+                            <h2 class="text-xl font-bold text-gray-800 mb-2">Facial Data Captured!</h2>
+                            <p class="text-gray-500 text-sm max-w-xs mx-auto">The face has been successfully enrolled. You can now add a fingerprint for extra security.</p>
                         </div>
                         
-                        <div class="flex flex-col sm:flex-row justify-center gap-4">
-                            <button id="btn-choice-fingerprint" class="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow-lg shadow-emerald-200 flex items-center justify-center transition-transform hover:-translate-y-0.5">
+                        <div class="flex flex-col gap-3">
+                            <button id="btn-choice-fingerprint" class="w-full py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow-lg shadow-emerald-200 flex items-center justify-center transition-transform hover:-translate-y-0.5">
                                 <i class="fas fa-fingerprint mr-2"></i> Enroll Fingerprint
                             </button>
                             
-                            <button id="btn-choice-skip" class="px-6 py-3 bg-white text-gray-600 rounded-lg hover:bg-gray-50 font-medium border border-gray-200 shadow-sm flex items-center justify-center transition-colors">
+                            <button id="btn-choice-skip" class="w-full py-2.5 bg-white text-gray-600 rounded-lg hover:bg-gray-50 font-medium border border-gray-200 shadow-sm flex items-center justify-center transition-colors">
                                 Skip & Finish <i class="fas fa-arrow-right ml-2 text-xs"></i>
                             </button>
                         </div>

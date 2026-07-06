@@ -43,6 +43,11 @@ Route::post('/get-started/check-subdomain', [\App\Http\Controllers\OnboardingCon
 Route::middleware(['tenant'])->group(function () {
     Route::redirect('/', '/attendance/clock');
 
+    // Biometric Policy Route
+    Route::get('/biometric-policy', function () {
+        return view('pages.biometric-policy');
+    })->name('policy.biometric');
+
     // Session Keep-Alive Route
     Route::get('/session-keep-alive', function () {
         return response()->json(['status' => 'active']);
@@ -51,6 +56,11 @@ Route::middleware(['tenant'])->group(function () {
     // Registration Routes
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:60,1');
+    
+    // OTP Verification Routes
+    Route::get('/register/verify-otp', [RegisterController::class, 'showVerifyOtpForm'])->name('register.otp');
+    Route::post('/register/verify-otp', [RegisterController::class, 'verifyOtp'])->name('register.verify-otp')->middleware('throttle:10,1');
+    Route::post('/register/resend-otp', [RegisterController::class, 'resendOtp'])->name('register.resend-otp')->middleware('throttle:3,1');
 
     // Attendance Routes (Publicly accessible but tenant-scoped)
     Route::get('/attendance/qr', [AttendanceController::class, 'showQRCode'])->name('attendance.qr');
@@ -126,6 +136,10 @@ Route::middleware(['tenant'])->group(function () {
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/biometric/revoke', [\App\Http\Controllers\PrivacySettingsController::class, 'revokeConsent'])->name('profile.biometric.revoke');
+
+        // Staff Dashboard
+        Route::get('/staff/dashboard', [\App\Http\Controllers\StaffDashboardController::class, 'index'])->name('staff.dashboard');
     });
 
     // Auth Routes (Login/Logout/etc. don't need subscription check)

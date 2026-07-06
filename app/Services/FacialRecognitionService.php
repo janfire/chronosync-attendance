@@ -65,8 +65,9 @@ class FacialRecognitionService
         ]);
 
         // Enrollment takes longer due to CNN + 10-jitter; allow extra time
-        $timeout = $isEnrollment ? 30 : 5;
-
+        // On a CPU without GPU acceleration, this can easily take 45+ seconds.
+        $timeout = $isEnrollment ? 120 : 10;
+        set_time_limit(120);
         $options = [
             'http' => [
                 'header'  => "Content-type: application/json\r\nContent-Length: " . strlen($payload) . "\r\n",
@@ -104,12 +105,11 @@ class FacialRecognitionService
             ->whereNotNull('facial_encoding')
             ->whereNotNull('user_id')
             ->where('facial_status', 'captured')
-            ->toBase()
             ->get();
             
         $templates = [];
         foreach ($enrolledFaces as $face) {
-            $templates[(string)$face->user_id] = json_decode($face->facial_encoding);
+            $templates[(string)$face->user_id] = $face->facial_encoding;
         }
         
         $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : 'default';
@@ -379,17 +379,15 @@ class FacialRecognitionService
             $query->where('id', '!=', $excludeBiometricId);
         }
             
-        // Use a generator cursor for memory efficiency if dataset is large, 
-        // though for typical attendance (<10k users) standard collection is faster due to fewer DB roundtrips.
-        // Sticking to get() for speed on reasonable datasets.
-        $enrolledFaces = $query->toBase()->get(); // toBase() skips model hydration for raw speed on iteration
+        // Use standard get() so Eloquent model casts (like encrypted:array) are automatically applied
+        $enrolledFaces = $query->get(); 
 
         $bestBiometric = null;
         $minDistance = $tolerance; // Start with tolerance — anything worse is not a match
 
         foreach ($enrolledFaces as $biometric) {
-            // Manually decode since we used toBase()
-            $storedEncoding = json_decode($biometric->facial_encoding);
+            // facial_encoding is automatically decrypted and cast to an array by Eloquent
+            $storedEncoding = $biometric->facial_encoding;
 
             if (!is_array($storedEncoding) || count($storedEncoding) !== count($newEncoding)) {
                 continue;

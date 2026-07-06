@@ -29,7 +29,7 @@ class BiometricData extends Model
     protected $casts = [
         'fingerprint_captured_at' => 'datetime',
         'facial_captured_at' => 'datetime',
-        'facial_encoding' => 'array',
+        'facial_encoding' => 'encrypted:array', // Encrypt facial data array
         'fingerprint_template' => 'encrypted', // Encrypt fingerprint data
     ];
 

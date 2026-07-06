@@ -181,13 +181,9 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
         image = np.array(image_pil)
 
         # --- Detector selection ---
-        # Enrollment: CNN model — handles tilted faces, glasses, partial occlusion.
-        #             Much more precise bounding box = better landmark alignment = better encoding.
-        # Scanning:   HOG model — ~20x faster, sufficient for frontal live captures.
-        if is_enrollment:
-            face_locations = face_recognition.face_locations(image, model="cnn")
-        else:
-            face_locations = face_recognition.face_locations(image, model="hog", number_of_times_to_upsample=2)
+        # Both Enrollment and Scanning now use HOG for maximum CPU performance.
+        # number_of_times_to_upsample=2 helps find slightly smaller faces.
+        face_locations = face_recognition.face_locations(image, model="hog", number_of_times_to_upsample=2)
 
         if len(face_locations) == 0:
             return {'error': 'No face detected'}
@@ -208,11 +204,8 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
                 )
             }
 
-        # --- Encoding ---
-        # Enrollment: num_jitters=10 runs 10 random perturbations and averages them,
-        #             producing a stable centroid-like template (slower but done only once).
-        # Scanning:   num_jitters=1 — fast single-shot, acceptable for live comparison.
-        num_jitters = 10 if is_enrollment else 1
+        # Enrollment and Scanning now both use num_jitters=1 for maximum speed.
+        num_jitters = 1
         face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters=num_jitters)
         
         if len(face_encodings) == 0:

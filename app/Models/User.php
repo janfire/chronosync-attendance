@@ -19,6 +19,10 @@ class User extends Authenticatable
         'password',
         'role',
         'tenant_id',
+        'biometric_consent_granted',
+        'biometric_consent_timestamp',
+        'biometric_consent_ip',
+        'policy_version_agreed',
     ];
 
     protected $hidden = [
@@ -32,6 +36,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class, // Cast to enum
+            'biometric_consent_granted' => 'boolean',
+            'biometric_consent_timestamp' => 'datetime',
         ];
     }
 

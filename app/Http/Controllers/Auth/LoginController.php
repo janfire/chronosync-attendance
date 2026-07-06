@@ -23,7 +23,7 @@ class LoginController extends Controller
             if (in_array($user->role, [UserRole::SUPER_ADMIN, UserRole::ADMIN, UserRole::GENERAL_USER])) {
                 return redirect()->route('admin.dashboard');
             }
-            return redirect()->route('attendance.qr');
+            return redirect()->route('staff.dashboard');
         }
         
         return view('auth.login');
@@ -41,6 +41,14 @@ class LoginController extends Controller
         $user = User::withoutTenantScope()->where('email', $request->email)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
+            // Prevent cross-workspace logins
+            $currentTenant = app()->bound('current_tenant') ? app('current_tenant') : null;
+            if ($currentTenant && $user->role !== UserRole::PLATFORM_ADMIN && $user->tenant_id !== $currentTenant->id) {
+                return back()->withErrors([
+                    'email' => 'This account does not belong to this workspace.',
+                ])->withInput($request->only('email'));
+            }
+
             Auth::login($user);
             $request->session()->regenerate();
 
@@ -71,7 +79,7 @@ class LoginController extends Controller
             }
 
             // Regular staff - redirect to attendance QR or dashboard
-            return redirect()->intended(route('attendance.qr'))->with('success', 'Welcome, ' . $user->name . '!');
+            return redirect()->route('staff.dashboard')->with('success', 'Welcome, ' . $user->name . '!');
         }
 
         return back()->withErrors([

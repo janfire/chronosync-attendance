@@ -85,7 +85,20 @@ class AttendanceController extends Controller
             $user = \App\Models\User::find($matchResult['user_id']);
 
             if (!$user) {
-                return ApiResponse::error('Matched user record not found in database', 500);
+                // Self-healing: The Python server found a match, but the user account is missing (orphaned record).
+                // We should delete the orphaned record from the database and force a sync.
+                \App\Models\BiometricData::where('user_id', $matchResult['user_id'])->delete();
+                
+                // Force Python to flush the orphaned record from RAM
+                app(\App\Services\FacialRecognitionService::class)->syncWithPythonServer();
+
+                // Return the standard prompt so the user can register a new account
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Face not found in our records. Would you like to register?',
+                    'error' => 'Face not recognized',
+                    'action_required' => 'registration_prompt'
+                ], 200); 
             }
 
             // Perform common attendance processing

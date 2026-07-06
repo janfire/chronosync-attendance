@@ -56,6 +56,8 @@ class BiometricController extends Controller
     {
         $request->validate([
             'facial_image' => 'required|string',
+            'consent_granted' => 'nullable|boolean',
+            'policy_version' => 'nullable|string',
         ]);
 
         try {
@@ -79,6 +81,14 @@ class BiometricController extends Controller
             if (Auth::check()) {
                 $this->handleAuthenticatedUserFacialEnrollment($facialEncoding);
             } else {
+                if ($request->consent_granted && session()->has('pending_registration')) {
+                    $regData = session('pending_registration');
+                    $regData['biometric_consent_granted'] = true;
+                    $regData['biometric_consent_timestamp'] = now();
+                    $regData['biometric_consent_ip'] = $request->ip();
+                    $regData['policy_version_agreed'] = $request->policy_version;
+                    session(['pending_registration' => $regData]);
+                }
                 $this->handlePendingRegistrationFacialEnrollment($facialEncoding, $userName);
             }
 
@@ -167,6 +177,15 @@ class BiometricController extends Controller
         }
 
         $user = Auth::user();
+        if (request()->consent_granted) {
+            $user->update([
+                'biometric_consent_granted' => true,
+                'biometric_consent_timestamp' => now(),
+                'biometric_consent_ip' => request()->ip(),
+                'policy_version_agreed' => request()->policy_version,
+            ]);
+        }
+
         $biometric = BiometricData::where('user_id', $user->id)->first();
 
         $enrollmentData = [
@@ -190,6 +209,15 @@ class BiometricController extends Controller
 
     private function handleExistingUserFacialEnrollment(array $facialEncoding, User $user): void
     {
+        if (request()->consent_granted) {
+            $user->update([
+                'biometric_consent_granted' => true,
+                'biometric_consent_timestamp' => now(),
+                'biometric_consent_ip' => request()->ip(),
+                'policy_version_agreed' => request()->policy_version,
+            ]);
+        }
+
         $biometric = BiometricData::where('user_id', $user->id)->first();
 
         $enrollmentData = [
@@ -923,6 +951,13 @@ class BiometricController extends Controller
             'facial_status' => 'not_enrolled',
             'facial_captured_at' => null,
         ]);
+
+        // Force Python to flush this user's face from RAM by re-syncing the database
+        try {
+            app(\App\Services\FacialRecognitionService::class)->syncWithPythonServer();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to sync Python server after admin deleted face: ' . $e->getMessage());
+        }
 
         \Illuminate\Support\Facades\Log::info('Facial enrollment deleted by admin', ['target_user_id' => $user->id, 'admin_id' => \Illuminate\Support\Facades\Auth::id()]);
 

@@ -1,6 +1,15 @@
 <div class="facial-section" id="facial-section">
-    <div class="camera-container relative">
-        <video id="facial-video" autoplay playsinline muted class="w-full rounded-lg border border-gray-200 bg-black/50 max-h-[50vh] sm:max-h-none object-cover"></video>
+    <div id="consent-section" class="mb-4 p-4 border border-emerald-200 bg-emerald-50 rounded-lg text-sm text-left hidden">
+        <label class="flex items-start space-x-3 cursor-pointer">
+            <input type="checkbox" id="biometric-consent" class="mt-1 w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+            <span class="text-gray-700">
+                I have read and agree to the <a href="{{ route('policy.biometric') }}" target="_blank" class="text-emerald-600 hover:underline font-semibold">Biometric Privacy Policy (v1.0.0)</a>. I consent to the collection, storage, and processing of my facial data for attendance verification.
+            </span>
+        </label>
+    </div>
+
+    <div class="camera-container relative mx-auto w-full max-w-sm hidden" id="camera-container">
+        <video id="facial-video" autoplay playsinline muted class="w-full rounded-lg border border-gray-200 bg-black/50 aspect-[4/3] object-cover shadow-inner"></video>
         <canvas id="facial-canvas" class="hidden"></canvas>
     </div>
 
@@ -14,8 +23,18 @@
             <p class="text-gray-600 text-xs sm:text-sm">Capturing facial data...</p>
         </div>
 
-        <div class="text-xs sm:text-sm text-gray-500 text-center">
+        <div class="text-xs sm:text-sm text-gray-500 text-center mb-2">
             Hold still and ensure good lighting. The system will capture automatically.
+        </div>
+
+        <div class="bg-gray-50 border border-gray-100 rounded-lg p-2.5">
+            <div class="flex flex-col sm:flex-row justify-center sm:space-x-4 items-center text-xs text-gray-500 gap-1.5 sm:gap-0">
+                <div class="flex items-center"><i class="fas fa-lightbulb text-amber-500 mr-1.5"></i> Well-lit area</div>
+                <div class="hidden sm:block text-gray-300">•</div>
+                <div class="flex items-center"><i class="fas fa-expand text-blue-500 mr-1.5"></i> Center face</div>
+                <div class="hidden sm:block text-gray-300">•</div>
+                <div class="flex items-center"><i class="fas fa-glasses text-emerald-500 mr-1.5"></i> Remove glasses</div>
+            </div>
         </div>
     </div>
 

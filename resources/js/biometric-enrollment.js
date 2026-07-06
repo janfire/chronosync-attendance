@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function () {
         fingerprintSection: document.getElementById('fingerprint-section'),
         facialSection: document.getElementById('facial-section'),
         completionSection: document.getElementById('enrollment-complete'),
+        consentSection: document.getElementById('consent-section'),
+        biometricConsent: document.getElementById('biometric-consent'),
+        cameraContainer: document.getElementById('camera-container'),
 
         // Fingerprint elements
         startFingerprintBtn: document.getElementById('start-fingerprint-scan'),
@@ -59,9 +62,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.switchMethod = function (method) {
         updateMethodUI(method);
-        if (method === 'facial') startCamera();
-        else stopCamera();
+        if (method === 'facial') {
+            if (elements.biometricConsent && !elements.biometricConsent.checked) {
+                if (elements.consentSection) elements.consentSection.classList.remove('hidden');
+                if (elements.cameraContainer) elements.cameraContainer.classList.add('hidden');
+                if (elements.statusText) elements.statusText.textContent = 'Please agree to the privacy policy to continue.';
+            } else {
+                if (elements.consentSection) elements.consentSection.classList.add('hidden');
+                if (elements.cameraContainer) elements.cameraContainer.classList.remove('hidden');
+                startCamera();
+            }
+        } else {
+            stopCamera();
+        }
     };
+
+    if (elements.biometricConsent) {
+        elements.biometricConsent.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                if (elements.consentSection) elements.consentSection.classList.add('hidden');
+                if (elements.cameraContainer) elements.cameraContainer.classList.remove('hidden');
+                startCamera();
+            }
+        });
+    }
 
     // --- EVENT LISTENERS ---
 
@@ -80,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (elements.facialError) elements.facialError.classList.add('hidden');
             if (elements.statusMessage) elements.statusMessage.classList.remove('hidden');
             if (elements.statusText) elements.statusText.textContent = 'Reinitializing camera...';
+            if (elements.cameraContainer) elements.cameraContainer.classList.remove('hidden');
             startCamera();
         });
     }
@@ -253,7 +278,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                 },
-                body: JSON.stringify({ facial_image: imageData }),
+                body: JSON.stringify({ 
+                    facial_image: imageData,
+                    consent_granted: elements.biometricConsent ? elements.biometricConsent.checked : false,
+                    policy_version: '1.0.0'
+                }),
             });
 
             const result = await response.json().catch(async (e) => {
@@ -293,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleFacialSuccess() {
         if (elements.facialSuccess) elements.facialSuccess.classList.remove('hidden');
         if (elements.statusMessage) elements.statusMessage.classList.add('hidden');
+        if (elements.cameraContainer) elements.cameraContainer.classList.add('hidden');
         stopCamera();
 
         // Hide facial section and show choice modal
@@ -305,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Fallback if modal missing
                 window.location.href = window.routes.complete;
             }
-        }, 1000);
+        }, 1500);
     }
 
     // --- CHOICE MODAL LISTENERS ---
@@ -333,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function showFacialError(message) {
         stopCamera(); // Stop trying if error
         if (elements.statusMessage) elements.statusMessage.classList.add('hidden');
+        if (elements.cameraContainer) elements.cameraContainer.classList.add('hidden');
         if (elements.facialError) elements.facialError.classList.remove('hidden');
         if (elements.facialErrorText) elements.facialErrorText.textContent = message;
     }

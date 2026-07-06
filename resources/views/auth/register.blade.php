@@ -74,10 +74,10 @@
 
             <!-- Registration Form -->
             <div class="w-full bg-white flex flex-col relative flex-1 min-h-0">
-                <div class="p-6 overflow-y-auto custom-scroll h-full">
+                <div class="p-4 sm:p-5 md:p-6 overflow-y-auto custom-scroll h-full">
                     
-                    <div class="mb-6 text-center">
-                        <div class="flex justify-center items-center space-x-3 mb-6">
+                    <div class="mb-4 text-center">
+                        <div class="flex justify-center items-center space-x-3 mb-3">
                             <!-- Logo Icon -->
                             <div class="w-12 h-12 bg-emerald-500 rounded-xl shadow-lg flex items-center justify-center relative overflow-hidden shrink-0">
                                 <span class="text-white/40 font-bold text-3xl absolute -left-0.5">C</span>
@@ -126,12 +126,12 @@
                     @endif
 
                     <!-- Tabs Header -->
-                    <div class="flex justify-center mb-8">
+                    <div class="flex justify-center mb-5">
                         <div class="inline-flex w-full bg-gray-100 p-1.5 rounded-xl">
-                            <button type="button" onclick="switchTab('zou-client')" id="tab-btn-zou" class="tab-btn active flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center text-gray-500">
+                            <button type="button" onclick="switchTab('zou-client')" id="tab-btn-zou" class="tab-btn active flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center text-gray-500">
                                 <i class="fas fa-user-tie mr-2"></i> Staff
                             </button>
-                            <button type="button" onclick="switchTab('guest')" id="tab-btn-guest" class="tab-btn flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                            <button type="button" onclick="switchTab('guest')" id="tab-btn-guest" class="tab-btn flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center text-gray-500 hover:text-gray-700">
                                 <i class="fas fa-user-tag mr-2"></i> Guest Account
                             </button>
                         </div>
@@ -161,17 +161,17 @@
 
                     <!-- TAB 2: Guest Registration -->
                     <div id="tab-guest" class="tab-content">
-                        <form method="POST" action="{{ route('register') }}" class="space-y-5">
+                        <form method="POST" action="{{ route('register') }}" class="space-y-3 sm:space-y-4">
                             @csrf
                             <input type="hidden" name="is_guest" value="1">
 
-                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 mb-4 flex gap-2">
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-2.5 text-xs text-amber-800 mb-2 flex gap-2 items-start">
                                 <i class="fas fa-info-circle mt-0.5 text-amber-600"></i>
-                                <span>Guest accounts are for visitors who do not possess organizational Microsoft credentials. Approvals may be required.</span>
+                                <span class="leading-snug">Guest accounts are for visitors who do not possess organizational Microsoft credentials. Approvals may be required.</span>
                             </div>
 
                             <!-- Row 1: Name & ID -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Full Name</label>
                                     <div class="relative">
@@ -179,19 +179,19 @@
                                             <i class="fas fa-user-circle"></i>
                                         </div>
                                         <input type="text" name="name" value="{{ old('name') }}" required 
-                                               class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                                placeholder="e.g. Tendai Moyo">
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">ID Number</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">ID Number</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                             <i class="fas fa-id-card"></i>
                                         </div>
                                         <input type="text" name="employee_number" value="{{ old('employee_number') }}" required 
-                                               class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                                placeholder="e.g. 12-345678 A 12">
                                     </div>
                                 </div>
@@ -199,27 +199,27 @@
 
                             <!-- Email -->
                             <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Email Address</label>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">Email Address</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                         <i class="fas fa-envelope"></i>
                                     </div>
                                     <input type="email" name="email" value="{{ old('email') }}" required 
-                                           class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                           class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                            placeholder="guest@example.com">
                                 </div>
                             </div>
 
                             <!-- Row 2: Passwords -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Password</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">Password</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                             <i class="fas fa-lock"></i>
                                         </div>
                                         <input type="password" name="password" id="password" required 
-                                               class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                               class="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                                placeholder="Min. 8 characters">
                                         <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                             <i class="fas fa-eye text-xs"></i>
@@ -228,13 +228,13 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Confirm Password</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">Confirm Password</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                             <i class="fas fa-lock"></i>
                                         </div>
                                         <input type="password" name="password_confirmation" id="password_confirmation" required 
-                                               class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                               class="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                                placeholder="Re-enter password">
                                         <button type="button" onclick="togglePassword('password_confirmation')" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                             <i class="fas fa-eye text-xs"></i>
@@ -243,8 +243,8 @@
                                 </div>
                             </div>
 
-                            <div class="pt-4">
-                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center">
+                            <div class="pt-2">
+                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center">
                                     <i class="fas fa-arrow-right mr-2 text-sm"></i> Register as Guest
                                 </button>
                             </div>
@@ -289,7 +289,26 @@
                 document.getElementById('tab-guest').classList.add('active');
                 document.getElementById('tab-btn-guest').classList.add('active');
             }
+            
+            // Save choice to memory so it survives page reloads
+            localStorage.setItem('activeRegisterTab', tab);
         }
+
+        // Run when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // If Laravel caught an error from the guest form, force it open
+            const hasGuestError = {{ old('is_guest') ? 'true' : 'false' }};
+            
+            if (hasGuestError) {
+                switchTab('guest');
+            } else {
+                // Otherwise, remember whatever tab they were looking at last
+                const savedTab = localStorage.getItem('activeRegisterTab');
+                if (savedTab) {
+                    switchTab(savedTab);
+                }
+            }
+        });
     </script>
 </body>
 </html>
