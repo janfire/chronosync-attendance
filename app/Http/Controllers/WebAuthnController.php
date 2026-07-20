@@ -85,8 +85,8 @@ class WebAuthnController extends Controller
         }
 
         try {
-            $clientDataJSON = base64_decode($request->clientDataJSON);
-            $attestationObject = base64_decode($request->attestationObject);
+            $clientDataJSON = base64_decode($request->input('response.clientDataJSON'));
+            $attestationObject = base64_decode($request->input('response.attestationObject'));
             $challengeB64 = $request->session()->get('webauthn_challenge');
             $challenge = $challengeB64 ? base64_decode($challengeB64) : null;
 
@@ -95,8 +95,8 @@ class WebAuthnController extends Controller
             $webAuthn = $this->getWebAuthn();
             $data = $webAuthn->processCreate($clientDataJSON, $attestationObject, $challenge, true, true, false);
 
-            $b64CredentialId = base64_encode($webAuthn->getCredentialId());
-            $b64PublicKey = base64_encode($webAuthn->getCredentialPublicKey());
+            $b64CredentialId = base64_encode($data->credentialId);
+            $b64PublicKey = base64_encode($data->credentialPublicKey);
 
             if ($userId) {
                 WebAuthnCredential::create([
@@ -145,17 +145,28 @@ class WebAuthnController extends Controller
     public function loginVerify(Request $request)
     {
         try {
-            $clientDataJSON = base64_decode($request->clientDataJSON);
-            $authenticatorData = base64_decode($request->authenticatorData);
-            $signature = base64_decode($request->signature);
-            $id = base64_decode($request->id);
+            $clientDataJSON = base64_decode($request->input('response.clientDataJSON'));
+            $authenticatorData = base64_decode($request->input('response.authenticatorData'));
+            $signature = base64_decode($request->input('response.signature'));
+            
+            $rawId = $request->rawId;
+            $idBinary = base64_decode($rawId);
+
+            // WebAuthn JS standard returns `id` as base64url. Calculate standard base64 for fallback.
+            $b64IdFromUrl = strtr($request->id, '-_', '+/');
+            $b64IdFromUrl .= str_repeat('=', (4 - strlen($b64IdFromUrl) % 4) % 4);
 
             $challengeB64 = $request->session()->get('webauthn_challenge');
             $challenge = $challengeB64 ? base64_decode($challengeB64) : null;
 
             if (!$challenge) return ApiResponse::error('Session timed out.', 419);
 
-            $credential = WebAuthnCredential::where('credential_id', base64_encode($id))->first();
+            $credential = WebAuthnCredential::where('credential_id', base64_encode($idBinary))
+                ->orWhere('credential_id', $rawId)
+                ->orWhere('credential_id', $b64IdFromUrl)
+                ->orWhere('credential_id', $request->id)
+                ->first();
+                
             if (!$credential) return ApiResponse::error('Credential not found. Please register your device first.', 404);
 
             $webAuthn = $this->getWebAuthn();

@@ -21,10 +21,21 @@ document.addEventListener('DOMContentLoaded', function () {
         clockStatusTitle: document.getElementById('clock-status-title')
     };
 
-    let stream = null;
     let isProcessing = false;
+    let isClockedIn = false;
     let faceDetectionInterval = null;
-    let isClockedIn = false; // Prevent double clocking
+    let stream = null;
+    let zktecoHardwareAvailable = false;
+
+    // Pre-detect ZKTeco hardware on load
+    setTimeout(async () => {
+        zktecoHardwareAvailable = await zkTecoService.checkService();
+        if (zktecoHardwareAvailable) {
+            console.log('ZKTeco Hardware pre-detected.');
+        } else {
+            console.log('ZKTeco Hardware not found in background scan.');
+        }
+    }, 500);
 
     // Services
     const zkTecoService = new ZKTecoService();
@@ -72,6 +83,26 @@ document.addEventListener('DOMContentLoaded', function () {
     async function startFingerMode() {
         if (selectionScreen) selectionScreen.classList.add('hidden');
         if (fingerprintContainer) fingerprintContainer.classList.add('visible');
+        
+        if (zktecoHardwareAvailable) {
+            // USB Hardware available, start continuous scan
+            initZKTeco();
+        } else {
+            // Fallback to WebAuthn UI
+            updateZKStatus('ready');
+            const btnWebAuthn = document.getElementById('btn-trigger-webauthn');
+            if (btnWebAuthn) {
+                document.getElementById('fingerprint-indicator').classList.add('hidden');
+                document.getElementById('webauthn-fallback-container').classList.remove('hidden');
+                document.getElementById('fp-main-title').textContent = "Ready to Scan";
+                document.getElementById('fp-sub-title').textContent = "Click the button below to use your device's biometric scanner.";
+                
+                // Attach click handler once
+                btnWebAuthn.onclick = async () => {
+                    await startWebAuthnLogin();
+                };
+            }
+        }
         if (activeHeader) activeHeader.classList.add('visible');
 
         const titleEl = document.getElementById('active-method-title');
@@ -601,6 +632,107 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!isClockedIn) isProcessing = false;
             }
         }
+    }
+
+    async function startWebAuthnLogin() {
+        const btn = document.getElementById('btn-trigger-webauthn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Authenticating...';
+        btn.disabled = true;
+
+        try {
+            // 1. Get Login Options from Server
+            const optionsResponse = await fetch(window.routes.loginOptions);
+            const data = await optionsResponse.json();
+            
+            if (data.error) throw new Error(data.error);
+
+            const options = data.publicKey || data;
+
+            // 2. Format options for browser API
+            options.challenge = base64ToArrayBuffer(options.challenge);
+            if (options.allowCredentials) {
+                for (let cred of options.allowCredentials) {
+                    cred.id = base64ToArrayBuffer(cred.id);
+                }
+            }
+
+            // 3. Trigger native prompt
+            const credential = await navigator.credentials.get({ publicKey: options });
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Verifying...';
+
+            // 4. Send response to server
+            const verifyResponse = await fetch(window.routes.verifyLogin, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    id: credential.id,
+                    rawId: arrayBufferToBase64(credential.rawId),
+                    response: {
+                        authenticatorData: arrayBufferToBase64(credential.response.authenticatorData),
+                        clientDataJSON: arrayBufferToBase64(credential.response.clientDataJSON),
+                        signature: arrayBufferToBase64(credential.response.signature),
+                        userHandle: credential.response.userHandle ? arrayBufferToBase64(credential.response.userHandle) : null
+                    },
+                    clientExtensionResults: credential.getClientExtensionResults()
+                })
+            });
+
+            const result = await verifyResponse.json();
+
+            if (!verifyResponse.ok) throw new Error(result.error || 'Verification failed on server.');
+
+            // Success
+            handleSuccess(result);
+
+        } catch (error) {
+            console.error('WebAuthn Login Error:', error);
+            const errorMsg = error.message.includes('The operation either timed out or was not allowed') 
+                ? 'Biometric verification cancelled.' 
+                : error.message;
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Cannot Clock In',
+                    text: errorMsg,
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444'
+                });
+            } else {
+                alert(errorMsg);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // --- BASE64 HELPERS ---
+    function base64ToArrayBuffer(base64) {
+        base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) base64 += '=';
+        const binary_string = window.atob(base64);
+        const len = binary_string.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
     }
 
     function updateZKStatus(status) {

@@ -7,10 +7,12 @@ use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Validation\Rule;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, BelongsToTenant;
+    use HasFactory, Notifiable, BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -23,6 +25,7 @@ class User extends Authenticatable
         'biometric_consent_timestamp',
         'biometric_consent_ip',
         'policy_version_agreed',
+        'expires_at',
     ];
 
     protected $hidden = [
@@ -38,6 +41,7 @@ class User extends Authenticatable
             'role' => UserRole::class, // Cast to enum
             'biometric_consent_granted' => 'boolean',
             'biometric_consent_timestamp' => 'datetime',
+            'expires_at' => 'datetime',
         ];
     }
 
@@ -45,8 +49,8 @@ class User extends Authenticatable
     public static function rules()
     {
         return [
-            'email' => 'required|email|unique:users',
-            'employee_number' => 'required|string|unique:users',
+            'email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
+            'employee_number' => ['required', 'string', Rule::unique('users')->whereNull('deleted_at')],
             'name' => 'required|string|max:255',
             'password' => 'required|min:8|confirmed',
         ];
@@ -88,6 +92,11 @@ class User extends Authenticatable
     public function isStaff(): bool
     {
         return $this->role === UserRole::STAFF;
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === UserRole::GUEST;
     }
 
     public function canManageUsers(): bool

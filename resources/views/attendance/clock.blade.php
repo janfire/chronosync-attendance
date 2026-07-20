@@ -247,8 +247,8 @@
                         <div class="fp-ring-2"></div>
                         <div class="fp-icon"><i class="fas fa-fingerprint"></i></div>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Place Finger on Scanner</h3>
-                    <p class="text-sm text-gray-500 mt-1">Waiting for fingerprint capture...</p>
+                    <h3 class="text-lg font-bold text-gray-900" id="fp-main-title">Place Finger on Scanner</h3>
+                    <p class="text-sm text-gray-500 mt-1" id="fp-sub-title">Waiting for fingerprint capture...</p>
                     
                     <div id="fingerprint-indicator" class="mt-6 w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl">
                         <div class="flex items-center gap-3">
@@ -256,6 +256,14 @@
                             <span id="zk-status-text" class="text-sm font-medium text-gray-700">Connecting...</span>
                         </div>
                         <i class="fas fa-fingerprint text-gray-400 text-lg" id="zk-icon"></i>
+                    </div>
+
+                    <div id="webauthn-fallback-container" class="hidden mt-6 w-full flex-col items-center">
+                        <button id="btn-trigger-webauthn" class="w-full px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-200 transition-all font-semibold flex justify-center items-center gap-2 transform active:scale-95">
+                            <i class="fas fa-mobile-alt text-lg"></i>
+                            Scan Device Fingerprint
+                        </button>
+                        <p class="text-xs text-gray-500 mt-3 text-center">Using your device's built-in security</p>
                     </div>
                 </div>
 

@@ -9,6 +9,7 @@ enum UserRole: string
     case ADMIN = 'admin';
     case GENERAL_USER = 'general_user';
     case STAFF = 'staff';
+    case GUEST = 'guest';
 
     /**
      * Get the display label for the role
@@ -21,6 +22,7 @@ enum UserRole: string
             self::ADMIN => 'Admin',
             self::GENERAL_USER => 'General User',
             self::STAFF => 'Staff',
+            self::GUEST => 'Guest',
         };
     }
 
@@ -35,6 +37,7 @@ enum UserRole: string
             self::ADMIN => 3,
             self::GENERAL_USER => 2,
             self::STAFF => 1,
+            self::GUEST => 0,
         };
     }
 

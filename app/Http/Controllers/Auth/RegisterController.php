@@ -37,12 +37,19 @@ class RegisterController extends Controller
         
         // PREVENT USER ENUMERATION: Remove 'unique' checks from the initial form.
         // We will only check if the account exists AFTER they prove they own the email via OTP.
-        if (is_string($rules['email'])) {
+        if (is_array($rules['email'])) {
+            $rules['email'] = array_filter($rules['email'], fn($rule) => !($rule instanceof \Illuminate\Validation\Rules\Unique));
+        } elseif (is_string($rules['email'])) {
             $rules['email'] = str_replace('|unique:users', '', $rules['email']);
         }
         
-        // Specifically enforce National ID format for Guests without the unique check
+        // Specifically enforce National ID format without the unique check
         $rules['employee_number'] = ['required', 'string', 'regex:/^\d{2}-\d{6,7}\s?[A-Za-z]\s?\d{2}$/'];
+        
+        $isGuest = $request->has('is_guest') && $request->is_guest == '1';
+        if ($isGuest) {
+            $rules['stay_duration'] = ['required', 'in:1_day,3_days,1_week,1_month'];
+        }
         
         $messages = [
             'employee_number.regex' => 'The ID Number must be a valid National ID format (e.g. 12-345678 A 12).'
@@ -56,6 +63,19 @@ class RegisterController extends Controller
                 ->withInput();
         }
 
+        $role = $isGuest ? 'guest' : 'staff';
+        $expiresAt = null;
+
+        if ($isGuest) {
+            $expiresAt = match($request->stay_duration) {
+                '1_day' => now()->addDay(),
+                '3_days' => now()->addDays(3),
+                '1_week' => now()->addWeek(),
+                '1_month' => now()->addMonth(),
+                default => now()->addDay(),
+            };
+        }
+
         // Store unverified registration data in session
         session([
             'unverified_registration' => [
@@ -63,7 +83,8 @@ class RegisterController extends Controller
                 'email' => $request->email,
                 'employee_number' => $request->employee_number,
                 'password' => $request->password,
-                'role' => 'staff',
+                'role' => $role,
+                'expires_at' => $expiresAt,
             ]
         ]);
 
@@ -102,11 +123,11 @@ class RegisterController extends Controller
         // OTP is correct! The user has proven they own this email.
         // NOW it is safe to check if they already have an account without risking user enumeration.
         $unverifiedData = session('unverified_registration');
-        $userExists = User::where('email', $unverifiedData['email'])
-                          ->orWhere('employee_number', $unverifiedData['employee_number'])
-                          ->exists();
-
-        if ($userExists) {
+        $userExists = clone User::where('email', $unverifiedData['email'])
+                          ->orWhere('employee_number', $unverifiedData['employee_number']);
+                          
+        // Check without soft-deleted
+        if ($userExists->exists()) {
             session()->forget(['unverified_registration', 'registration_otp', 'registration_otp_expires_at']);
             return redirect()->route('login') // Assuming a 'login' route exists
                 ->with('error', 'An account with this email or ID already exists. Please log in.');

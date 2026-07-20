@@ -1,39 +1,14 @@
 <div class="fingerprint-section hidden" id="fingerprint-section">
     <div class="p-6 bg-white rounded-lg border border-gray-200 text-center">
-        <div class="mb-6">
-            <!-- 3-Step Visualizer -->
-            <div class="flex justify-center items-center space-x-4 mb-4" id="fingerprint-steps">
-                <!-- Step 1 -->
-                <div class="flex flex-col items-center">
-                    <div id="step-1" class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg transition-all duration-300">
-                        1
-                    </div>
-                    <span class="text-xs text-gray-400 mt-1">First</span>
-                </div>
-                
-                <div class="w-8 h-1 bg-gray-200 rounded"></div>
-
-                <!-- Step 2 -->
-                <div class="flex flex-col items-center">
-                    <div id="step-2" class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg transition-all duration-300">
-                        2
-                    </div>
-                    <span class="text-xs text-gray-400 mt-1">Second</span>
-                </div>
-
-                <div class="w-8 h-1 bg-gray-200 rounded"></div>
-
-                <!-- Step 3 -->
-                <div class="flex flex-col items-center">
-                    <div id="step-3" class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg transition-all duration-300">
-                        3
-                    </div>
-                    <span class="text-xs text-gray-400 mt-1">Final</span>
+            <!-- 1-Step Visualizer -->
+            <div class="flex justify-center items-center mb-6 mt-4">
+                <div id="fingerprint-pulsing-icon" class="hidden w-24 h-24 rounded-full bg-emerald-50 border-4 border-emerald-500 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                    <i class="fas fa-fingerprint text-4xl text-emerald-600"></i>
                 </div>
             </div>
 
             <h3 class="text-lg font-semibold text-gray-800" id="fingerprint-instruction-title">Fingerprint Enrollment</h3>
-            <p class="text-gray-500 text-sm mt-1" id="fingerprint-instruction-text">Please place your finger on the scanner</p>
+            <p class="text-gray-500 text-sm mt-1" id="fingerprint-instruction-text">Please place your finger firmly on the scanner.</p>
             
             <div class="mt-2">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">

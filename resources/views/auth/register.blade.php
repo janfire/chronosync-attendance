@@ -210,6 +210,27 @@
                                 </div>
                             </div>
 
+                            <!-- Duration of Stay (Guest Only) -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">Estimated Period of Stay</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <select name="stay_duration" required 
+                                           class="w-full pl-10 pr-8 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all bg-gray-50/50 focus:bg-white text-gray-700 appearance-none">
+                                        <option value="" disabled selected>Select duration...</option>
+                                        <option value="1_day" {{ old('stay_duration') == '1_day' ? 'selected' : '' }}>1 Day</option>
+                                        <option value="3_days" {{ old('stay_duration') == '3_days' ? 'selected' : '' }}>3 Days</option>
+                                        <option value="1_week" {{ old('stay_duration') == '1_week' ? 'selected' : '' }}>1 Week</option>
+                                        <option value="1_month" {{ old('stay_duration') == '1_month' ? 'selected' : '' }}>1 Month</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Row 2: Passwords -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 <div>

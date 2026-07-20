@@ -1,6 +1,6 @@
 {
-  "_zkteco-service-BuNkKQez.js": {
-    "file": "assets/zkteco-service-BuNkKQez.js",
+  "_zkteco-service-B5nwGNqC.js": {
+    "file": "assets/zkteco-service-B5nwGNqC.js",
     "name": "zkteco-service"
   },
   "resources/css/app.css": {
@@ -19,21 +19,21 @@
     "isEntry": true
   },
   "resources/js/attendance-clock.js": {
-    "file": "assets/attendance-clock-Bl29cVIx.js",
+    "file": "assets/attendance-clock-BogdxHN7.js",
     "name": "attendance-clock",
     "src": "resources/js/attendance-clock.js",
     "isEntry": true,
     "imports": [
-      "_zkteco-service-BuNkKQez.js"
+      "_zkteco-service-B5nwGNqC.js"
     ]
   },
   "resources/js/biometric-enrollment.js": {
-    "file": "assets/biometric-enrollment-DCgVPIrw.js",
+    "file": "assets/biometric-enrollment-VLe0YD_t.js",
     "name": "biometric-enrollment",
     "src": "resources/js/biometric-enrollment.js",
     "isEntry": true,
     "imports": [
-      "_zkteco-service-BuNkKQez.js"
+      "_zkteco-service-B5nwGNqC.js"
     ]
   }
 }

@@ -11,6 +11,11 @@
     <div class="camera-container relative mx-auto w-full max-w-sm hidden" id="camera-container">
         <video id="facial-video" autoplay playsinline muted class="w-full rounded-lg border border-gray-200 bg-black/50 aspect-[4/3] object-cover shadow-inner"></video>
         <canvas id="facial-canvas" class="hidden"></canvas>
+        
+        <!-- Premium Progress Bar -->
+        <div id="facial-progress-container" class="absolute bottom-0 left-0 w-full h-1.5 bg-gray-900/30 rounded-b-lg overflow-hidden backdrop-blur-md opacity-0 transition-opacity duration-300">
+            <div id="facial-progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 w-0 transition-[width] duration-700 ease-out shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+        </div>
     </div>
 
     <div class="mt-3 sm:mt-4 space-y-2 sm:space-y-3">

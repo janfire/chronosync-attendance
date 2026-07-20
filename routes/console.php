@@ -21,3 +21,9 @@ Schedule::command('billing:process')
     ->dailyAt('08:00')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Hourly guest cleanup: soft delete expired guests and erase biometrics
+Schedule::command('attendance:cleanup-guests')
+    ->hourly()
+    ->withoutOverlapping()
+    ->runInBackground();

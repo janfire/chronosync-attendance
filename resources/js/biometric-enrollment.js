@@ -27,7 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
         facialSuccess: document.getElementById('facial-success'),
         facialError: document.getElementById('facial-error'),
         facialErrorText: document.getElementById('error-text'),
-        retryFacialBtn: document.getElementById('retry-facial')
+        retryFacialBtn: document.getElementById('retry-facial'),
+        progressContainer: document.getElementById('facial-progress-container'),
+        progressBar: document.getElementById('facial-progress-bar')
     };
 
     let stream = null;
@@ -239,6 +241,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (elements.facialSuccess) elements.facialSuccess.classList.add('hidden');
         if (elements.facialError) elements.facialError.classList.add('hidden');
 
+        if (elements.progressContainer && elements.progressBar) {
+            elements.progressContainer.classList.remove('opacity-0');
+            elements.progressContainer.classList.add('opacity-100');
+            elements.progressBar.style.transitionDuration = '700ms';
+            elements.progressBar.style.width = '0%';
+            
+            setTimeout(() => {
+                elements.progressBar.style.width = '85%';
+            }, 50);
+        }
+
         const vWidth = elements.video.videoWidth;
         const vHeight = elements.video.videoHeight;
         elements.canvas.width = vWidth;
@@ -296,6 +309,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (result.error && result.error.includes('No face detected')) {
                     if (elements.statusText) elements.statusText.textContent = 'Face not detected. Please ensure you are visible and center.';
                     if (elements.statusMessage) elements.statusMessage.classList.remove('hidden');
+                    
+                    if (elements.progressContainer && elements.progressBar) {
+                        elements.progressContainer.classList.remove('opacity-100');
+                        elements.progressContainer.classList.add('opacity-0');
+                        setTimeout(() => {
+                            elements.progressBar.style.width = '0%';
+                        }, 300);
+                    }
                     return; // Don't throw, just exit and wait for next interval
                 }
                 throw new Error(result.error || 'Facial enrollment failed');
@@ -320,22 +341,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleFacialSuccess() {
-        if (elements.facialSuccess) elements.facialSuccess.classList.remove('hidden');
-        if (elements.statusMessage) elements.statusMessage.classList.add('hidden');
-        if (elements.cameraContainer) elements.cameraContainer.classList.add('hidden');
-        stopCamera();
+        if (elements.progressBar) {
+            elements.progressBar.style.transitionDuration = '300ms';
+            elements.progressBar.style.width = '100%';
+        }
 
-        // Hide facial section and show choice modal
         setTimeout(() => {
-            if (elements.facialSection) elements.facialSection.classList.add('hidden');
-            const choiceModal = document.getElementById('enrollment-choice');
-            if (choiceModal) {
-                choiceModal.classList.remove('hidden');
-            } else {
-                // Fallback if modal missing
-                window.location.href = window.routes.complete;
-            }
-        }, 1500);
+            if (elements.facialSuccess) elements.facialSuccess.classList.remove('hidden');
+            if (elements.statusMessage) elements.statusMessage.classList.add('hidden');
+            if (elements.cameraContainer) elements.cameraContainer.classList.add('hidden');
+            stopCamera();
+
+            // Hide facial section and show choice modal
+            setTimeout(() => {
+                if (elements.facialSection) elements.facialSection.classList.add('hidden');
+                const choiceModal = document.getElementById('enrollment-choice');
+                if (choiceModal) {
+                    choiceModal.classList.remove('hidden');
+                } else {
+                    // Fallback if modal missing
+                    window.location.href = window.routes.complete;
+                }
+            }, 1500);
+        }, 400); // Give the progress bar time to reach 100%
     }
 
     // --- CHOICE MODAL LISTENERS ---
@@ -366,18 +394,38 @@ document.addEventListener('DOMContentLoaded', function () {
         if (elements.cameraContainer) elements.cameraContainer.classList.add('hidden');
         if (elements.facialError) elements.facialError.classList.remove('hidden');
         if (elements.facialErrorText) elements.facialErrorText.textContent = message;
+        
+        if (elements.progressContainer && elements.progressBar) {
+            elements.progressContainer.classList.remove('opacity-100');
+            elements.progressContainer.classList.add('opacity-0');
+            setTimeout(() => {
+                elements.progressBar.style.width = '0%';
+            }, 300);
+        }
     }
 
     // --- FINGERPRINT LOGIC ---
+    let zktecoHardwareAvailable = false;
+
+    // Pre-detect hardware in the background so we don't block the user gesture token during click
+    setTimeout(async () => {
+        zktecoHardwareAvailable = await zkTecoService.checkService();
+        if (zktecoHardwareAvailable) {
+            console.log('ZKTeco Hardware pre-detected.');
+        } else {
+            console.log('ZKTeco Hardware not found in background scan.');
+        }
+    }, 500);
 
     async function startFingerprintEnrollment() {
-        // Force ZKTeco mode if the toggle is hidden/unused
-        currentFingerprintMethod = 'zkteco';
+        const btn = elements.startFingerprintBtn;
+        btn.disabled = true;
 
-        if (currentFingerprintMethod === 'zkteco') {
+        if (zktecoHardwareAvailable) {
+            console.log('ZKTeco Hardware detected. Using USB Scanner.');
             await startZKTecoEnrollment();
         } else {
-            // Should not be reachable
+            console.log('ZKTeco Hardware not found. Falling back to WebAuthn.');
             await startWebAuthnEnrollment();
         }
     }
@@ -392,82 +440,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (elements.fingerprintStatusMsg) elements.fingerprintStatusMsg.classList.add('hidden');
 
         try {
-            // Check if agent is running
-            const isRunning = await zkTecoService.checkService();
-            if (!isRunning) {
-                // FALLBACK TO WEBAUTHN SILENTLY
-                console.log('ZKTeco offline. Falling back to WebAuthn...');
-                await startWebAuthnEnrollment();
-                return;
-            }
-
             if (elements.fingerprintStatusMsg) {
                 elements.fingerprintStatusMsg.innerHTML = '<div class="text-sm p-3 bg-blue-50 text-blue-700 rounded-lg"><i class="fas fa-hand-pointer mr-2"></i> Please place your finger on the ZK Scanner...</div>';
                 elements.fingerprintStatusMsg.classList.remove('hidden');
             }
             btn.innerHTML = '<i class="fas fa-fingerprint mr-2"></i> Scanning...';
 
-            // --- PROGRESS UI HELPERS ---
-            const resetSteps = () => {
-                ['1', '2', '3'].forEach(i => {
-                    const el = document.getElementById(`step-${i}`);
-                    if (el) {
-                        el.className = 'w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg transition-all duration-300';
-                        el.innerHTML = i;
-                    }
-                });
-            };
-
-            const setActiveStep = (step) => {
-                const el = document.getElementById(`step-${step}`);
-                if (el) {
-                    el.className = 'w-12 h-12 rounded-full bg-blue-100 border-2 border-blue-500 flex items-center justify-center text-blue-600 font-bold text-lg transition-all duration-300 animate-pulse';
-                }
-            };
-
-            const setCompletedStep = (step) => {
-                const el = document.getElementById(`step-${step}`);
-                if (el) {
-                    el.className = 'w-12 h-12 rounded-full bg-green-100 border-2 border-green-500 flex items-center justify-center text-green-600 font-bold text-lg transition-all duration-300';
-                    el.innerHTML = '<i class="fas fa-check"></i>';
-                }
-            };
-
-            const setInstruction = (title, text) => {
-                const titleEl = document.getElementById('fingerprint-instruction-title');
-                const textEl = document.getElementById('fingerprint-instruction-text');
-                if (titleEl) titleEl.textContent = title;
-                if (textEl) textEl.textContent = text;
-            };
-
-            // Initialize Progress
-            resetSteps();
-            setActiveStep(1);
-            setInstruction('First Press', 'Place your finger on the sensor');
+            // Show pulsing scanner UI
+            const pulsingIcon = document.getElementById('fingerprint-pulsing-icon');
+            if (pulsingIcon) {
+                pulsingIcon.classList.remove('hidden');
+                pulsingIcon.classList.add('animate-pulse');
+            }
 
             // --- PROCESS ---
             const onProgress = (index) => {
-                // index comes as 0, 1, 2, 3... depending on firmware. 
-                // Usually for ZK9500: 
-                // enroll_index: 0 -> start
-                // enroll_index: 1 -> After 1st press success
-                // enroll_index: 2 -> After 2nd press success
-                // enroll_index: 3 -> Enrollment complete (will trigger resolve)
-
-                console.log('Progress Update:', index);
-
-                if (index === 1) {
-                    setCompletedStep(1);
-                    setActiveStep(2);
-                    setInstruction('Lift & Press Again', 'Lift your finger completely, then press it again.');
-                } else if (index === 2) {
-                    setCompletedStep(2);
-                    setActiveStep(3);
-                    setInstruction('One Last Time', 'Lift finger, and press one final time.');
-                } else if (index >= 3) {
-                    setCompletedStep(3);
-                    setInstruction('Processing...', 'Finalizing template...');
-                }
+                // Not used in single-scan capture mode
             };
 
             // Capture
@@ -489,24 +477,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
             });
 
-            const json = await response.json();
-            if (!response.ok) throw new Error(json.error || 'Enrollment failed');
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Enrollment failed');
 
-            // Success
-            if (elements.fingerprintSuccess) elements.fingerprintSuccess.classList.remove('hidden');
-            if (elements.fingerprintStatusMsg) elements.fingerprintStatusMsg.classList.add('hidden');
-            btn.innerHTML = '<i class="fas fa-check mr-2"></i> Enrolled';
-            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            if (pulsingIcon) {
+                pulsingIcon.classList.remove('animate-pulse');
+            }
+
+            if (data) {
+                // Success UI Update
+                if (elements.fingerprintStatusMsg) elements.fingerprintStatusMsg.classList.add('hidden');
+                if (elements.fingerprintSuccess) elements.fingerprintSuccess.classList.remove('hidden');
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i> Fingerprint Enrolled';
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
 
             setTimeout(() => {
                 window.location.href = window.routes.complete;
             }, 1500);
 
         } catch (error) {
-            console.error(error);
-            if (elements.fingerprintError) elements.fingerprintError.classList.remove('hidden');
-            if (elements.fingerprintErrorText) elements.fingerprintErrorText.textContent = error.message;
+            if (document.getElementById('fingerprint-pulsing-icon')) {
+                document.getElementById('fingerprint-pulsing-icon').classList.remove('animate-pulse');
+            }
+            if (elements.fingerprintError) {
+                elements.fingerprintError.classList.remove('hidden');
+                const errText = document.getElementById('fingerprint-error-text');
+                if (errText) errText.textContent = error.message || 'Capture failed';
+            }
             if (elements.fingerprintStatusMsg) elements.fingerprintStatusMsg.classList.add('hidden');
 
             btn.disabled = false;

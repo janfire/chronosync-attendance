@@ -86,6 +86,13 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
         else:
             FACE_DATABASE[tenant_id].clear()
             
+        if isinstance(templates, list):
+            if len(templates) == 0:
+                templates = {}
+            else:
+                self._send_response({'error': 'Templates must be a dictionary'}, 400)
+                return
+
         for user_id_str, enc_list in templates.items():
             FACE_DATABASE[tenant_id][int(user_id_str)] = np.array(enc_list)
             

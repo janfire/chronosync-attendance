@@ -9,9 +9,11 @@ export default class ZKTecoService {
     async checkService() {
         try {
             await this.connect();
+            // Actually test if the hardware is present by trying to open it
+            await this.openDevice();
             return true;
         } catch (error) {
-            console.error('ZK Service Check Failed:', error);
+            console.warn('ZK Hardware Check Failed:', error.message || error);
             return false;
         }
     }
@@ -150,13 +152,12 @@ export default class ZKTecoService {
             try {
                 this.socket.send(JSON.stringify(openCmd));
                 // console.log('Sent Open command');
-                // Fallback resolve if no response
                 setTimeout(() => {
                     if (this.requests.has('open')) {
                         this.requests.delete('open');
-                        resolve(true); // Assume open worked or was already open
+                        reject(new Error('Scanner not detected or not responding.'));
                     }
-                }, 2000);
+                }, 1500);
             } catch (e) {
                 this.requests.delete('open');
                 reject(e);

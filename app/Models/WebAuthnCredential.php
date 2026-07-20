@@ -10,6 +10,8 @@ class WebAuthnCredential extends Model
 {
     use HasFactory, BelongsToTenant;
 
+    protected $table = 'webauthn_credentials';
+
     protected $fillable = [
         'user_id',
         'credential_id',

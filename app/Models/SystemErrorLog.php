@@ -10,4 +10,14 @@ class SystemErrorLog extends Model
         'reference_code', 'tenant_id', 'user_id', 'url', 'method', 
         'message', 'stack_trace', 'status'
     ];
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
