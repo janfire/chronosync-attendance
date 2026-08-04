@@ -106,7 +106,7 @@ Set the same `date.timezone` if needed.
 
 ---
 
-## Part 3: Install Composer
+## Part 3: Install Composer and Node.js
 
 ### Step 3.1 — Download Composer
 
@@ -121,10 +121,27 @@ curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
 ```
 
-### Step 3.3 — Verify
+### Step 3.3 — Verify Composer
 
 ```bash
 composer --version
+```
+
+### Step 3.4 — Install Node.js and NPM (Required for Vite)
+
+Laravel 12 uses Vite for asset bundling, which requires Node.js.
+
+```bash
+# Add NodeSource PPA for Node.js 20 (LTS)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+Verify the installation:
+
+```bash
+node -v
+npm -v
 ```
 
 ---
@@ -638,7 +655,7 @@ tail -f /var/www/zou-attendance/storage/logs/laravel.log
 |------|--------|--------|
 | 1 | System updated | ☐ |
 | 2 | PHP 8.2+ with extensions installed | ☐ |
-| 3 | Composer installed | ☐ |
+| 3 | Composer and Node.js installed | ☐ |
 | 4 | PostgreSQL installed, DB created | ☐ |
 | 5 | Python 3 + face_recognition installed | ☐ |
 | 6 | Nginx installed | ☐ |
