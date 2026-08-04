@@ -12,7 +12,7 @@ class PlatformAuditController extends Controller
     {
         $logs = SystemErrorLog::with(['tenant', 'user'])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
         return view('admin.superadmin.audit.index', compact('logs'));
     }

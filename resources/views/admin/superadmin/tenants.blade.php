@@ -81,48 +81,6 @@
 </div>
 
 
-{{-- ══════════════════════════════════════════════════════════════════
-     DROPDOWN MENU (single instance, repositioned per click)
-     ══════════════════════════════════════════════════════════════════ --}}
-<div id="tenantDropdown"
-     class="hidden fixed z-50 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1 text-sm"
-     role="menu">
-
-    {{-- View Details --}}
-    <button type="button" data-action="view"
-            class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-        <i class="fas fa-eye w-4 text-gray-400"></i> View Details
-    </button>
-
-    <div class="border-t border-gray-100 my-1"></div>
-
-    {{-- Activate (hidden when already active) --}}
-    <button type="button" data-action="activate"
-            class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-green-700 hover:bg-green-50 transition-colors">
-        <i class="fas fa-check-circle w-4 text-green-500"></i> Activate
-    </button>
-
-    {{-- Suspend (hidden when already suspended) --}}
-    <button type="button" data-action="suspend"
-            class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-orange-700 hover:bg-orange-50 transition-colors">
-        <i class="fas fa-ban w-4 text-orange-500"></i> Suspend
-    </button>
-
-    {{-- Reset Subscription --}}
-    <button type="button" data-action="reset"
-            class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-blue-700 hover:bg-blue-50 transition-colors">
-        <i class="fas fa-sync-alt w-4 text-blue-500"></i> Reset Subscription
-    </button>
-
-    <div class="border-t border-gray-100 my-1"></div>
-
-    {{-- Delete --}}
-    <button type="button" data-action="delete"
-            class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors font-medium">
-        <i class="fas fa-trash-alt w-4 text-red-500"></i> Delete Tenant
-    </button>
-</div>
-
 
 {{-- ══════════════════════════════════════════════════════════════════
      DELETE CONFIRMATION MODAL
@@ -428,63 +386,9 @@ $(function () {
     };
 
     // ═════════════════════════════════════════════════════════════════════════
-    // ACTION DROPDOWN
+    // INLINE ACTIONS
     // ═════════════════════════════════════════════════════════════════════════
-    const Dropdown = {
-        _currentTenant: null,
-        $el: $('#tenantDropdown'),
-
-        open(btn) {
-            const $btn = $(btn);
-            this._currentTenant = {
-                id:     $btn.data('tenant-id'),
-                name:   $btn.data('tenant-name'),
-                status: $btn.data('tenant-status'),
-            };
-
-            this._adjustMenuItems(this._currentTenant.status);
-
-            // Position below the trigger button
-            const rect = btn.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const menuHeight = 220;
-            const top = spaceBelow >= menuHeight
-                ? rect.bottom + window.scrollY + 4
-                : rect.top  + window.scrollY - menuHeight - 4;
-
-            this.$el.css({ top, right: window.innerWidth - rect.right })
-                    .removeClass('hidden');
-        },
-
-        close() { this.$el.addClass('hidden'); },
-
-        _adjustMenuItems(status) {
-            // Show/hide context-sensitive items based on current tenant status
-            $('[data-action="activate"]').toggle(status !== 'active');
-            $('[data-action="suspend"]').toggle(status !== 'suspended');
-        },
-    };
-
-    // Open dropdown on ⋮ click (delegated — rows are rendered by DataTables)
-    $(document).on('click', '.tenant-action-btn', function (e) {
-        e.stopPropagation();
-        if (Dropdown._currentTenant && !Dropdown.$el.hasClass('hidden')) {
-            Dropdown.close();
-            return;
-        }
-        Dropdown.open(this);
-    });
-
-    // Close dropdown when clicking outside
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('#tenantDropdown, .tenant-action-btn').length) {
-            Dropdown.close();
-        }
-    });
-
-    // ─── Dropdown item handlers ───────────────────────────────────────────────
     function doAction(action, tenant) {
-        Dropdown.close();
         const urls = {
             activate : `/superadmin/tenants/${tenant.id}/activate`,
             suspend  : `/superadmin/tenants/${tenant.id}/suspend`,
@@ -520,7 +424,16 @@ $(function () {
 
     $(document).on('click', '[data-action]', function () {
         const action = $(this).data('action');
-        if (Dropdown._currentTenant) doAction(action, Dropdown._currentTenant);
+        const $group = $(this).closest('.tenant-inline-actions');
+        
+        if ($group.length) {
+            const tenant = {
+                id: $group.data('tenant-id'),
+                name: $group.data('tenant-name'),
+                status: $group.data('tenant-status')
+            };
+            doAction(action, tenant);
+        }
     });
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -578,9 +491,9 @@ $(function () {
     $('#deleteConfirmBtn').on('click', () => DeleteModal.confirm());
     $('#deleteCancelBtn, #deleteBackdrop').on('click', () => DeleteModal.close());
 
-    // Keyboard: Escape closes dropdown and modal
+    // Keyboard: Escape closes modal
     $(document).on('keydown', function (e) {
-        if (e.key === 'Escape') { Dropdown.close(); DeleteModal.close(); }
+        if (e.key === 'Escape') { DeleteModal.close(); }
     });
 
 });

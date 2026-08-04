@@ -19,7 +19,7 @@
 
 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full admin-data-table display" id="auditTable">
             <thead>
                 <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     <th class="px-6 py-4 font-semibold">Reference</th>
@@ -84,10 +84,37 @@
             </tbody>
         </table>
     </div>
-    @if($logs->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            {{ $logs->links() }}
-        </div>
-    @endif
+
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.DataTable) {
+        window.jQuery(function() {
+            window.jQuery('#auditTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'All']],
+                order: [[3, 'desc']], // Sort by date descending
+                columnDefs: [
+                    { orderable: false, searchable: false, targets: [5] } // Disable sorting on Actions column
+                ],
+                stripeClasses: ['even', 'odd'],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search logs...',
+                    lengthMenu: 'Show _MENU_ logs',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ logs',
+                    infoEmpty: 'No logs to show',
+                    infoFiltered: '(filtered from _MAX_ total logs)',
+                    paginate: {
+                        previous: '<i class="fas fa-chevron-left"></i>',
+                        next: '<i class="fas fa-chevron-right"></i>'
+                    }
+                },
+                dom: '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
+            });
+        });
+    }
+</script>
+@endpush

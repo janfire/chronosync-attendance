@@ -27,12 +27,15 @@ class StaffDashboardController extends Controller
 
         // Calculate Rank based on total points this month
         $allUserPoints = AttendanceScore::whereBetween('attendance_date', [$startOfMonth, $endOfMonth])
+            ->whereHas('user', function($q) {
+                $q->where('role', 'staff');
+            })
             ->selectRaw('user_id, SUM(total_points) as sum_points')
             ->groupBy('user_id')
             ->orderByDesc('sum_points')
             ->get();
 
-        $totalEmployees = User::count();
+        $totalEmployees = User::where('role', 'staff')->count();
         $rankedEmployeesCount = $allUserPoints->count();
         
         $totalEmployees = max($totalEmployees, $rankedEmployeesCount);

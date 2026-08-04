@@ -292,16 +292,37 @@ class PlatformAdminController extends Controller
      */
     private function actionsCell(Tenant $tenant): string
     {
-        return '<div class="flex justify-center">
-            <button type="button"
-                    class="tenant-action-btn h-8 w-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800
-                           flex items-center justify-center transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                    data-tenant-id="' . $tenant->id . '"
-                    data-tenant-name="' . e($tenant->company_name) . '"
-                    data-tenant-status="' . $tenant->status . '"
-                    aria-label="Actions for ' . e($tenant->company_name) . '">
-                <i class="fas fa-ellipsis-v text-sm"></i>
-            </button>
-        </div>';
+        $html = '<div class="table-action-group tenant-inline-actions justify-center" 
+                      data-tenant-id="' . $tenant->id . '"
+                      data-tenant-name="' . e($tenant->company_name) . '"
+                      data-tenant-status="' . $tenant->status . '">';
+
+        $html .= '<button type="button" data-action="view" class="table-action-btn table-action-btn--view" title="View Details">
+                    <i class="fas fa-eye text-sm"></i>
+                  </button>';
+
+        if ($tenant->status !== 'active') {
+            $html .= '<button type="button" data-action="activate" class="table-action-btn text-green-600 hover:bg-green-50" title="Activate">
+                        <i class="fas fa-check-circle text-sm"></i>
+                      </button>';
+        }
+
+        if ($tenant->status !== 'suspended') {
+            $html .= '<button type="button" data-action="suspend" class="table-action-btn table-action-btn--warn" title="Suspend">
+                        <i class="fas fa-ban text-sm"></i>
+                      </button>';
+        }
+
+        $html .= '<button type="button" data-action="reset" class="table-action-btn text-blue-600 hover:bg-blue-50" title="Reset Subscription">
+                    <i class="fas fa-sync-alt text-sm"></i>
+                  </button>';
+
+        $html .= '<button type="button" data-action="delete" class="table-action-btn table-action-btn--danger" title="Delete Tenant">
+                    <i class="fas fa-trash-alt text-sm"></i>
+                  </button>';
+
+        $html .= '</div>';
+        
+        return $html;
     }
 }
