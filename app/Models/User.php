@@ -9,12 +9,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
+        'uuid',
         'name',
         'email',
         'employee_number',
@@ -43,6 +45,20 @@ class User extends Authenticatable
             'biometric_consent_timestamp' => 'datetime',
             'expires_at' => 'datetime',
         ];
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
     }
 
     // Validation rule for ZOU email

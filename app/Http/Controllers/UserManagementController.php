@@ -171,6 +171,16 @@ class UserManagementController extends Controller
             'employee_number.unique' => 'This employee number is already in use',
         ]);
 
+        // Prevent downgrading the last super admin
+        if ($user->role === UserRole::SUPER_ADMIN && $validated['role'] !== UserRole::SUPER_ADMIN->value) {
+            $superAdminCount = User::where('role', UserRole::SUPER_ADMIN)->count();
+            if ($superAdminCount <= 1) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'You cannot change the role of the last super admin in this workspace.');
+            }
+        }
+
         // Update user
         $user->update([
             'name' => $validated['name'],
@@ -270,6 +280,13 @@ class UserManagementController extends Controller
     {
         if ($user->role === UserRole::PLATFORM_ADMIN) {
             return 'Platform admin accounts cannot be deleted.';
+        }
+
+        if ($user->role === UserRole::SUPER_ADMIN) {
+            $superAdminCount = User::where('role', UserRole::SUPER_ADMIN)->count();
+            if ($superAdminCount <= 1) {
+                return 'You cannot delete the last super admin of this workspace.';
+            }
         }
 
         if ($user->id === $currentUser->id) {
