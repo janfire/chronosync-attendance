@@ -145,6 +145,9 @@ Route::middleware(['tenant'])->group(function () {
     // Auth Routes (Login/Logout/etc. don't need subscription check)
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
+    Route::get('/login/pending', [LoginController::class, 'showPending'])->name('login.pending');
+    Route::get('/login/check-approval', [LoginController::class, 'checkApproval'])->name('login.check-approval');
+    Route::get('/login/approve/{token}', [LoginController::class, 'approveLogin'])->name('login.approve');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::post('/biometric/update-login', [LoginController::class, 'loginForBiometricUpdate'])
         ->name('biometric.update-login')

@@ -171,7 +171,7 @@ class RegisterController extends Controller
         \Illuminate\Support\Facades\Log::info("===================================");
 
         try {
-            Mail::to($email)->send(new RegistrationOtpMail($otp));
+            Mail::to($email)->queue(new RegistrationOtpMail($otp));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send OTP email: ' . $e->getMessage());
             // Fail silently so the user can still land on the OTP page and press resend if needed

@@ -306,7 +306,7 @@ class UserManagementController extends Controller
             ];
 
             \Illuminate\Support\Facades\Mail::to('masiyatino9@gmail.com')
-                ->send(new \App\Mail\UserDeletionAlert($userData, $currentUser->name));
+                ->queue(new \App\Mail\UserDeletionAlert($userData, $currentUser->name));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send user deletion email: ' . $e->getMessage());
         }

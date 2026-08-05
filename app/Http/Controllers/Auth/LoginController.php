@@ -49,42 +49,115 @@ class LoginController extends Controller
                 ])->withInput($request->only('email'));
             }
 
-            Auth::login($user);
-            $request->session()->regenerate();
+            // Generate Email Approval Tokens
+            $token = \Illuminate\Support\Str::random(64);
+            $sessionId = \Illuminate\Support\Str::uuid()->toString();
 
-            // Platform admin → redirect to platform admin dashboard
-            if ($user->role === UserRole::PLATFORM_ADMIN) {
-                return redirect()->route('superadmin.dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
+            \Illuminate\Support\Facades\Cache::put("pending_login_{$token}", [
+                'user_id' => $user->id,
+                'session_id' => $sessionId,
+                'status' => 'pending'
+            ], now()->addMinutes(10));
+
+            $deviceInfo = $request->header('User-Agent') ?? 'Unknown Device';
+            $ipAddress = $request->header('X-Forwarded-For') ?? $request->ip();
+
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\LoginApprovalMail($token, $deviceInfo, $ipAddress));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send login approval email: ' . $e->getMessage());
+                return back()->withErrors(['email' => 'Failed to send login approval email. Please try again.']);
             }
 
-            // Check if user is admin or super_admin, redirect accordingly
-            if (in_array($user->role, [UserRole::SUPER_ADMIN, UserRole::ADMIN])) {
-                return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, ' . $user->name . '!');
-            }
-            
-            // General users can also access dashboard but with limited features
-            if ($user->role === UserRole::GENERAL_USER) {
-                return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome, ' . $user->name . '!');
-            }
+            session([
+                'login_session_id' => $sessionId,
+                'pending_token' => $token
+            ]);
 
-            // Regular staff logic
-            // Check if they have biometric data enrolled
-            $hasBiometric = \App\Models\BiometricData::where('user_id', $user->id)
-                ->whereNotNull('facial_encoding')
-                ->exists();
-
-            if (!$hasBiometric) {
-                return redirect()->route('biometric.enrollment')
-                    ->with('warning', 'Please complete your facial recognition enrollment to continue.');
-            }
-
-            // Regular staff - redirect to attendance QR or dashboard
-            return redirect()->route('staff.dashboard')->with('success', 'Welcome, ' . $user->name . '!');
+            return redirect()->route('login.pending');
         }
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->withInput($request->only('email'));
+    }
+
+    public function showPending()
+    {
+        if (!session()->has('pending_token')) {
+            return redirect()->route('login');
+        }
+        return view('auth.pending-approval');
+    }
+
+    public function checkApproval(Request $request)
+    {
+        $token = session('pending_token');
+        $sessionId = session('login_session_id');
+
+        if (!$token || !$sessionId) {
+            return response()->json(['status' => 'expired']);
+        }
+
+        $cacheData = \Illuminate\Support\Facades\Cache::get("pending_login_{$token}");
+
+        if (!$cacheData || $cacheData['session_id'] !== $sessionId) {
+            return response()->json(['status' => 'expired']);
+        }
+
+        if ($cacheData['status'] === 'approved') {
+            $user = User::find($cacheData['user_id']);
+            if ($user) {
+                Auth::login($user);
+                $request->session()->regenerate();
+                
+                // Clear pending session data
+                session()->forget(['login_session_id', 'pending_token']);
+                \Illuminate\Support\Facades\Cache::forget("pending_login_{$token}");
+
+                return response()->json([
+                    'status' => 'approved',
+                    'redirect_url' => $this->getRedirectUrlForUser($user)
+                ]);
+            }
+        }
+
+        return response()->json(['status' => 'pending']);
+    }
+
+    public function approveLogin($token)
+    {
+        $cacheData = \Illuminate\Support\Facades\Cache::get("pending_login_{$token}");
+
+        if (!$cacheData) {
+            return view('auth.approval-success', ['success' => false, 'message' => 'This link has expired or is invalid.']);
+        }
+
+        $cacheData['status'] = 'approved';
+        \Illuminate\Support\Facades\Cache::put("pending_login_{$token}", $cacheData, now()->addMinutes(5));
+
+        return view('auth.approval-success', ['success' => true, 'message' => 'Login Approved! You can safely close this tab and return to your original device.']);
+    }
+
+    private function getRedirectUrlForUser(User $user)
+    {
+        if ($user->role === UserRole::PLATFORM_ADMIN) {
+            return route('superadmin.dashboard');
+        }
+
+        if (in_array($user->role, [UserRole::SUPER_ADMIN, UserRole::ADMIN, UserRole::GENERAL_USER])) {
+            return route('admin.dashboard');
+        }
+
+        $hasBiometric = \App\Models\BiometricData::where('user_id', $user->id)
+            ->whereNotNull('facial_encoding')
+            ->exists();
+
+        if (!$hasBiometric) {
+            return route('biometric.enrollment');
+        }
+
+        return route('staff.dashboard');
     }
 
     /**

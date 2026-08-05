@@ -556,9 +556,9 @@ php artisan config:cache
 
 ---
 
-## Part 11: Queue Worker (Optional but Recommended)
+## Part 11: Queue Worker (Required for Email)
 
-If you use queues:
+Because the system uses background queues to send emails instantly without freezing the web interface, the Queue Worker is required:
 
 ```bash
 sudo nano /etc/systemd/system/zou-queue.service
