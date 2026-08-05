@@ -311,6 +311,9 @@ class UserManagementController extends Controller
             \Illuminate\Support\Facades\Log::error('Failed to send user deletion email: ' . $e->getMessage());
         }
 
+        // Detach/Delete biometric data so the face is freed up for a new account
+        $user->biometricData()->delete();
+
         $user->delete();
 
         return true;

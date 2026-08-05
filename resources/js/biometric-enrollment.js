@@ -298,11 +298,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 }),
             });
 
-            const result = await response.json().catch(async (e) => {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
+            const responseText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                console.error('Non-JSON response:', responseText);
                 throw new Error('Server returned invalid response. Please check console for details.');
-            });
+            }
 
             if (!response.ok || !result.success) {
                 // Special handling for 'No face detected' - don't stop the process, just let it retry
