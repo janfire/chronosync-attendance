@@ -29,7 +29,7 @@ class WebAuthnController extends Controller
             }
         }
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'none', 'packed', 'tpm'];
-        return new \lbuchs\WebAuthn\WebAuthn('Zou Attendance', $rpId, $formats);
+        return new \lbuchs\WebAuthn\WebAuthn('ChronoSync Attendance', $rpId, $formats);
     }
 
     private function getUserContext(): array

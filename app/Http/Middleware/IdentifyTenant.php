@@ -27,8 +27,10 @@ class IdentifyTenant
         $subdomain = $parts[0];
         $tenant = null;
 
+        $baseHost = parse_url(config('app.url'), PHP_URL_HOST);
+
         // 1. Standard host-based resolution (production & standard local DNS)
-        if (count($parts) > 1 && $host !== 'zou-attendance.test') {
+        if (count($parts) > 1 && $host !== $baseHost) {
             $tenant = Tenant::where('subdomain', $subdomain)->first();
         }
 
@@ -45,7 +47,7 @@ class IdentifyTenant
         }
 
         // 3. Last fallback: default to first tenant if on local development (localhost / base domain)
-        if (!$tenant && ($host === 'localhost' || $host === '127.0.0.1' || $host === 'zou-attendance.test')) {
+        if (!$tenant && ($host === 'localhost' || $host === '127.0.0.1' || $host === $baseHost)) {
             $tenant = Tenant::orderBy('id')->first();
         }
 

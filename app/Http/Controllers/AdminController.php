@@ -39,7 +39,7 @@ class AdminController extends Controller
         // to recalculate on every page load. Flush automatically every minute.
         $stats = Cache::remember("dashboard_stats_{$tenantId}", 60, function () {
             return [
-                'total_employees'    => User::where('role', 'staff')->count(),
+                'total_employees'    => User::whereIn('role', ['staff', 'guest'])->count(),
                 'today_attendance'   => AttendanceLog::whereDate('timestamp', today())
                     ->where('action', 'clock_in')
                     ->distinct('user_id')
@@ -86,7 +86,7 @@ class AdminController extends Controller
             }
         }
 
-        $employees = User::where('role', 'staff')->orderBy('name')->get();
+        $employees = User::whereIn('role', ['staff', 'guest'])->orderBy('name')->get();
 
         $teamStats = [
             'avg_daily_hours' => $this->analyticsService->calculateAverageDailyHours(),
@@ -125,7 +125,7 @@ class AdminController extends Controller
 
     public function employees(Request $request)
     {
-        $query = User::where('role', 'staff')
+        $query = User::whereIn('role', ['staff', 'guest'])
             ->with('biometricData', 'attendanceLogs');
 
         // Search functionality
@@ -156,7 +156,7 @@ class AdminController extends Controller
 
         // Calculate enrollment stats using direct count queries instead of loading all records.
         // Previously this loaded every staff member into memory just to count two numbers.
-        $totalStaff = User::where('role', 'staff')->count();
+        $totalStaff = User::whereIn('role', ['staff', 'guest'])->count();
         $enrolledCount = BiometricData::whereNotNull('user_id')
             ->where('facial_status', 'captured')
             ->distinct('user_id')
@@ -232,7 +232,7 @@ class AdminController extends Controller
 
     private function getAbsentCount()
     {
-        return User::where('role', 'staff')
+        return User::whereIn('role', ['staff', 'guest'])
             ->whereDoesntHave('attendanceLogs', function ($query) {
                 $query->whereDate('timestamp', today())
                       ->where('action', 'clock_in');
@@ -244,7 +244,7 @@ class AdminController extends Controller
     {
         // Single query: fetch all of today's logs for staff users, grouped by user.
         // This replaces the previous N+1 pattern (1 query per employee × 2 per action = 2N+1 queries).
-        $employees = User::where('role', 'staff')->orderBy('name')->get();
+        $employees = User::whereIn('role', ['staff', 'guest'])->orderBy('name')->get();
 
         // Load today's first clock-in and last clock-out per user in two bulk queries
         $clockIns = AttendanceLog::whereDate('timestamp', today())

@@ -1,6 +1,6 @@
-# ZOU Attendance System — Linux Server Deployment Guide
+# ChronoSync Attendance System — Linux Server Deployment Guide
 
-Complete step-by-step guide to deploy the ZOU Attendance System on a company Linux server. Do not skip any step.
+Complete step-by-step guide to deploy the ChronoSync Attendance System on a company Linux server. Do not skip any step.
 
 ---
 
@@ -9,7 +9,7 @@ Complete step-by-step guide to deploy the ZOU Attendance System on a company Lin
 Before starting, ensure you have:
 
 - Root or sudo access on the Linux server
-- A domain or subdomain (e.g. `attendance.zou.ac.zw`) or the server IP
+- A domain or subdomain (e.g. `attendance.ChronoSync.ac.zw`) or the server IP
 - SSH access to the server
 - Basic familiarity with the terminal
 
@@ -26,7 +26,7 @@ sudo apt update && sudo apt upgrade -y
 ### Step 1.2 — Set Hostname (Optional but Recommended)
 
 ```bash
-sudo hostnamectl set-hostname attendance.zou.ac.zw
+sudo hostnamectl set-hostname attendance.ChronoSync.ac.zw
 ```
 
 ### Step 1.3 — Create a Deployment User (Recommended)
@@ -34,14 +34,14 @@ sudo hostnamectl set-hostname attendance.zou.ac.zw
 Do not run the app as `root`. Create a dedicated user:
 
 ```bash
-sudo adduser zouattendance
-sudo usermod -aG sudo zouattendance
+sudo adduser ChronoSyncattendance
+sudo usermod -aG sudo ChronoSyncattendance
 ```
 
 Switch to that user for deployment:
 
 ```bash
-su - zouattendance
+su - ChronoSyncattendance
 ```
 
 ---
@@ -170,9 +170,9 @@ sudo -u postgres psql
 In the PostgreSQL prompt:
 
 ```sql
-CREATE USER zou_attendance_user WITH PASSWORD 'z0uadm1n';
-CREATE DATABASE zou_attendance OWNER zou_attendance_user;
-GRANT ALL PRIVILEGES ON DATABASE zou_attendance TO zou_attendance_user;
+CREATE USER ChronoSync_attendance_user WITH PASSWORD 'z0uadm1n';
+CREATE DATABASE ChronoSync_attendance OWNER ChronoSync_attendance_user;
+GRANT ALL PRIVILEGES ON DATABASE ChronoSync_attendance TO ChronoSync_attendance_user;
 \q
 ```
 
@@ -198,9 +198,9 @@ sudo apt install -y build-essential cmake libopenblas-dev liblapack-dev libx11-d
 
 ```bash
 cd /var/www  # or wherever you will deploy
-sudo mkdir -p zou-attendance
-sudo chown $USER:$USER zou-attendance
-cd zou-attendance
+sudo mkdir -p ChronoSync-attendance
+sudo chown $USER:$USER ChronoSync-attendance
+cd ChronoSync-attendance
 ```
 
 We will create the venv after the app is deployed (see Part 8).
@@ -232,12 +232,12 @@ Visit `http://10.1.3.15` in a browser. You should see the default Nginx page.
 
 ### Step 7.1 — Choose Deployment Directory
 
-Typical paths: `/var/www/zou-attendance` or `/home/zouattendance/zou-attendance`.
+Typical paths: `/var/www/ChronoSync-attendance` or `/home/ChronoSyncattendance/ChronoSync-attendance`.
 
 ```bash
-sudo mkdir -p /var/www/zou-attendance
-sudo chown $USER:$USER /var/www/zou-attendance
-cd /var/www/zou-attendance
+sudo mkdir -p /var/www/ChronoSync-attendance
+sudo chown $USER:$USER /var/www/ChronoSync-attendance
+cd /var/www/ChronoSync-attendance
 ```
 
 ### Step 7.2 — Transfer Project Files
@@ -245,13 +245,13 @@ cd /var/www/zou-attendance
 **Option A: Git (Recommended)**
 
 ```bash
-git clone https://github.com/YOUR_ORG/zou-attendance.git .
+git clone https://github.com/YOUR_ORG/ChronoSync-attendance.git .
 ```
 
 Or if you deploy from a private repo:
 
 ```bash
-git clone git@github.com:YOUR_ORG/zou-attendance.git .
+git clone git@github.com:YOUR_ORG/ChronoSync-attendance.git .
 ```
 
 **Option B: SCP from Your Machine**
@@ -259,20 +259,20 @@ git clone git@github.com:YOUR_ORG/zou-attendance.git .
 On your Windows machine (PowerShell or Command Prompt):
 
 ```powershell
-scp -r C:\xampp\htdocs\zou-attendance\* user@10.1.3.15:/var/www/zou-attendance/
+scp -r C:\xampp\htdocs\ChronoSync-attendance\* user@10.1.3.15:/var/www/ChronoSync-attendance/
 ```
 
 **Option C: Rsync**
 
 ```bash
 rsync -avz --exclude 'node_modules' --exclude 'vendor' --exclude '.env' \
-  /path/to/local/zou-attendance/ user@YOUR_SERVER_IP:/var/www/zou-attendance/
+  /path/to/local/ChronoSync-attendance/ user@YOUR_SERVER_IP:/var/www/ChronoSync-attendance/
 ```
 
 ### Step 7.3 — Install PHP Dependencies
 
 ```bash
-cd /var/www/zou-attendance
+cd /var/www/ChronoSync-attendance
 composer install --no-dev --optimize-autoloader
 ```
 
@@ -297,16 +297,16 @@ nano .env
 Set at least these values:
 
 ```env
-APP_NAME="ZOU Attendance"
+APP_NAME="ChronoSync Attendance"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://attendance.zou.ac.zw
+APP_URL=https://attendance.ChronoSync.ac.zw
 
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_DATABASE=zou_attendance
-DB_USERNAME=zou_attendance_user
+DB_DATABASE=ChronoSync_attendance
+DB_USERNAME=ChronoSync_attendance_user
 DB_PASSWORD=YOUR_STRONG_PASSWORD_HERE
 
 SESSION_DRIVER=database
@@ -315,8 +315,8 @@ SESSION_SECURE_COOKIE=true
 # Facial recognition server (used by Laravel)
 RECOGNITION_SERVER_URL=http://127.0.0.1:5001
 
-# Optional: ZOU redirect URL after clock in/out
-ZOU_WEBSITE_URL=https://www.zou.ac.zw
+# Optional: ChronoSync redirect URL after clock in/out
+ChronoSync_WEBSITE_URL=https://www.ChronoSync.ac.zw
 ATTENDANCE_REDIRECT_DELAY=2
 ```
 
@@ -375,7 +375,7 @@ php artisan view:cache
 ### Step 8.1 — Create Python Virtual Environment
 
 ```bash
-cd /var/www/zou-attendance
+cd /var/www/ChronoSync-attendance
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -400,23 +400,23 @@ You should see: `Starting Facial Recognition Server on localhost:5001`. Press `C
 ### Step 8.4 — Create systemd Service for Recognition Server
 
 ```bash
-sudo nano /etc/systemd/system/zou-recognition.service
+sudo nano /etc/systemd/system/ChronoSync-recognition.service
 ```
 
 Paste:
 
 ```ini
 [Unit]
-Description=ZOU Facial Recognition Server
+Description=ChronoSync Facial Recognition Server
 After=network.target
 
 [Service]
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/zou-attendance
-Environment="PATH=/var/www/zou-attendance/venv/bin"
-ExecStart=/var/www/zou-attendance/venv/bin/python /var/www/zou-attendance/scripts/recognition_server.py
+WorkingDirectory=/var/www/ChronoSync-attendance
+Environment="PATH=/var/www/ChronoSync-attendance/venv/bin"
+ExecStart=/var/www/ChronoSync-attendance/venv/bin/python /var/www/ChronoSync-attendance/scripts/recognition_server.py
 Restart=always
 RestartSec=5
 
@@ -429,16 +429,16 @@ Save and exit.
 ### Step 8.5 — Fix Ownership for Python Scripts
 
 ```bash
-sudo chown -R www-data:www-data /var/www/zou-attendance
+sudo chown -R www-data:www-data /var/www/ChronoSync-attendance
 ```
 
 ### Step 8.6 — Start and Enable Recognition Service
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start zou-recognition
-sudo systemctl enable zou-recognition
-sudo systemctl status zou-recognition
+sudo systemctl start ChronoSync-recognition
+sudo systemctl enable ChronoSync-recognition
+sudo systemctl status ChronoSync-recognition
 ```
 
 Verify it shows `active (running)`.
@@ -450,17 +450,17 @@ Verify it shows `active (running)`.
 ### Step 9.1 — Create Nginx Site Config
 
 ```bash
-sudo nano /etc/nginx/sites-available/zou-attendance
+sudo nano /etc/nginx/sites-available/ChronoSync-attendance
 ```
 
-Paste (replace `attendance.zou.ac.zw` and paths as needed):
+Paste (replace `attendance.ChronoSync.ac.zw` and paths as needed):
 
 ```nginx
 server {
     listen 80;
     listen [::]:80;
-    server_name attendance.zou.ac.zw YOUR_SERVER_IP;
-    root /var/www/zou-attendance/public;
+    server_name attendance.ChronoSync.ac.zw YOUR_SERVER_IP;
+    root /var/www/ChronoSync-attendance/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -497,7 +497,7 @@ Save and exit.
 ### Step 9.2 — Enable the Site
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/zou-attendance /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/ChronoSync-attendance /etc/nginx/sites-enabled/
 ```
 
 ### Step 9.3 — Remove Default Site (Optional)
@@ -527,10 +527,10 @@ sudo apt install -y certbot python3-certbot-nginx
 
 ### Step 10.2 — Obtain Certificate
 
-Ensure your domain `attendance.zou.ac.zw` points to this server's IP, then:
+Ensure your domain `attendance.ChronoSync.ac.zw` points to this server's IP, then:
 
 ```bash
-sudo certbot --nginx -d attendance.zou.ac.zw
+sudo certbot --nginx -d attendance.ChronoSync.ac.zw
 ```
 
 Follow prompts. Provide email and agree to terms.
@@ -544,7 +544,7 @@ sudo certbot renew --dry-run
 ### Step 10.4 — Update .env for HTTPS
 
 ```env
-APP_URL=https://attendance.zou.ac.zw
+APP_URL=https://attendance.ChronoSync.ac.zw
 SESSION_SECURE_COOKIE=true
 ```
 
@@ -561,19 +561,19 @@ php artisan config:cache
 Because the system uses background queues to send emails instantly without freezing the web interface, the Queue Worker is required:
 
 ```bash
-sudo nano /etc/systemd/system/zou-queue.service
+sudo nano /etc/systemd/system/ChronoSync-queue.service
 ```
 
 ```ini
 [Unit]
-Description=ZOU Attendance Queue Worker
+Description=ChronoSync Attendance Queue Worker
 After=network.target
 
 [Service]
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/zou-attendance
+WorkingDirectory=/var/www/ChronoSync-attendance
 ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3
 Restart=always
 
@@ -583,8 +583,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start zou-queue
-sudo systemctl enable zou-queue
+sudo systemctl start ChronoSync-queue
+sudo systemctl enable ChronoSync-queue
 ```
 
 ---
@@ -598,7 +598,7 @@ crontab -e
 Add:
 
 ```
-* * * * * cd /var/www/zou-attendance && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/ChronoSync-attendance && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ---
@@ -631,20 +631,20 @@ sudo systemctl status php8.2-fpm
 ```bash
 sudo systemctl status nginx
 sudo systemctl status postgresql
-sudo systemctl status zou-recognition
+sudo systemctl status ChronoSync-recognition
 ```
 
 ### Step 14.3 — Test the Application
 
-1. Visit `https://attendance.zou.ac.zw`
-2. Login with admin: `admin@zou.ac.zw` / `admin123`
+1. Visit `https://attendance.ChronoSync.ac.zw`
+2. Login with admin: `admin@ChronoSync.ac.zw` / `admin123`
 3. Test registration and biometric enrollment
 4. Test clock in/out (requires HTTPS for camera)
 
 ### Step 14.4 — Check Logs on Errors
 
 ```bash
-tail -f /var/www/zou-attendance/storage/logs/laravel.log
+tail -f /var/www/ChronoSync-attendance/storage/logs/laravel.log
 ```
 
 ---
@@ -677,8 +677,8 @@ tail -f /var/www/zou-attendance/storage/logs/laravel.log
 - Verify socket path in Nginx matches: `ls /var/run/php/php8.2-fpm.sock`
 
 ### Face Recognition Not Working
-- Ensure `zou-recognition` service is running: `sudo systemctl status zou-recognition`
-- Check logs: `sudo journalctl -u zou-recognition -f`
+- Ensure `ChronoSync-recognition` service is running: `sudo systemctl status ChronoSync-recognition`
+- Check logs: `sudo journalctl -u ChronoSync-recognition -f`
 - Verify `.env` has `RECOGNITION_SERVER_URL=http://127.0.0.1:5001`
 - Ensure `config/services.php` has the `recognition` entry
 
@@ -696,7 +696,7 @@ sudo chmod -R 775 storage bootstrap/cache
 
 ## Security Reminders
 
-1. Change the hardcoded admin password (`admin@zou.ac.zw` / `admin123`) after first login.
+1. Change the hardcoded admin password (`admin@ChronoSync.ac.zw` / `admin123`) after first login.
 2. Use strong database passwords.
 3. Keep `APP_DEBUG=false` in production.
 4. Do not commit `.env` to version control.

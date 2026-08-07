@@ -106,7 +106,7 @@ class LoginController extends Controller
         }
 
         if ($cacheData['status'] === 'approved') {
-            $user = User::find($cacheData['user_id']);
+            $user = User::withoutTenantScope()->find($cacheData['user_id']);
             if ($user) {
                 Auth::login($user);
                 $request->session()->regenerate();

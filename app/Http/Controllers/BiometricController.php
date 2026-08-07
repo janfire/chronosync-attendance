@@ -295,7 +295,7 @@ class BiometricController extends Controller
         }
 
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'none', 'packed', 'tpm'];
-        return new \lbuchs\WebAuthn\WebAuthn('Zou Attendance', $rpId, $formats);
+        return new \lbuchs\WebAuthn\WebAuthn('ChronoSync Attendance', $rpId, $formats);
     }
 
     /**
@@ -739,6 +739,14 @@ class BiometricController extends Controller
                 throw new \Exception('Biometric data was not properly linked to user');
             }
 
+            // Link WebAuthn credential if exists
+            if (session()->has('pending_webauthn_credential')) {
+                $webAuthnData = session('pending_webauthn_credential');
+                \App\Models\WebAuthnCredential::create(array_merge($webAuthnData, [
+                    'user_id' => $user->id,
+                ]));
+            }
+
             Log::info('User created and biometric linked successfully', [
                 'user_id' => $user->id,
                 'biometric_id' => $biometric->id,
@@ -767,6 +775,7 @@ class BiometricController extends Controller
     {
         // Clear the pending registration session
         session()->forget('pending_registration');
+        session()->forget('pending_webauthn_credential');
 
         // KIOSK MODE: Do NOT log the user in
         // Ensure we are logged out to prepare for the next user

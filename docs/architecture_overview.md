@@ -1,10 +1,10 @@
-# Zou Attendance - System Architecture & Developer Onboarding
+# ChronoSync Attendance - System Architecture & Developer Onboarding
 
-Welcome to the **Zou Attendance** project! This document is designed to help new developers quickly understand the system architecture, core modules, and integration points, allowing you to kickstart your work efficiently.
+Welcome to the **ChronoSync Attendance** project! This document is designed to help new developers quickly understand the system architecture, core modules, and integration points, allowing you to kickstart your work efficiently.
 
 ## 1. High-Level Architecture
 
-Zou Attendance is a **multi-tenant SaaS application** built on the **Laravel 12** framework. It provides businesses with a comprehensive time and attendance tracking solution, augmented with advanced biometric and hardware integrations.
+ChronoSync Attendance is a **multi-tenant SaaS application** built on the **Laravel 12** framework. It provides businesses with a comprehensive time and attendance tracking solution, augmented with advanced biometric and hardware integrations.
 
 ### Tech Stack
 *   **Backend Framework:** Laravel 12 (PHP ^8.2)
@@ -32,7 +32,7 @@ The core engine for tracking when employees arrive and leave.
 *   **`AttendanceExceptionController`**: Allows employees to request manual corrections or exceptions for missed punches, which admins can then approve or reject.
 
 ### 2.3 Biometric Integrations
-Zou Attendance supports multiple forms of biometric authentication to prevent buddy-punching.
+ChronoSync Attendance supports multiple forms of biometric authentication to prevent buddy-punching.
 *   **Facial Recognition (`FacialRecognitionService`)**: 
     *   Takes base64 images and extracts a 128-d facial encoding.
     *   Communicates with an external Python server (usually on `http://localhost:5001`) for fast processing (using HOG models for scanning, CNN models for enrollment).
@@ -70,7 +70,7 @@ The application routes (`routes/web.php`) are divided into distinct scopes:
 
 ### Local Environment Setup & Running the System
 
-To fully run Zou Attendance locally, you need to start two main components: the Laravel PHP application (which handles web requests, queues, and frontend assets) and the Python Facial Recognition server.
+To fully run ChronoSync Attendance locally, you need to start two main components: the Laravel PHP application (which handles web requests, queues, and frontend assets) and the Python Facial Recognition server.
 
 #### 1. First-time Setup
 1.  **Install dependencies**:
