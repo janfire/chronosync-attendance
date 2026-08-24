@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+# Install system dependencies required for OpenCV and dlib (face_recognition)
+RUN apt-get update && apt-get install -y \
+    cmake \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements and install
+COPY scripts/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the server script
+COPY scripts/recognition_server.py /app/recognition_server.py
+
+EXPOSE 5001
+
+CMD ["python", "recognition_server.py"]

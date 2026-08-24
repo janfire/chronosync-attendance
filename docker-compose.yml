@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Caddy automatically handles HTTPS/SSL certificates
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  # Your Laravel Backend & Frontend
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Tell Laravel we are behind a proxy so it generates HTTPS URLs
+      - ASSET_URL=https://${DOMAIN_NAME}
+    depends_on:
+      - db
+      - ml-server
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Python Facial Recognition Server
+  ml-server:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.ml
+    restart: unless-stopped
+    expose:
+      - "5001"
+    environment:
+      # Use the 4 ARM cores for faster face recognition
+      - MAX_FACE_WORKERS=4 
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

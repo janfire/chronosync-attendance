@@ -1,0 +1,4 @@
+# The domain will be passed in from the .env file
+{$DOMAIN_NAME} {
+    reverse_proxy app:80
+}

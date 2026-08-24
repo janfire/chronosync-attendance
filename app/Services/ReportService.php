@@ -127,7 +127,7 @@ class ReportService
 
         $stats = [];
         foreach ($userAverages as $userId => $avgMinutes) {
-            $user = User::find($userId);
+            $user = User::withTrashed()->find($userId);
             if (!$user) continue;
 
             $shiftStartMinutes = $shiftStart->hour * 60 + $shiftStart->minute;
@@ -165,7 +165,7 @@ class ReportService
             ->get();
 
         foreach ($logs as $log) {
-            $log->user = User::find($log->user_id);
+            $log->user = User::withTrashed()->find($log->user_id);
         }
 
         return $logs;
@@ -281,7 +281,7 @@ class ReportService
             ->get();
 
         foreach ($results as $res) {
-            $res->user = User::find($res->user_id);
+            $res->user = User::withTrashed()->find($res->user_id);
         }
 
         return $results;
@@ -306,7 +306,7 @@ class ReportService
             ->get();
 
         foreach ($results as $res) {
-            $res->user = User::find($res->user_id);
+            $res->user = User::withTrashed()->find($res->user_id);
         }
 
         return $results;
