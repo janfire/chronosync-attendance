@@ -72,9 +72,10 @@ class AttendanceScoringService
             ? $this->classifyClockOut($clockOut->timestamp)
             : ['status' => 'absent', 'points' => 0];
 
-        $score = AttendanceScore::updateOrCreate(
+        $score = AttendanceScore::withoutTenantScope()->updateOrCreate(
             ['user_id' => $user->id, 'attendance_date' => $dateStr],
             [
+                'tenant_id'        => $user->tenant_id,
                 'clock_in_log_id'  => $clockIn?->id,
                 'clock_out_log_id' => $clockOut?->id,
                 'clock_in_time'    => $clockIn?->timestamp->format('H:i:s'),
