@@ -6,36 +6,37 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Http\Request;
 
-class MicrosoftAuthController extends Controller
+class GoogleAuthController extends Controller
 {
     /**
-     * Redirect the user to the Microsoft Azure AD authentication page.
+     * Redirect the user to the Google authentication page.
      */
     public function redirect()
     {
-        return Socialite::driver('azure')->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     /**
-     * Obtain the user information from Microsoft Azure AD.
+     * Obtain the user information from Google.
      */
     public function callback()
     {
         try {
-            $azureUser = Socialite::driver('azure')->user();
+            $googleUser = Socialite::driver('google')->user();
         } catch (\Exception $e) {
-            return redirect()->route('register')->with('error', 'Microsoft Authentication failed. Please try again.');
+            return redirect()->route('register')->with('error', 'Google Authentication failed. Please try again.');
         }
 
-        // Extract the user's email from the Azure AD response payload
-        $email = $azureUser->getEmail() ?? $azureUser->user['userPrincipalName'] ?? null;
+        // Extract the user's email from the Google response payload
+        $email = $googleUser->getEmail();
 
         if (!$email) {
-            return redirect()->route('register')->with('error', 'Could not retrieve email from Microsoft. Please contact IT.');
+            return redirect()->route('register')->with('error', 'Could not retrieve email from Google. Please try again.');
         }
 
-        // Check if the user exists in our database (Zou Client)
+        // Check if the user exists in our database
         $user = User::where('email', $email)->first();
 
         if (!$user) {
@@ -47,18 +48,18 @@ class MicrosoftAuthController extends Controller
                 // Auto-create student
                 $studentPin = explode('@', $email)[0];
                 $user = User::create([
-                    'name' => $azureUser->getName() ?? 'Zou Student',
+                    'name' => $googleUser->getName() ?? 'Zou Student',
                     'email' => $email,
                     'employee_number' => strtoupper($studentPin),
                     'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(24)),
                     'email_verified_at' => now(),
-                    'role' => 'staff' // Defaulting to staff role as per schema
+                    'role' => 'staff' // Defaulting to staff role as per schema for Zou students
                 ]);
             } else {
                 // It's a staff member, we need their real employee ID
                 session([
-                    'azure_registration' => [
-                        'name' => $azureUser->getName(),
+                    'google_registration' => [
+                        'name' => $googleUser->getName(),
                         'email' => $email,
                     ]
                 ]);
@@ -78,7 +79,7 @@ class MicrosoftAuthController extends Controller
      */
     public function showStaffPrompt()
     {
-        if (!session()->has('azure_registration')) {
+        if (!session()->has('google_registration')) {
             return redirect()->route('register');
         }
         return view('auth.staff-prompt');
@@ -87,28 +88,28 @@ class MicrosoftAuthController extends Controller
     /**
      * Complete Staff Registration with Employee ID
      */
-    public function completeStaffPrompt(\Illuminate\Http\Request $request)
+    public function completeStaffPrompt(Request $request)
     {
         $request->validate([
             'employee_number' => 'required|string|max:50|unique:users,employee_number'
         ]);
 
-        $azureData = session('azure_registration');
-        if (!$azureData) {
+        $googleData = session('google_registration');
+        if (!$googleData) {
             return redirect()->route('register');
         }
 
         // Create the staff user
         $user = User::create([
-            'name' => $azureData['name'] ?? 'Zou Staff',
-            'email' => $azureData['email'],
+            'name' => $googleData['name'] ?? 'Zou Staff',
+            'email' => $googleData['email'],
             'employee_number' => $request->employee_number,
             'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(24)),
             'email_verified_at' => now(),
             'role' => 'staff'
         ]);
 
-        session()->forget('azure_registration');
+        session()->forget('google_registration');
 
         Auth::login($user);
         return redirect()->route('biometric.enrollment');

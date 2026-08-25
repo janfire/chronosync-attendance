@@ -45,7 +45,7 @@
                     </div>
                     <h2 class="text-xl font-bold text-gray-800">Verify Employee ID</h2>
                     <p class="text-sm text-gray-500 mt-1">
-                        Welcome <strong>{{ session('azure_registration')['name'] ?? 'Staff' }}</strong>! <br>
+                        Welcome <strong>{{ session('google_registration')['name'] ?? 'Staff' }}</strong>! <br>
                         Please provide your official staff ID to finalize your account creation.
                     </p>
                 </div>
@@ -74,7 +74,7 @@
                                    placeholder="e.g. EMP-98765">
                         </div>
                         <p class="text-xs text-gray-400 mt-2">
-                            This ID will be permanently linked to your Microsoft Azure account ({{ session('azure_registration')['email'] ?? '' }}).
+                            This ID will be permanently linked to your Google account ({{ session('google_registration')['email'] ?? '' }}).
                         </p>
                     </div>
 

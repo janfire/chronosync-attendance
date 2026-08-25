@@ -153,11 +153,11 @@ Route::middleware(['tenant'])->group(function () {
         ->name('biometric.update-login')
         ->middleware('throttle:10,1');
 
-    // Microsoft Azure AD Routes (For Zou Clients)
-    Route::get('/auth/microsoft/redirect', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'redirect'])->name('auth.microsoft.redirect');
-    Route::get('/auth/microsoft/callback', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'callback'])->name('auth.microsoft.callback');
-    Route::get('/auth/staff/complete', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'showStaffPrompt'])->name('auth.staff.prompt');
-    Route::post('/auth/staff/complete', [\App\Http\Controllers\Auth\MicrosoftAuthController::class, 'completeStaffPrompt'])->name('auth.staff.complete');
+    // Google OAuth Routes
+    Route::get('/auth/google/redirect', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+    Route::get('/auth/staff/complete', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'showStaffPrompt'])->name('auth.staff.prompt');
+    Route::post('/auth/staff/complete', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'completeStaffPrompt'])->name('auth.staff.complete');
 
     Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
@@ -173,4 +173,12 @@ Route::get('/test-crash', function() {
 
 Route::get('/preview-500', function() {
     return view('errors.500', ['reference_code' => 'ERR-TEST99']);
+});
+
+Route::get('/debug-env', function() {
+    return [
+        'app_url' => config('app.url'),
+        'baseHost' => parse_url(config('app.url'), PHP_URL_HOST),
+        'host' => request()->getHost(),
+    ];
 });

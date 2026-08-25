@@ -137,20 +137,20 @@
                         </div>
                     </div>
 
-                    <!-- TAB 1: Zou Client (Microsoft OAuth) -->
+                    <!-- TAB 1: Zou Client (Google OAuth) -->
                     <div id="tab-zou-client" class="tab-content active">
                         <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 text-center">
                             <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm mb-2">
-                                <i class="fab fa-microsoft text-2xl text-[#00a4ef]"></i>
+                                <i class="fab fa-google text-2xl text-[#DB4437]"></i>
                             </div>
-                            <h3 class="text-base font-bold text-gray-900 mb-1">Sign in with Microsoft</h3>
+                            <h3 class="text-base font-bold text-gray-900 mb-1">Sign up with Google</h3>
                             <p class="text-xs text-gray-600 mb-4 px-2">
-                                Use your official organizational email (or student PIN).
+                                Use your official organizational or student email.
                             </p>
                             
-                            <a href="{{ route('auth.microsoft.redirect') }}" class="inline-flex items-center justify-center w-full bg-white border border-gray-200 hover:border-[#00a4ef] hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="h-4 mr-2">
-                                Continue with Microsoft
+                            <a href="{{ route('auth.google.redirect') }}" class="inline-flex items-center justify-center w-full bg-white border border-gray-200 hover:border-[#DB4437] hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="h-4 mr-2">
+                                Sign up with Google
                             </a>
                             
                             <p class="text-[0.65rem] text-gray-400 mt-3">
@@ -167,7 +167,7 @@
 
                             <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-2.5 text-xs text-amber-800 mb-2 flex gap-2 items-start">
                                 <i class="fas fa-info-circle mt-0.5 text-amber-600"></i>
-                                <span class="leading-snug">Guest accounts are for visitors who do not possess organizational Microsoft credentials. Approvals may be required.</span>
+                                <span class="leading-snug">Guest accounts are for visitors who do not possess organizational Google credentials. Approvals may be required.</span>
                             </div>
 
                             <!-- Row 1: Name & ID -->
