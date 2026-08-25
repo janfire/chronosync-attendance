@@ -12,7 +12,7 @@ import cv2
 import face_recognition
 from PIL import Image, ImageOps
 PORT = 5001
-HOST = "localhost"
+HOST = "0.0.0.0"
 
 # Global variable to store loaded models (technically face_recognition loads lazily, 
 # but we can force a load by running a dummy image)
