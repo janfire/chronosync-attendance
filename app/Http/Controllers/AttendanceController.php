@@ -415,6 +415,13 @@ class AttendanceController extends Controller
             'location_name' => $locationName,
             'source' => $source,
         ]);
+
+        // Immediately trigger the scoring engine so the dashboard updates in real-time
+        try {
+            app(\App\Services\AttendanceScoringService::class)->scoreDay($user, now());
+        } catch (\Exception $e) {
+            Log::error('Failed to generate daily score: ' . $e->getMessage());
+        }
     }
 
     public function getAttendanceLogs(Request $request)
