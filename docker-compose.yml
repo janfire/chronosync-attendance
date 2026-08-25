@@ -30,6 +30,17 @@ services:
       - db
       - ml-server
 
+  # Laravel Queue Worker (Processes Background Jobs like Emails)
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: php artisan queue:work --tries=3 --timeout=90
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - db
+
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
