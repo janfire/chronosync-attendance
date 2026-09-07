@@ -348,13 +348,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                     if (result.isConfirmed) {
                                         window.location.href = '/biometric/enrollment';
                                     } else {
-                                        // Resume detection if they cancel update
-                                        startFaceDetection();
+                                        // Stop detection and go back to selection if they cancel update
+                                        resetToSelection();
                                     }
                                 });
                             } else {
-                                // Resume detection if they click Cancel
-                                startFaceDetection();
+                                // Stop detection and go back to selection if they click Cancel
+                                resetToSelection();
                             }
                             const badgeText = badgeContainer.querySelector('span');
                             if (badgeText) badgeText.textContent = "Face not recognized.";
