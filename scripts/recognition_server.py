@@ -211,6 +211,27 @@ class RecognitionHandler(http.server.BaseHTTPRequestHandler):
                 )
             }
 
+        if is_enrollment:
+            # Enforce strict frontal face for high-quality baseline templates
+            landmarks = face_recognition.face_landmarks(image, face_locations)
+            if landmarks:
+                lm = landmarks[0]
+                left_eye_x = sum([p[0] for p in lm['left_eye']]) / len(lm['left_eye'])
+                right_eye_x = sum([p[0] for p in lm['right_eye']]) / len(lm['right_eye'])
+                nose_x = lm['nose_bridge'][3][0] # Bottom of nose bridge
+                
+                dist_1 = abs(nose_x - left_eye_x)
+                dist_2 = abs(nose_x - right_eye_x)
+                
+                max_dist = max(dist_1, dist_2)
+                min_dist = min(dist_1, dist_2)
+                
+                if max_dist > 0:
+                    ratio = min_dist / max_dist
+                    # Ratio < 0.55 indicates significant yaw (head turn)
+                    if ratio < 0.55:
+                        return {'error': 'Face is turned to the side. Please look directly at the camera.'}
+
         # Enrollment and Scanning now both use num_jitters=1 for maximum speed.
         num_jitters = 1
         face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters=num_jitters)
