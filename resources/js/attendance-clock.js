@@ -131,7 +131,10 @@ document.addEventListener('DOMContentLoaded', function () {
         isProcessing = false;
 
         // Reset UI
-        if (selectionScreen) selectionScreen.classList.remove('hidden');
+        if (selectionScreen) {
+            selectionScreen.classList.remove('hidden');
+            selectionScreen.style.display = 'flex';
+        }
         if (cameraContainer) cameraContainer.classList.remove('visible');
         if (fingerprintContainer) fingerprintContainer.classList.remove('visible');
         if (activeHeader) activeHeader.classList.remove('visible');
