@@ -91,7 +91,7 @@ class GoogleAuthController extends Controller
     public function completeStaffPrompt(Request $request)
     {
         $request->validate([
-            'employee_number' => 'required|string|max:50|unique:users,employee_number'
+            'employee_number' => ['required', 'string', 'max:50', \Illuminate\Validation\Rule::unique('users')->whereNull('deleted_at')]
         ]);
 
         $googleData = session('google_registration');

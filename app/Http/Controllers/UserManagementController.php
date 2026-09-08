@@ -95,8 +95,8 @@ class UserManagementController extends Controller
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'employee_number' => 'required|string|unique:users,employee_number',
+            'email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
+            'employee_number' => ['required', 'string', Rule::unique('users')->whereNull('deleted_at')],
             'password' => 'required|min:8|confirmed',
             'role' => ['required', Rule::in($availableRoles)],
         ], [
@@ -162,8 +162,8 @@ class UserManagementController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'employee_number' => ['required', 'string', Rule::unique('users')->ignore($user->id)],
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)->whereNull('deleted_at')],
+            'employee_number' => ['required', 'string', Rule::unique('users')->ignore($user->id)->whereNull('deleted_at')],
             'password' => 'nullable|min:8|confirmed',
             'role' => ['required', Rule::in($availableRoles)],
         ], [
