@@ -46,6 +46,10 @@ class FacialRecognitionService
         try {
             return $this->extractViaServer($base64Image, $isEnrollment);
         } catch (\Throwable $e) {
+            // Re-throw if it's a business logic error from the server (e.g. Face turned)
+            if ($e->getMessage() !== 'Could not connect to recognition server') {
+                throw $e;
+            }
             // Log the error but don't stop - fallback to CLI (Slow Mode)
             Log::warning('Recognition server unavailable, falling back to CLI.', ['error' => $e->getMessage()]);
         }
