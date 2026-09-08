@@ -103,11 +103,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (elements.retryFacialBtn) {
         elements.retryFacialBtn.addEventListener('click', () => {
-            if (elements.facialError) elements.facialError.classList.add('hidden');
-            if (elements.statusMessage) elements.statusMessage.classList.remove('hidden');
-            if (elements.statusText) elements.statusText.textContent = 'Reinitializing camera...';
-            if (elements.cameraContainer) elements.cameraContainer.classList.remove('hidden');
-            startCamera();
+            // Reload the page to cleanly reset the MediaPipe WebGL context and camera
+            window.location.reload();
         });
     }
 
@@ -337,6 +334,29 @@ document.addEventListener('DOMContentLoaded', function () {
             handleFacialSuccess();
         } catch (error) {
             console.error('Facial enrollment error:', error);
+
+            if (error.message.includes('Face is turned') || error.message.includes('look directly')) {
+                if (elements.statusText) elements.statusText.textContent = error.message;
+                if (elements.statusMessage) elements.statusMessage.classList.remove('hidden');
+                
+                if (elements.cameraContainer) {
+                    elements.cameraContainer.classList.add('ring-4', 'ring-red-500');
+                    setTimeout(() => {
+                        elements.cameraContainer.classList.remove('ring-4', 'ring-red-500');
+                        if (elements.statusText) elements.statusText.textContent = 'Please blink to confirm identity';
+                    }, 3000);
+                }
+                
+                if (elements.progressContainer && elements.progressBar) {
+                    elements.progressContainer.classList.remove('opacity-100');
+                    elements.progressContainer.classList.add('opacity-0');
+                }
+                
+                if (typeof livenessDetector !== 'undefined' && livenessDetector) {
+                    livenessDetector.reset();
+                }
+                return; // Let them try again immediately without stopping the camera
+            }
 
             let userMessage = error.message;
             if (userMessage.includes('timeout') || userMessage.includes('taking too long')) {
