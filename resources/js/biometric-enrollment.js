@@ -252,11 +252,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 50);
         }
 
-        const vWidth = elements.video.videoWidth;
-        const vHeight = elements.video.videoHeight;
+        const vWidthOriginal = elements.video.videoWidth;
+        const vHeightOriginal = elements.video.videoHeight;
+        
+        const MAX_DIMENSION = 600;
+        let scale = 1;
+        if (Math.max(vWidthOriginal, vHeightOriginal) > MAX_DIMENSION) {
+            scale = MAX_DIMENSION / Math.max(vWidthOriginal, vHeightOriginal);
+        }
+        
+        const vWidth = vWidthOriginal * scale;
+        const vHeight = vHeightOriginal * scale;
+        
         elements.canvas.width = vWidth;
         elements.canvas.height = vHeight;
-        
         const ctx = elements.canvas.getContext('2d');
         ctx.drawImage(elements.video, 0, 0, vWidth, vHeight);
         
