@@ -673,6 +673,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // 3. Trigger native prompt
             const credential = await navigator.credentials.get({ publicKey: options });
 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Getting location...';
+            const position = await getPosition();
+
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Verifying...';
 
             // 4. Send response to server
@@ -692,7 +695,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         signature: arrayBufferToBase64(credential.response.signature),
                         userHandle: credential.response.userHandle ? arrayBufferToBase64(credential.response.userHandle) : null
                     },
-                    clientExtensionResults: credential.getClientExtensionResults()
+                    clientExtensionResults: credential.getClientExtensionResults(),
+                    latitude: position?.latitude,
+                    longitude: position?.longitude,
+                    accuracy: position?.accuracy
                 })
             });
 
