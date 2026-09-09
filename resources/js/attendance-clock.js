@@ -430,13 +430,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } catch (e) {
                 console.error('Face verification error', e);
+                isProcessing = false;
+                
+                const badgeContainer = document.querySelector('.cam-status-badge');
+                if (badgeContainer) {
+                    const badgeText = badgeContainer.querySelector('span');
+                    if (badgeText) badgeText.textContent = "Network error. Try again.";
+                    const dot = badgeContainer.querySelector('.dot');
+                    if (dot) dot.style.background = 'var(--error)';
+                }
+                
+                if (typeof livenessDetector !== 'undefined' && livenessDetector) {
+                    setTimeout(() => livenessDetector.reset(), 2000);
+                }
             } finally {
                 // Only reset isProcessing if we're not showing a modal
                 if (!isClockedIn && (!window.Swal || !Swal.isVisible())) {
                     // Don't reset immediately if we're in an error state that shows a message
-                    if (!result || result.success === false && result.action_required !== 'registration_prompt') {
+                    if (result && result.success === false && result.action_required !== 'registration_prompt') {
                         // Already handled with setTimeout above
-                    } else {
+                    } else if (result) {
                         isProcessing = false;
                     }
                 }
