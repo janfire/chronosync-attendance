@@ -123,6 +123,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
             stream = null;
+            
+            // MediaPipe WebGL context cannot reliably recover from a stopped camera stream.
+            // A hard reload guarantees a clean slate.
+            window.location.reload();
+            return;
         }
         if (faceDetectionInterval) {
             clearInterval(faceDetectionInterval);
