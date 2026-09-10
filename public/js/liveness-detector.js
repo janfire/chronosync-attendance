@@ -18,6 +18,13 @@ class LivenessDetector {
         
         // EAR threshold: Below this is considered a closed eye.
         this.EAR_THRESHOLD = 0.22; 
+        
+        // Adaptive Calibration State
+        this.isCalibrating = true;
+        this.calibrationFrames = 0;
+        this.maxCalibrationFrames = 10;
+        this.calibrationEARSum = 0;
+        this.dynamicThreshold = 0.22; // Fallback starting point
     }
 
     async init(videoElement) {
@@ -56,7 +63,7 @@ class LivenessDetector {
 
             await this.camera.start();
             this.isInitialized = true;
-            this._updateStatus('Ready: Please blink to confirm identity');
+            this.reset(); // Starts the calibration process
 
         } catch (error) {
             console.error("Failed to initialize Liveness Detector:", error);
@@ -75,12 +82,22 @@ class LivenessDetector {
         }
         this.blinkCount = 0;
         this.blinkState = 'open';
+        
+        // Reset calibration
+        this.isCalibrating = true;
+        this.calibrationFrames = 0;
+        this.calibrationEARSum = 0;
     }
 
     reset() {
         this.blinkCount = 0;
         this.blinkState = 'open';
-        this._updateStatus('Please blink to confirm identity');
+        
+        // Restart calibration process
+        this.isCalibrating = true;
+        this.calibrationFrames = 0;
+        this.calibrationEARSum = 0;
+        this._updateStatus('Calibrating... Please look at the camera');
     }
 
     _onResults(results) {
@@ -104,8 +121,28 @@ class LivenessDetector {
         const rightEAR = this._calculateEAR(rightEye);
         const avgEAR = (leftEAR + rightEAR) / 2.0;
 
-        // Blink detection logic
-        if (avgEAR < this.EAR_THRESHOLD) {
+        // --- Adaptive Calibration Phase ---
+        if (this.isCalibrating) {
+            // Outlier filter: only use frames where the eye is reasonably open (> 0.15 EAR)
+            if (avgEAR > 0.15) {
+                this.calibrationEARSum += avgEAR;
+                this.calibrationFrames++;
+                
+                if (this.calibrationFrames >= this.maxCalibrationFrames) {
+                    // Set threshold to 75% of the average resting EAR
+                    let calculated = (this.calibrationEARSum / this.maxCalibrationFrames) * 0.75;
+                    // Clamp between 0.15 and 0.25 to prevent permanent lockouts
+                    this.dynamicThreshold = Math.max(0.15, Math.min(0.25, calculated));
+                    
+                    this.isCalibrating = false;
+                    this._updateStatus('Ready: Please blink to confirm identity');
+                }
+            }
+            return; // Skip normal blink detection during calibration
+        }
+
+        // --- Blink Detection Logic ---
+        if (avgEAR < this.dynamicThreshold) {
             if (this.blinkState === 'open') {
                 this.blinkState = 'closed';
             }
