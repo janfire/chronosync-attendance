@@ -95,6 +95,19 @@
                     </div>
                 </form>
 
+                <div class="mt-5 flex items-center justify-center space-x-2">
+                    <span class="h-px bg-gray-200 w-full"></span>
+                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">or</span>
+                    <span class="h-px bg-gray-200 w-full"></span>
+                </div>
+
+                <div class="mt-5">
+                    <a href="{{ route('auth.google.redirect') }}" class="inline-flex items-center justify-center w-full bg-white border border-gray-200 hover:border-[#DB4437] hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="h-4 mr-2">
+                        Continue with Google
+                    </a>
+                </div>
+
                 <div class="mt-4 flex justify-end">
                     @if (Route::has('password.request'))
                         <a class="text-xs text-emerald-600 hover:text-emerald-800" href="{{ route('password.request') }}">Forget Password</a>
