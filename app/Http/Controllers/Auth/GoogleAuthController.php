@@ -13,8 +13,10 @@ class GoogleAuthController extends Controller
     /**
      * Redirect the user to the Google authentication page.
      */
-    public function redirect()
+    public function redirect(Request $request)
     {
+        $intent = $request->query('intent', 'register');
+        session(['google_auth_intent' => $intent]);
         return Socialite::driver('google')->redirect();
     }
 
@@ -40,6 +42,13 @@ class GoogleAuthController extends Controller
         $user = User::where('email', $email)->first();
 
         if (!$user) {
+            $intent = session('google_auth_intent', 'register');
+            session()->forget('google_auth_intent');
+
+            if ($intent === 'login') {
+                return redirect()->route('login')->withErrors(['email' => 'No account found with this Google email. Please register an account first.']);
+            }
+
             // Determine if Student or Staff based on email pattern
             // Student emails look like p239319n@zou.ac.zw (1 letter, digits, optional letter)
             $isStudent = preg_match('/^[a-zA-Z]\d{4,}[a-zA-Z]?@/i', $email);

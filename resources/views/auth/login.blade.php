@@ -102,7 +102,7 @@
                 </div>
 
                 <div class="mt-5">
-                    <a href="{{ route('auth.google.redirect') }}" class="inline-flex items-center justify-center w-full bg-white border border-gray-200 hover:border-[#DB4437] hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]">
+                    <a href="{{ route('auth.google.redirect', ['intent' => 'login']) }}" class="inline-flex items-center justify-center w-full bg-white border border-gray-200 hover:border-[#DB4437] hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="h-4 mr-2">
                         Continue with Google
                     </a>
