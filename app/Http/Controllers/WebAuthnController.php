@@ -177,6 +177,10 @@ class WebAuthnController extends Controller
             $request->session()->forget('webauthn_challenge');
 
             $user = $credential->user;
+            if (!$user) {
+                return ApiResponse::error('Your account has been deactivated or deleted. Please contact administration.', 403);
+            }
+
             $controller = app()->make(AttendanceController::class);
             return $this->processAttendanceForUser($controller, $user, $request, 'device_biometric');
 
