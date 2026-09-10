@@ -46,10 +46,19 @@ class BiometricController extends Controller
 
         // If the user is logging in themselves (not an admin enrolling someone else)
         if (Auth::check() && !session()->has('pending_enrollment_user_id')) {
-            $biometric = BiometricData::where('user_id', Auth::id())->first();
+            $user = Auth::user();
+            $biometric = BiometricData::where('user_id', $user->id)->first();
+            
             if ($biometric && $biometric->facial_encoding && $biometric->facial_status === 'captured') {
-                // User is already enrolled, forward them away from the enrollment page
-                return redirect()->route('attendance.clock')->with('info', 'You are already enrolled in biometric authentication.');
+                // User is already enrolled, forward them to their respective dashboard
+                $redirectRoute = 'staff.dashboard';
+                if ($user->role === \App\Enums\UserRole::PLATFORM_ADMIN) {
+                    $redirectRoute = 'superadmin.dashboard';
+                } elseif (in_array($user->role, [\App\Enums\UserRole::SUPER_ADMIN, \App\Enums\UserRole::ADMIN, \App\Enums\UserRole::GENERAL_USER])) {
+                    $redirectRoute = 'admin.dashboard';
+                }
+                
+                return redirect()->route($redirectRoute)->with('info', 'You are already enrolled in biometric authentication.');
             }
         }
 
