@@ -44,6 +44,15 @@ class BiometricController extends Controller
             return redirect()->route('register')->with('error', 'Please complete registration or login first.');
         }
 
+        // If the user is logging in themselves (not an admin enrolling someone else)
+        if (Auth::check() && !session()->has('pending_enrollment_user_id')) {
+            $biometric = BiometricData::where('user_id', Auth::id())->first();
+            if ($biometric && $biometric->facial_encoding && $biometric->facial_status === 'captured') {
+                // User is already enrolled, forward them away from the enrollment page
+                return redirect()->route('attendance.clock')->with('info', 'You are already enrolled in biometric authentication.');
+            }
+        }
+
         // Force HTTPS for ngrok
         if (request()->secure() || str_contains(request()->url(), 'ngrok-free.dev')) {
             URL::forceScheme('https');
