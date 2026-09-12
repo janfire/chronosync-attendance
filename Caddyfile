@@ -1,4 +1,7 @@
 # The domain will be passed in from the .env file
-{$DOMAIN_NAME} {
+*.{$DOMAIN_NAME}, {$DOMAIN_NAME} {
+    tls {
+        dns duckdns {$DUCKDNS_TOKEN}
+    }
     reverse_proxy app:80
 }
