@@ -313,7 +313,7 @@
                                         {{ $log->user_name }}
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase rounded border {{ $log->action == 'clock_in' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700' }}">
+                                        <span class="inline-block whitespace-nowrap px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase rounded border {{ $log->action == 'clock_in' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700' }}">
                                             {{ str_replace('_', ' ', $log->action) }}
                                         </span>
                                     </td>
