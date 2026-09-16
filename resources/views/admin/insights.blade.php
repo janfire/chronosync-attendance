@@ -265,8 +265,8 @@
 <script>
     $(document).ready(function() {
         $('#logsTable').DataTable({
-            "pageLength": 15,
-            "lengthMenu": [[15, 30, 50, -1], [15, 30, 50, "All"]],
+            "pageLength": 5,
+            "lengthMenu": [[5, 15, 30, 50, -1], [5, 15, 30, 50, "All"]],
             "order": [[ 2, "desc" ]], // Order by Timestamp column
             "language": {
                 "search": "",
