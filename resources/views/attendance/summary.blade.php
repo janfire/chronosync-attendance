@@ -235,47 +235,62 @@
                             }
                         });
 
-                        fetch("{{ route('attendance.manual-clock-out') }}", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                user_id: {{ $user->id }}
+                        const sendClockOutRequest = (lat, lng, acc) => {
+                            fetch("{{ route('attendance.manual-clock-out') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    user_id: {{ $user->id }},
+                                    latitude: lat,
+                                    longitude: lng,
+                                    accuracy: acc
+                                })
                             })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: data.message,
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    // Redirect to the fresh signed URL returned by the backend
-                                    window.location.href = data.redirect_url;
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: data.error || 'Failed to clock out'
-                                }).then(() => {
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: data.message,
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        // Redirect to the fresh signed URL returned by the backend
+                                        window.location.href = data.redirect_url;
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: data.error || 'Failed to clock out'
+                                    }).then(() => {
+                                        @if(!$isMobile) startCountdown(); @endif
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire('Error', 'Network error occurred.', 'error')
+                                .then(() => {
                                     @if(!$isMobile) startCountdown(); @endif
                                 });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire('Error', 'Network error occurred.', 'error')
-                            .then(() => {
-                                @if(!$isMobile) startCountdown(); @endif
                             });
-                        });
+                        };
+
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => sendClockOutRequest(position.coords.latitude, position.coords.longitude, position.coords.accuracy),
+                                (error) => sendClockOutRequest(null, null, null),
+                                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                            );
+                        } else {
+                            sendClockOutRequest(null, null, null);
+                        }
                     } else {
                         // User chose not to clock out
                         // Start the regular countdown if on kiosk

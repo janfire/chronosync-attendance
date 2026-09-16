@@ -307,7 +307,10 @@ class AttendanceController extends Controller
     public function manualClockOut(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|integer|exists:users,id'
+            'user_id' => 'required|integer|exists:users,id',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'accuracy' => 'nullable|numeric',
         ]);
 
         $user = \App\Models\User::find($request->user_id);
