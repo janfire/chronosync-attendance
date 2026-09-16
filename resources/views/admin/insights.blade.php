@@ -6,10 +6,10 @@
 @section('content')
     <!-- Dashboard Header & Filters -->
     <div class="mb-8">
-        <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 p-6">
+        <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 dark:border-gray-700/50 p-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800 tracking-tight">Performance Overview</h2>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Performance Overview</h2>
                     <p class="text-sm text-slate-500 font-medium mt-1">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100">
                             {{ \Carbon\Carbon::parse($date)->format('F j, Y') }}
@@ -28,8 +28,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <!-- Employee Selection -->
                     <div class="md:col-span-4 lg:col-span-5 relative group">
-                        <label class="absolute -top-2 left-3 bg-white px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider group-focus-within:text-emerald-600 transition-colors z-10">Employee</label>
-                        <select name="user_id" onchange="this.form.submit()" class="w-full h-[46px] px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 transition-all appearance-none cursor-pointer hover:bg-white hover:border-slate-300">
+                        <label class="absolute -top-2 left-3 bg-white dark:bg-gray-800 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider group-focus-within:text-emerald-600 transition-colors z-10">Employee</label>
+                        <select name="user_id" onchange="this.form.submit()" class="w-full h-[46px] px-4 bg-slate-50/50 dark:bg-gray-900/50 border border-slate-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 dark:text-gray-200 transition-all appearance-none cursor-pointer hover:bg-white dark:hover:bg-gray-900 hover:border-slate-300">
                             <option value="">Viewing Overall Team Data</option>
                             @foreach($employees as $emp)
                                 <option value="{{ $emp->id }}" {{ request('user_id') == $emp->id ? 'selected' : '' }}>
@@ -42,14 +42,14 @@
 
                     <!-- Date Selection -->
                     <div class="md:col-span-3 lg:col-span-3 relative group">
-                        <label class="absolute -top-2 left-3 bg-white px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider group-focus-within:text-emerald-600 transition-colors z-10">Date</label>
-                        <input type="date" name="date" onchange="this.form.submit()" value="{{ $date ?? today()->toDateString() }}" class="w-full h-[46px] px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 transition-all hover:bg-white hover:border-slate-300">
+                        <label class="absolute -top-2 left-3 bg-white dark:bg-gray-800 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider group-focus-within:text-emerald-600 transition-colors z-10">Date</label>
+                        <input type="date" name="date" onchange="this.form.submit()" value="{{ $date ?? today()->toDateString() }}" class="w-full h-[46px] px-4 bg-slate-50/50 dark:bg-gray-900/50 border border-slate-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 dark:text-gray-200 transition-all hover:bg-white dark:hover:bg-gray-900 hover:border-slate-300">
                     </div>
 
                     <!-- Action Filter -->
                     <div class="md:col-span-3 lg:col-span-2 relative group">
-                        <label class="absolute -top-2 left-3 bg-white px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider group-focus-within:text-emerald-600 transition-colors z-10">Type</label>
-                        <select name="action" onchange="this.form.submit()" class="w-full h-[46px] px-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 transition-all appearance-none cursor-pointer hover:bg-white hover:border-slate-300">
+                        <label class="absolute -top-2 left-3 bg-white dark:bg-gray-800 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider group-focus-within:text-emerald-600 transition-colors z-10">Type</label>
+                        <select name="action" onchange="this.form.submit()" class="w-full h-[46px] px-4 bg-slate-50/50 dark:bg-gray-900/50 border border-slate-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium text-slate-700 dark:text-gray-200 transition-all appearance-none cursor-pointer hover:bg-white dark:hover:bg-gray-900 hover:border-slate-300">
                             <option value="">All Activity</option>
                             <option value="clock_in" {{ request('action') == 'clock_in' ? 'selected' : '' }}>Clock In</option>
                             <option value="clock_out" {{ request('action') == 'clock_out' ? 'selected' : '' }}>Clock Out</option>
@@ -151,10 +151,10 @@
         <!-- Team Overview Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             <!-- Weekly Hours Chart -->
-            <div class="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-8">
                     <div>
-                        <h4 class="text-lg font-bold text-slate-800">Weekly Team Hours</h4>
+                        <h4 class="text-lg font-bold text-slate-800 dark:text-white">Weekly Team Hours</h4>
                         <p class="text-sm text-slate-500 mt-1">Total hours worked per day this week</p>
                     </div>
                     <div class="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
@@ -167,10 +167,10 @@
             </div>
 
             <!-- Peak Traffic Chart -->
-            <div class="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-8">
                     <div>
-                        <h4 class="text-lg font-bold text-slate-800">Peak Clock-in Times</h4>
+                        <h4 class="text-lg font-bold text-slate-800 dark:text-white">Peak Clock-in Times</h4>
                         <p class="text-sm text-slate-500 mt-1">Busiest hours at the scanner</p>
                     </div>
                     <div class="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
@@ -185,10 +185,10 @@
     @endif
 
     <!-- Detailed Logs Table -->
-    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-        <div class="px-8 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/30">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-gray-700 overflow-hidden">
+        <div class="px-8 py-6 border-b border-slate-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/30 dark:bg-gray-800/50">
             <div>
-                <h3 class="text-lg font-bold text-slate-800">Attendance Log</h3>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Attendance Log</h3>
                 <p class="text-sm text-slate-500 mt-1">Detailed breakdown of all clocking activity</p>
             </div>
             <button onclick="exportReports()" class="group flex items-center justify-center px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
@@ -199,7 +199,7 @@
         
         <div class="p-0">
             <table id="logsTable" class="w-full text-left admin-data-table display" style="width:100%">
-                <thead class="bg-slate-50/50">
+                <thead class="bg-slate-50/50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Employee</th>
                         <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
@@ -207,16 +207,16 @@
                         <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Location & Meta</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-50 dark:divide-gray-700">
                     @foreach($logs as $log)
-                        <tr class="hover:bg-slate-50/80 transition-colors group">
+                        <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-700/50 transition-colors group">
                             <td class="px-8 py-5">
                                 <div class="flex items-center cursor-pointer" onclick="window.location='{{ route('admin.staff.show', $log->user_id) }}'">
                                     <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 font-bold flex items-center justify-center mr-4 shadow-sm border border-white group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-emerald-600 transition-all">
                                         {{ strtoupper(substr($log->user_name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">{{ $log->user_name }}</div>
+                                        <div class="font-bold text-slate-800 dark:text-gray-200 group-hover:text-emerald-600 transition-colors">{{ $log->user_name }}</div>
                                         <div class="text-xs text-slate-400 font-medium tracking-wide">ID: {{ $log->user->employee_number ?? 'N/A' }}</div>
                                     </div>
                                 </div>
@@ -235,7 +235,7 @@
                                 @endif
                             </td>
                             <td class="px-8 py-5" data-order="{{ $log->timestamp->timestamp }}">
-                                <div class="font-bold text-slate-700">{{ $log->timestamp->format('g:i A') }}</div>
+                                <div class="font-bold text-slate-700 dark:text-gray-200">{{ $log->timestamp->format('g:i A') }}</div>
                                 <div class="text-xs text-slate-400 font-medium mt-0.5">{{ $log->timestamp->format('M j, Y') }}</div>
                             </td>
                             <td class="px-8 py-5">
@@ -293,7 +293,7 @@
             scales: { 
                 y: { 
                     beginAtZero: true,
-                    grid: { color: '#f1f5f9', drawBorder: false },
+                    grid: { color: 'rgba(100, 116, 139, 0.1)', drawBorder: false },
                     ticks: { padding: 10 }
                 },
                 x: {
