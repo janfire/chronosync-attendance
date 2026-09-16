@@ -35,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
             (request()->hasHeader('X-Forwarded-Proto') && request()->header('X-Forwarded-Proto') === 'https')
         ) {
             URL::forceScheme('https');
+            request()->server->set('HTTPS', 'on');
         }
     }
 }
