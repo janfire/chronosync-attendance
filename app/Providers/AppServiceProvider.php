@@ -25,9 +25,9 @@ class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
         });
 
-        // Force HTTPS if we are using ngrok
-        // Force HTTPS if we are using ngrok (handling both .app and .dev domains)
+        // Force HTTPS in production or if behind a proxy
         if (
+            config('app.env') === 'production' ||
             (request()->hasHeader('X-Forwarded-Host') && (
                 str_contains(request()->header('X-Forwarded-Host'), 'ngrok-free.app') || 
                 str_contains(request()->header('X-Forwarded-Host'), 'ngrok-free.dev')
