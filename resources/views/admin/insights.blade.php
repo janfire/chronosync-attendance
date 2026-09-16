@@ -191,7 +191,7 @@
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white">Attendance Log</h3>
                 <p class="text-sm text-slate-500 mt-1">Detailed breakdown of all clocking activity</p>
             </div>
-            <div id="export-menu-wrapper" class="relative z-10">
+            <div id="export-menu-wrapper" class="relative z-50">
                 <button type="button" onclick="toggleExportMenu(event)" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md hover:border-emerald-500 dark:hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-500 group">
                     <i class="fas fa-download text-slate-400 dark:text-gray-500 group-hover:text-emerald-500 transition-colors"></i>
                     <span>Export</span>
