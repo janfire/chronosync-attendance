@@ -191,10 +191,32 @@
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white">Attendance Log</h3>
                 <p class="text-sm text-slate-500 mt-1">Detailed breakdown of all clocking activity</p>
             </div>
-            <button onclick="exportReports()" class="group flex items-center justify-center px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
-                <i class="fas fa-file-csv mr-2 text-slate-400 group-hover:text-emerald-500 transition-colors"></i>
-                Export CSV
-            </button>
+            <div id="export-menu-wrapper" class="relative z-10">
+                <button type="button" onclick="toggleExportMenu(event)" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md hover:border-emerald-500 dark:hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-500 group">
+                    <i class="fas fa-download text-slate-400 dark:text-gray-500 group-hover:text-emerald-500 transition-colors"></i>
+                    <span>Export</span>
+                    <i class="fas fa-chevron-down text-xs ml-1 opacity-60"></i>
+                </button>
+                <!-- Dropdown menu -->
+                <div id="export-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-slate-100 dark:border-gray-700 py-1 z-50">
+                    <button type="button" onclick="printLogs(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                        <i class="fas fa-print w-4 text-indigo-600"></i>
+                        <span>Print</span>
+                    </button>
+                    <button type="button" onclick="exportLogsPdf(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                        <i class="fas fa-file-pdf w-4 text-red-600"></i>
+                        <span>PDF</span>
+                    </button>
+                    <button type="button" onclick="exportLogsExcel(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                        <i class="fas fa-file-excel w-4 text-emerald-600"></i>
+                        <span>Excel (.xlsx)</span>
+                    </button>
+                    <button type="button" onclick="exportLogsCsv(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                        <i class="fas fa-file-csv w-4 text-emerald-600"></i>
+                        <span>CSV</span>
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="p-0">
@@ -262,6 +284,9 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#logsTable').DataTable({
@@ -385,44 +410,177 @@
         @endif
     });
 
-    function exportReports() {
-        let csv = 'Employee,ID,Action,Date,Time,Location,Network\n';
-        const rows = document.querySelectorAll('#logsTable tbody tr'); // Select rows from specific table ID
+    function closeExportMenu() {
+        const exportMenu = document.getElementById('export-menu');
+        if (exportMenu) exportMenu.classList.add('hidden');
+    }
+
+    function toggleExportMenu(event) {
+        if (event) event.stopPropagation();
+        const exportMenu = document.getElementById('export-menu');
+        if (exportMenu) exportMenu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (event) => {
+        const exportMenu = document.getElementById('export-menu');
+        const exportMenuWrapper = document.getElementById('export-menu-wrapper');
+        if (!exportMenu || !exportMenuWrapper) return;
+        if (exportMenuWrapper.contains(event.target)) return;
+        closeExportMenu();
+    });
+
+    function getExportRows() {
+        const rows = [];
+        const tableRows = document.querySelectorAll('#logsTable tbody tr');
         
-        rows.forEach(row => {
-            // Skip empty/loading rows
+        tableRows.forEach(row => {
             if(row.cells.length < 4) return;
             
-            // Safer robust selectors that won't break if classes change slightly
             const employeeCell = row.cells[0]; 
             const typeCell = row.cells[1];
             const timeCell = row.cells[2];
             const locCell = row.cells[3];
 
-            // Extract with fallbacks
             const employee = employeeCell.querySelector('.font-bold')?.textContent.trim() || 'Unknown';
             const id = employeeCell.innerText.match(/ID:\s*([^\s]+)/)?.[1] || '';
             const action = typeCell.textContent.trim().replace(/\s+/g, ' ');
             
-            // Time logic might need adjusting depending on exact HTML structure
             const timeRaw = timeCell.innerText.split('\n');
-            const time = timeRaw[0] || '';
-            const date = timeRaw[1] || '';
+            const time = timeRaw[0]?.trim() || '';
+            const date = timeRaw[1]?.trim() || '';
             
-            const location = locCell.innerText.split('\n')[0] || '';
-            const network = locCell.innerText.split('\n')[1] || '';
+            const location = locCell.innerText.split('\n')[0]?.trim() || '';
+            const network = locCell.innerText.split('\n')[1]?.trim() || '';
             
-            csv += `"${employee}","${id}","${action}","${date}","${time}","${location.trim()}","${network.trim()}"\n`;
+            rows.push({ employee, id, action, date, time, location, network });
+        });
+        return rows;
+    }
+
+    function exportLogsCsv() {
+        const rows = getExportRows();
+        if (!rows.length) return alert('No data to export');
+
+        const escapeCsv = (value) => String(value ?? '').replace(/"/g, '""');
+        let csv = 'Employee,ID,Action,Date,Time,Location,Network\n';
+        
+        rows.forEach(row => {
+            csv += `"${escapeCsv(row.employee)}","${escapeCsv(row.id)}","${escapeCsv(row.action)}","${escapeCsv(row.date)}","${escapeCsv(row.time)}","${escapeCsv(row.location)}","${escapeCsv(row.network)}"\n`;
         });
         
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'analytics_export_' + new Date().toISOString().split('T')[0] + '.csv';
-        document.body.appendChild(a);
+        a.download = 'attendance_logs_' + new Date().toISOString().split('T')[0] + '.csv';
         a.click();
-        document.body.removeChild(a);
+    }
+
+    function exportLogsExcel() {
+        const rows = getExportRows();
+        if (!rows.length) return alert('No data to export');
+        if (typeof XLSX === 'undefined') return alert('Excel export library failed to load.');
+
+        const workbookData = rows.map(row => ({
+            'Employee': row.employee,
+            'ID': row.id,
+            'Action': row.action,
+            'Date': row.date,
+            'Time': row.time,
+            'Location': row.location,
+            'Network': row.network
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(workbookData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance Logs');
+        XLSX.writeFile(workbook, 'attendance_logs_' + new Date().toISOString().split('T')[0] + '.xlsx');
+    }
+
+    function exportLogsPdf() {
+        const rows = getExportRows();
+        if (!rows.length) return alert('No data to export');
+        if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') return alert('PDF export library failed to load.');
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        const columns = ['Employee', 'ID', 'Action', 'Date', 'Time', 'Location', 'Network'];
+        const body = rows.map(row => [row.employee, row.id, row.action, row.date, row.time, row.location, row.network]);
+        const dateLabel = new Date().toLocaleString();
+
+        doc.setFontSize(14);
+        doc.text('Attendance Logs Export', 14, 15);
+        doc.setFontSize(10);
+        doc.text('Generated: ' + dateLabel, 14, 22);
+
+        doc.autoTable({
+            head: [columns],
+            body,
+            startY: 28,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: [16, 185, 129] }
+        });
+
+        doc.save('attendance_logs_' + new Date().toISOString().split('T')[0] + '.pdf');
+    }
+
+    function printLogs() {
+        const rows = getExportRows();
+        if (!rows.length) return alert('No data to print');
+
+        const dateLabel = new Date().toLocaleString();
+        let tableRowsHtml = '';
+        rows.forEach((row) => {
+            tableRowsHtml += `<tr>
+                <td>${row.employee}</td>
+                <td>${row.id}</td>
+                <td>${row.action}</td>
+                <td>${row.date}</td>
+                <td>${row.time}</td>
+                <td>${row.location}</td>
+                <td>${row.network}</td>
+            </tr>`;
+        });
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Attendance Logs Print View</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+                    h1 { margin: 0 0 8px; font-size: 20px; }
+                    p { margin: 0 0 16px; color: #4b5563; font-size: 12px; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 12px; text-align: left; }
+                    th { background: #ecfdf5; color: #065f46; font-weight: 700; }
+                    tr:nth-child(even) { background: #f9fafb; }
+                </style>
+            </head>
+            <body>
+                <h1>Attendance Logs</h1>
+                <p>Generated: ${dateLabel}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>ID</th>
+                            <th>Action</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>Network</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRowsHtml}</tbody>
+                </table>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
     }
 </script>
 @endpush
