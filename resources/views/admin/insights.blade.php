@@ -100,7 +100,7 @@
                     </div>
                     
                     <!-- Quick Action -->
-                    <a href="{{ route('admin.staff.show', $selectedEmployee->uuid) }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl font-semibold text-sm transition-all flex items-center backdrop-blur-md">
+                    <a href="{{ route('admin.staff.show', $selectedEmployee) }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl font-semibold text-sm transition-all flex items-center backdrop-blur-md">
                         View Profile <i class="fas fa-arrow-right ml-2 opacity-70"></i>
                     </a>
                 </div>
@@ -211,7 +211,7 @@
                     @foreach($logs as $log)
                         <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-700/50 transition-colors group">
                             <td class="px-8 py-5">
-                                <div class="flex items-center cursor-pointer" onclick="window.location='{{ route('admin.staff.show', $log->user->uuid ?? '') }}'">
+                                <div class="flex items-center cursor-pointer" onclick="window.location='{{ route('admin.staff.show', $log->user) }}'">
                                     <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 font-bold flex items-center justify-center mr-4 shadow-sm border border-white group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-emerald-600 transition-all">
                                         {{ strtoupper(substr($log->user_name, 0, 1)) }}
                                     </div>

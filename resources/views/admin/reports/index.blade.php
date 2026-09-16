@@ -445,7 +445,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @foreach($monthlyDetails as $data)
-                    <tr class="hover:bg-emerald-50/30 transition-colors cursor-pointer" onclick="window.location='{{ route('admin.staff.show', $data['user']->uuid) }}'">
+                    <tr class="hover:bg-emerald-50/30 transition-colors cursor-pointer" onclick="window.location='{{ route('admin.staff.show', $data['user']) }}'">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 mr-3">
