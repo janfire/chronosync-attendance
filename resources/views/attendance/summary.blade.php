@@ -256,8 +256,8 @@
                                     timer: 2000,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    // Remove the rapid_clocking param and reload the page to show clock out status
-                                    window.location.href = window.location.pathname;
+                                    // Redirect to the fresh signed URL returned by the backend
+                                    window.location.href = data.redirect_url;
                                 });
                             } else {
                                 Swal.fire({

@@ -330,10 +330,13 @@ class AttendanceController extends Controller
         // Log the manual clock out
         $this->createAttendanceLog($user, $action, $request, 'manual_override');
 
+        $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), ['user_id' => $user->id]);
+
         return ApiResponse::success([
             'action' => $action,
             'user_name' => $user->name,
             'timestamp' => now()->format('Y-m-d H:i:s'),
+            'redirect_url' => $redirectUrl,
         ], "Goodbye, {$user->name}! You have successfully clocked out.");
     }
 
