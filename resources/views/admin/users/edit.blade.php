@@ -28,11 +28,11 @@
 
 @section('content')
     <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-md border border-gray-200 px-8 py-7 sm:px-10">
-            <div class="mb-6 border-b border-gray-100 pb-5">
+        <div class="bg-white rounded-2xl shadow-md border border-gray-200 px-8 py-7 sm:px-10 dark:bg-gray-800 dark:border-gray-700">
+            <div class="mb-6 border-b border-gray-100 pb-5 dark:border-gray-700">
                 <p class="text-sm font-semibold text-emerald-700">Admin / Users / Edit</p>
-                <h3 class="mt-1 text-xl font-semibold text-gray-900">Update staff account</h3>
-                <p class="mt-2 text-sm text-gray-600">Edit profile details for <span class="font-medium text-gray-800">{{ $user->name }}</span>. Leave password fields blank to keep the current password.</p>
+                <h3 class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">Update staff account</h3>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Edit profile details for <span class="font-medium text-gray-800 dark:text-white">{{ $user->name }}</span>. Leave password fields blank to keep the current password.</p>
             </div>
 
             <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-7" id="edit-user-form">
@@ -41,7 +41,7 @@
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-7">
                     <div>
-                        <label for="name" class="block text-sm font-semibold text-gray-800 mb-2">
+                        <label for="name" class="block text-sm font-semibold text-gray-800 mb-2 dark:text-white">
                             Full Name <span class="text-red-500">*</span>
                         </label>
                         <input
@@ -50,7 +50,7 @@
                             name="name"
                             value="{{ old('name', $user->name) }}"
                             required
-                            class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('name') border-red-500 @enderror"
+                            class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('name') border-red-500 @enderror dark:text-white"
                             placeholder="Enter full name"
                         >
                         @error('name')
@@ -59,7 +59,7 @@
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-800 mb-2">
+                        <label for="email" class="block text-sm font-semibold text-gray-800 mb-2 dark:text-white">
                             Email Address <span class="text-red-500">*</span>
                         </label>
                         <input
@@ -68,18 +68,18 @@
                             name="email"
                             value="{{ old('email', $user->email) }}"
                             required
-                            class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('email') border-red-500 @enderror"
+                            class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('email') border-red-500 @enderror dark:text-white"
                             placeholder="staff.member@example.com"
                         >
                         @error('email')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-xs text-gray-500">Must be a valid company email address.</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Must be a valid company email address.</p>
                     </div>
                 </div>
 
                 <div>
-                    <label for="employee_number" class="block text-sm font-semibold text-gray-800 mb-2">
+                    <label for="employee_number" class="block text-sm font-semibold text-gray-800 mb-2 dark:text-white">
                         Employee Number <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -88,7 +88,7 @@
                         name="employee_number"
                         value="{{ old('employee_number', $user->employee_number) }}"
                         required
-                        class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('employee_number') border-red-500 @enderror"
+                        class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('employee_number') border-red-500 @enderror dark:text-white"
                         placeholder="ChronoSync-001"
                     >
                     @error('employee_number')
@@ -97,14 +97,14 @@
                 </div>
 
                 <div>
-                    <label for="role" class="block text-sm font-semibold text-gray-800 mb-2">
+                    <label for="role" class="block text-sm font-semibold text-gray-800 mb-2 dark:text-white">
                         Role <span class="text-red-500">*</span>
                     </label>
                     <select
                         id="role"
                         name="role"
                         required
-                        class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 focus:outline-none @error('role') border-red-500 @enderror"
+                        class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 focus:outline-none @error('role') border-red-500 @enderror dark:text-white"
                     >
                         <option value="">Select Role</option>
                         @foreach($roles as $key => $label)
@@ -133,7 +133,7 @@
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-7">
                         <div>
-                            <label for="password" class="block text-sm font-semibold text-gray-800 mb-2">
+                            <label for="password" class="block text-sm font-semibold text-gray-800 mb-2 dark:text-white">
                                 New Password
                             </label>
                             <input
@@ -141,17 +141,17 @@
                                 id="password"
                                 name="password"
                                 minlength="8"
-                                class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('password') border-red-500 @enderror"
+                                class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none @error('password') border-red-500 @enderror dark:text-white"
                                 placeholder="Leave blank to keep current password"
                             >
                             @error('password')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <p id="password-help" class="mt-1 text-xs text-gray-500">Use at least 8 characters with a mix of letters, numbers, and symbols.</p>
+                            <p id="password-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">Use at least 8 characters with a mix of letters, numbers, and symbols.</p>
                         </div>
 
                         <div>
-                            <label for="password_confirmation" class="block text-sm font-semibold text-gray-800 mb-2">
+                            <label for="password_confirmation" class="block text-sm font-semibold text-gray-800 mb-2 dark:text-white">
                                 Confirm New Password
                             </label>
                             <input
@@ -159,16 +159,16 @@
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 minlength="8"
-                                class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none"
+                                class="form-field w-full px-4 py-3 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none dark:text-white"
                                 placeholder="Re-enter new password"
                             >
-                            <p id="password-match-help" class="mt-1 text-xs text-gray-500">Re-enter the same password to confirm.</p>
+                            <p id="password-match-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">Re-enter the same password to confirm.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end space-x-4 pt-5 border-t border-gray-200">
-                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center justify-end space-x-4 pt-5 border-t border-gray-200 dark:border-gray-700">
+                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors dark:bg-gray-900 dark:text-gray-200">
                         Cancel
                     </a>
                     <button type="submit" id="edit-user-submit" class="inline-flex items-center px-6 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-emerald-300 disabled:cursor-not-allowed transition-colors">

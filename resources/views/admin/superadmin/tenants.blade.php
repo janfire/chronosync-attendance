@@ -14,10 +14,10 @@
                 <i class="fas fa-th-large text-xs"></i> Dashboard
             </a>
             <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-            <span class="text-sm text-gray-600 font-medium">Tenants</span>
+            <span class="text-sm text-gray-600 font-medium dark:text-gray-300">Tenants</span>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900">Tenant Directory</h1>
-        <p class="text-sm text-gray-500 mt-0.5" id="tableInfo">Loading tenants…</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tenant Directory</h1>
+        <p class="text-sm text-gray-500 mt-0.5 dark:text-gray-400" id="tableInfo">Loading tenants…</p>
     </div>
 </div>
 
@@ -39,7 +39,7 @@
                    border border-transparent hover:border-gray-300 transition-all duration-150 text-left w-full">
         <span class="h-2.5 w-2.5 rounded-full {{ $stat['dot'] }} shrink-0"></span>
         <div>
-            <p class="text-xs text-gray-500 font-medium">{{ $stat['label'] }}</p>
+            <p class="text-xs text-gray-500 font-medium dark:text-gray-400">{{ $stat['label'] }}</p>
             <p id="stat-count-{{ $stat['status'] ?: 'total' }}" class="text-xl font-bold {{ $stat['color'] }} leading-none mt-0.5">{{ $stat['value'] }}</p>
         </div>
     </button>
@@ -47,24 +47,24 @@
 </div>
 
 {{-- ── Table Card ── --}}
-<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden dark:bg-gray-800 dark:border-gray-700">
 
     {{-- Toolbar — populated by DataTables initComplete --}}
-    <div id="dt-toolbar" class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3 items-center"></div>
+    <div id="dt-toolbar" class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3 items-center dark:border-gray-700"></div>
 
     <div class="overflow-x-auto">
         <table id="tenantsTable" class="w-full text-sm" style="width:100%">
             <thead>
-                <tr class="bg-gray-50 border-b-2 border-gray-200">
-                    <th class="px-6 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Client</th>
-                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Subdomain</th>
-                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Plan</th>
-                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Status</th>
-                    <th class="px-5 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Staff</th>
-                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Date Joined</th>
-                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Subscription</th>
-                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Latest Invoice</th>
-                    <th class="px-5 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">Actions</th>
+                <tr class="bg-gray-50 border-b-2 border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+                    <th class="px-6 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Client</th>
+                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Subdomain</th>
+                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Plan</th>
+                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Status</th>
+                    <th class="px-5 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Staff</th>
+                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Date Joined</th>
+                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Subscription</th>
+                    <th class="px-5 py-3.5 text-left   text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Latest Invoice</th>
+                    <th class="px-5 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap dark:text-gray-400">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,8 +74,8 @@
     </div>
 
     {{-- Pagination footer — populated by DataTables drawCallback --}}
-    <div id="dt-footer" class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 hidden">
-        <p id="dt-info" class="text-sm text-gray-500"></p>
+    <div id="dt-footer" class="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 hidden dark:bg-gray-900 dark:border-gray-700">
+        <p id="dt-info" class="text-sm text-gray-500 dark:text-gray-400"></p>
         <div id="dt-pagination" class="flex items-center gap-1.5 flex-wrap justify-center"></div>
     </div>
 </div>
@@ -90,7 +90,7 @@
     <div id="deleteBackdrop" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
 
     {{-- Panel --}}
-    <div class="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 p-6">
+    <div class="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 p-6 dark:bg-gray-800 dark:border-gray-700">
 
         {{-- Icon + title --}}
         <div class="flex items-start gap-4 mb-5">
@@ -98,9 +98,9 @@
                 <i class="fas fa-trash-alt text-red-600 text-lg"></i>
             </div>
             <div>
-                <h2 class="text-lg font-bold text-gray-900">Delete Tenant</h2>
-                <p class="text-sm text-gray-500 mt-0.5">
-                    This will permanently delete <strong id="deleteModalName" class="text-gray-800"></strong>
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white">Delete Tenant</h2>
+                <p class="text-sm text-gray-500 mt-0.5 dark:text-gray-400">
+                    This will permanently delete <strong id="deleteModalName" class="text-gray-800 dark:text-white"></strong>
                     and all associated data. This action cannot be undone.
                 </p>
             </div>
@@ -108,7 +108,7 @@
 
         {{-- Confirmation input --}}
         <div class="mb-5">
-            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 dark:text-gray-300">
                 Type the company name to confirm
             </label>
             <input type="text"
@@ -116,14 +116,14 @@
                    placeholder="Company name…"
                    autocomplete="off"
                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl
-                          focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition">
+                          focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition dark:border-gray-700">
             <p id="deleteConfirmHint" class="text-xs text-red-500 mt-1 hidden">Name does not match — please try again.</p>
         </div>
 
         {{-- Buttons --}}
         <div class="flex gap-3 justify-end">
             <button type="button" id="deleteCancelBtn"
-                    class="px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                    class="px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors dark:bg-gray-800 dark:text-gray-300">
                 Cancel
             </button>
             <button type="button" id="deleteConfirmBtn"
@@ -141,12 +141,12 @@
      ══════════════════════════════════════════════════════════════════ --}}
 <div id="toast"
      class="hidden fixed bottom-6 right-6 z-[70] flex items-center gap-3 px-5 py-4
-            bg-white rounded-2xl shadow-xl border border-gray-100 min-w-[280px] max-w-sm">
+            bg-white rounded-2xl shadow-xl border border-gray-100 min-w-[280px] max-w-sm dark:bg-gray-800 dark:border-gray-700">
     <div id="toastIcon" class="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"></div>
     <div class="flex-1 min-w-0">
-        <p id="toastMessage" class="text-sm font-semibold text-gray-800"></p>
+        <p id="toastMessage" class="text-sm font-semibold text-gray-800 dark:text-white"></p>
     </div>
-    <button type="button" onclick="Toast.hide()" class="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+    <button type="button" onclick="Toast.hide()" class="text-gray-400 hover:text-gray-600 transition-colors shrink-0 dark:text-gray-300">
         <i class="fas fa-times text-xs"></i>
     </button>
 </div>
@@ -215,8 +215,8 @@ $(function () {
         dom        : 'rt',      // custom toolbar + footer — no built-in controls
         language: {
             processing  : '<div class="py-10 text-center text-gray-400"><i class="fas fa-circle-notch fa-spin text-emerald-500 mr-2"></i>Loading…</div>',
-            zeroRecords : '<div class="py-16 text-center"><i class="fas fa-building text-4xl text-gray-200 mb-3 block"></i><p class="font-semibold text-gray-500">No tenants found</p><p class="text-sm text-gray-400 mt-1">Try a different search or filter.</p></div>',
-            emptyTable  : '<div class="py-16 text-center"><i class="fas fa-building text-4xl text-gray-200 mb-3 block"></i><p class="font-semibold text-gray-500">No tenants registered yet.</p></div>',
+            zeroRecords : '<div class="py-16 text-center"><i class="fas fa-building text-4xl text-gray-200 mb-3 block"></i><p class="font-semibold text-gray-500 dark:text-gray-400">No tenants found</p><p class="text-sm text-gray-400 mt-1">Try a different search or filter.</p></div>',
+            emptyTable  : '<div class="py-16 text-center"><i class="fas fa-building text-4xl text-gray-200 mb-3 block"></i><p class="font-semibold text-gray-500 dark:text-gray-400">No tenants registered yet.</p></div>',
         },
         initComplete: function () {
             Toolbar.build(this.api());
@@ -261,22 +261,22 @@ $(function () {
             // Search
             const $sw = $('<div class="flex-1 relative w-full"></div>');
             $('<span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-gray-400"><i class="fas fa-search text-sm"></i></span>').appendTo($sw);
-            $('<input type="text" placeholder="Search by name, subdomain or email…" class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition">')
+            $('<input type="text" placeholder="Search by name, subdomain or email…" class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition dark:bg-gray-800 dark:border-gray-700">')
                 .appendTo($sw)
                 .on('keyup', function () { api.search(this.value).draw(); });
             $tb.append($sw);
 
             // Export Dropdown
             const $ex = $('<div class="relative shrink-0"></div>');
-            const $exBtn = $('<button type="button" class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition flex items-center gap-2"><i class="fas fa-inbox text-gray-400"></i> Export <i class="fas fa-chevron-down text-xs ml-1 text-gray-400"></i></button>').appendTo($ex);
-            const $exMenu = $('<div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50"></div>').appendTo($ex);
+            const $exBtn = $('<button type="button" class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition flex items-center gap-2 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700"><i class="fas fa-inbox text-gray-400"></i> Export <i class="fas fa-chevron-down text-xs ml-1 text-gray-400"></i></button>').appendTo($ex);
+            const $exMenu = $('<div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 dark:bg-gray-800 dark:border-gray-700"></div>').appendTo($ex);
             
-            const btnTpl = (icon, color, label, action) => `<button type="button" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onclick="$('#tenantsTable').DataTable().button('.buttons-${action}').trigger()"><i class="${icon} w-4 ${color}"></i> ${label}</button>`;
+            const btnTpl = (icon, color, label, action) => `<button type="button" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors dark:bg-gray-900 dark:text-gray-200" onclick="$('#tenantsTable').DataTable().button('.buttons-${action}').trigger()"><i class="${icon} w-4 ${color}"></i> ${label}</button>`;
             
             $exMenu.append(btnTpl('fas fa-file-pdf', 'text-red-500', 'Download PDF', 'pdf'));
             $exMenu.append(btnTpl('fas fa-file-excel', 'text-green-500', 'Download Excel', 'excel'));
             $exMenu.append(btnTpl('fas fa-file-csv', 'text-blue-500', 'Download CSV', 'csv'));
-            $exMenu.append('<div class="border-t border-gray-100 my-1"></div>');
+            $exMenu.append('<div class="border-t border-gray-100 my-1 dark:border-gray-700"></div>');
             $exMenu.append(btnTpl('fas fa-print', 'text-gray-500', 'Print Directory', 'print'));
 
             $exBtn.on('click', (e) => { e.stopPropagation(); $exMenu.toggleClass('hidden'); });
@@ -286,8 +286,8 @@ $(function () {
 
             // Page-length chooser
             const $lw = $('<div class="flex items-center gap-2 shrink-0"></div>');
-            $('<span class="text-sm text-gray-500 font-medium whitespace-nowrap">Show</span>').appendTo($lw);
-            const $sel = $('<select class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"></select>');
+            $('<span class="text-sm text-gray-500 font-medium whitespace-nowrap dark:text-gray-400">Show</span>').appendTo($lw);
+            const $sel = $('<select class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition dark:bg-gray-800 dark:border-gray-700"></select>');
             [[5,'5 rows'],[10,'10 rows'],[25,'25 rows'],[50,'50 rows'],[100,'100 rows']].forEach(([val, label]) => {
                 $('<option>').val(val).text(label).prop('selected', api.page.len() === val).appendTo($sel);
             });
@@ -302,7 +302,7 @@ $(function () {
     const Footer = {
         build(api) {
             $('#dt-footer').html(
-                '<p id="dt-info" class="text-sm text-gray-500"></p>' +
+                '<p id="dt-info" class="text-sm text-gray-500 dark:text-gray-400"></p>' +
                 '<div id="dt-pagination" class="flex items-center gap-1.5 flex-wrap justify-center"></div>'
             );
             this.update(api);

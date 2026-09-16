@@ -7,7 +7,7 @@
 <div class="mb-6 flex justify-between items-center">
     <div>
         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Crash Reports & Errors</h3>
-        <p class="text-sm text-gray-500">Monitor system stability and investigate unhandled exceptions.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Monitor system stability and investigate unhandled exceptions.</p>
     </div>
     <form action="{{ route('superadmin.audit.resolve-all') }}" method="POST">
         @csrf
@@ -39,14 +39,14 @@
                     <td class="px-6 py-4">
                         <div class="text-sm">
                             <div class="font-medium text-gray-900 dark:text-gray-200">{{ $log->tenant->name ?? 'System/Public' }}</div>
-                            <div class="text-gray-500 text-xs">{{ $log->user->name ?? 'Guest' }}</div>
+                            <div class="text-gray-500 text-xs dark:text-gray-400">{{ $log->user->name ?? 'Guest' }}</div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-red-600 dark:text-red-400 truncate max-w-xs" title="{{ $log->message }}">
                             {{ Str::limit($log->message, 50) }}
                         </div>
-                        <div class="text-xs text-gray-500 mt-1 font-mono">
+                        <div class="text-xs text-gray-500 mt-1 font-mono dark:text-gray-400">
                             {{ $log->method }} {{ $log->url }}
                         </div>
                     </td>

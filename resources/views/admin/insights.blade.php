@@ -10,7 +10,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Performance Overview</h2>
-                    <p class="text-sm text-slate-500 font-medium mt-1">
+                    <p class="text-sm text-slate-500 font-medium mt-1 dark:text-gray-400">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100">
                             {{ \Carbon\Carbon::parse($date)->format('F j, Y') }}
                         </span>
@@ -18,7 +18,7 @@
                 </div>
                 
                 @if(request()->anyFilled(['user_id', 'date', 'action']))
-                    <a href="{{ route('admin.insights') }}" class="group flex items-center text-sm font-semibold text-slate-500 hover:text-red-500 transition-colors bg-slate-50 hover:bg-red-50 px-4 py-2 rounded-xl transition-all">
+                    <a href="{{ route('admin.insights') }}" class="group flex items-center text-sm font-semibold text-slate-500 hover:text-red-500 transition-colors bg-slate-50 hover:bg-red-50 px-4 py-2 rounded-xl transition-all dark:bg-gray-900 dark:text-gray-400">
                         <i class="fas fa-times-circle mr-2 group-hover:rotate-90 transition-transform duration-300"></i> Clear Filters
                     </a>
                 @endif
@@ -100,7 +100,7 @@
                     </div>
                     
                     <!-- Quick Action -->
-                    <a href="{{ route('admin.staff.show', $selectedEmployee) }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl font-semibold text-sm transition-all flex items-center backdrop-blur-md">
+                    <a href="{{ route('admin.staff.show', $selectedEmployee) }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl font-semibold text-sm transition-all flex items-center backdrop-blur-md dark:bg-gray-800">
                         View Profile <i class="fas fa-arrow-right ml-2 opacity-70"></i>
                     </a>
                 </div>
@@ -115,7 +115,7 @@
                     <div class="bg-slate-800/40 backdrop-blur-sm rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors group">
                         <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Daily Avg</p>
                         <p class="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-                            {{ $employeeStats['avg_daily_hours'] }}<span class="text-sm text-slate-500 font-medium ml-1">hrs</span>
+                            {{ $employeeStats['avg_daily_hours'] }}<span class="text-sm text-slate-500 font-medium ml-1 dark:text-gray-400">hrs</span>
                         </p>
                     </div>
                     
@@ -123,14 +123,14 @@
                         <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Lateness</p>
                         <p class="text-2xl font-bold {{ $employeeStats['late_count'] > 0 ? 'text-rose-400' : 'text-emerald-400' }}">
                             {{ $employeeStats['late_count'] }}
-                            <span class="text-xs text-slate-500 font-normal ml-1">this month</span>
+                            <span class="text-xs text-slate-500 font-normal ml-1 dark:text-gray-400">this month</span>
                         </p>
                     </div>
                     
                     <div class="bg-slate-800/40 backdrop-blur-sm rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors group">
                         <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Total Hours</p>
                         <p class="text-2xl font-bold text-white group-hover:text-purple-400 transition-colors">
-                            {{ $employeeStats['total_hours'] }}<span class="text-sm text-slate-500 font-medium ml-1">hrs</span>
+                            {{ $employeeStats['total_hours'] }}<span class="text-sm text-slate-500 font-medium ml-1 dark:text-gray-400">hrs</span>
                         </p>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                 <div class="bg-slate-900/50 rounded-2xl p-5 border border-white/5">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="text-sm font-bold text-slate-300">Activity Trend</h4>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase bg-slate-800 px-2 py-1 rounded">Last 7 Days</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase bg-slate-800 px-2 py-1 rounded dark:text-gray-400">Last 7 Days</span>
                     </div>
                     <div class="h-48 w-full">
                         <canvas id="employeeTrendChart"></canvas>
@@ -155,7 +155,7 @@
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h4 class="text-lg font-bold text-slate-800 dark:text-white">Weekly Team Hours</h4>
-                        <p class="text-sm text-slate-500 mt-1">Total hours worked per day this week</p>
+                        <p class="text-sm text-slate-500 mt-1 dark:text-gray-400">Total hours worked per day this week</p>
                     </div>
                     <div class="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
                         <i class="fas fa-chart-bar text-lg"></i>
@@ -171,7 +171,7 @@
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h4 class="text-lg font-bold text-slate-800 dark:text-white">Peak Clock-in Times</h4>
-                        <p class="text-sm text-slate-500 mt-1">Busiest hours at the scanner</p>
+                        <p class="text-sm text-slate-500 mt-1 dark:text-gray-400">Busiest hours at the scanner</p>
                     </div>
                     <div class="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
                         <i class="fas fa-clock text-lg"></i>
@@ -189,7 +189,7 @@
         <div class="px-8 py-6 border-b border-slate-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/30 dark:bg-gray-800/50">
             <div>
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white">Attendance Log</h3>
-                <p class="text-sm text-slate-500 mt-1">Detailed breakdown of all clocking activity</p>
+                <p class="text-sm text-slate-500 mt-1 dark:text-gray-400">Detailed breakdown of all clocking activity</p>
             </div>
             <div id="export-menu-wrapper" class="relative z-50">
                 <button type="button" onclick="toggleExportMenu(event)" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md hover:border-emerald-500 dark:hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-500 group">
@@ -199,19 +199,19 @@
                 </button>
                 <!-- Dropdown menu -->
                 <div id="export-menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-slate-100 dark:border-gray-700 py-1 z-50">
-                    <button type="button" onclick="printLogs(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                    <button type="button" onclick="printLogs(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors dark:bg-gray-900">
                         <i class="fas fa-print w-4 text-indigo-600"></i>
                         <span>Print</span>
                     </button>
-                    <button type="button" onclick="exportLogsPdf(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                    <button type="button" onclick="exportLogsPdf(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors dark:bg-gray-900">
                         <i class="fas fa-file-pdf w-4 text-red-600"></i>
                         <span>PDF</span>
                     </button>
-                    <button type="button" onclick="exportLogsExcel(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                    <button type="button" onclick="exportLogsExcel(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors dark:bg-gray-900">
                         <i class="fas fa-file-excel w-4 text-emerald-600"></i>
                         <span>Excel (.xlsx)</span>
                     </button>
-                    <button type="button" onclick="exportLogsCsv(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors">
+                    <button type="button" onclick="exportLogsCsv(); closeExportMenu();" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors dark:bg-gray-900">
                         <i class="fas fa-file-csv w-4 text-emerald-600"></i>
                         <span>CSV</span>
                     </button>
@@ -223,18 +223,18 @@
             <table id="logsTable" class="w-full text-left admin-data-table display" style="width:100%">
                 <thead class="bg-slate-50/50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Employee</th>
-                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Timestamp</th>
-                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Location & Meta</th>
+                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-gray-400">Employee</th>
+                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-gray-400">Type</th>
+                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-gray-400">Timestamp</th>
+                        <th class="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-gray-400">Location & Meta</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50 dark:divide-gray-700">
                     @foreach($logs as $log)
-                        <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-700/50 transition-colors group">
+                        <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-700/50 transition-colors group dark:bg-gray-900">
                             <td class="px-8 py-5">
                                 <div class="flex items-center cursor-pointer" onclick="window.location='{{ route('admin.staff.show', $log->user) }}'">
-                                    <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 font-bold flex items-center justify-center mr-4 shadow-sm border border-white group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-emerald-600 transition-all">
+                                    <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 font-bold flex items-center justify-center mr-4 shadow-sm border border-white group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-emerald-600 transition-all dark:text-gray-300">
                                         {{ strtoupper(substr($log->user_name, 0, 1)) }}
                                     </div>
                                     <div>
@@ -262,7 +262,7 @@
                             </td>
                             <td class="px-8 py-5">
                                 <div class="flex flex-col gap-1">
-                                    <div class="flex items-center text-xs font-medium text-slate-500">
+                                    <div class="flex items-center text-xs font-medium text-slate-500 dark:text-gray-400">
                                         <i class="fas fa-map-marker-alt w-4 text-slate-400"></i>
                                         {{ $log->location_name ?? 'Main Campus' }}
                                     </div>

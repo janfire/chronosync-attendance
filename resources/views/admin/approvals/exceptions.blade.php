@@ -6,10 +6,10 @@
 
         @include('auth.partials.messages')
 
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="bg-white rounded-lg shadow p-4 dark:bg-gray-800">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="text-sm text-gray-600 border-b">
+                    <tr class="text-sm text-gray-600 border-b dark:text-gray-300">
                         <th class="p-2">Requested</th>
                         <th class="p-2">Employee</th>
                         <th class="p-2">Type</th>
@@ -20,11 +20,11 @@
                 </thead>
                 <tbody>
                     @foreach($exceptions as $ex)
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-2 text-sm text-gray-600">{{ $ex->requested_at?->format('Y-m-d H:i') }}</td>
+                        <tr class="border-b hover:bg-gray-50 dark:bg-gray-900">
+                            <td class="p-2 text-sm text-gray-600 dark:text-gray-300">{{ $ex->requested_at?->format('Y-m-d H:i') }}</td>
                             <td class="p-2 font-medium">{{ $ex->user->name }}</td>
                             <td class="p-2 text-sm">{{ ucfirst(str_replace('_', ' ', $ex->type)) }}</td>
-                            <td class="p-2 text-sm text-gray-700">{{ Str::limit($ex->note, 120) }}</td>
+                            <td class="p-2 text-sm text-gray-700 dark:text-gray-200">{{ Str::limit($ex->note, 120) }}</td>
                             <td class="p-2 text-sm">{{ $ex->requester?->name ?? 'Self' }}</td>
                             <td class="p-2 text-sm">
                                 <!-- Approve with optional correction timestamp -->

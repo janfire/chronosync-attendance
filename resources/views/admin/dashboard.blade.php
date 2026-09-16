@@ -12,7 +12,7 @@
         {{-- Welcome Banner --}}
         <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-8 mb-6 text-white shadow-lg">
             <div class="flex items-center gap-4">
-                <div class="h-14 w-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                <div class="h-14 w-14 bg-white/20 rounded-2xl flex items-center justify-center dark:bg-gray-800">
                     <i class="fas fa-shield-alt text-white text-2xl"></i>
                 </div>
                 <div>
@@ -170,15 +170,15 @@
             </a>
 
             <a href="{{ route('admin.tenants.index') }}"
-               class="flex items-center gap-5 bg-white dark:bg-gray-800 rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-slate-400 transition-all duration-200 group">
-                <div class="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors shrink-0">
-                    <i class="fas fa-sitemap text-slate-600 text-xl"></i>
+               class="flex items-center gap-5 bg-white dark:bg-gray-800 rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-slate-400 transition-all duration-200 group dark:border-gray-700">
+                <div class="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors shrink-0 dark:bg-gray-800">
+                    <i class="fas fa-sitemap text-slate-600 text-xl dark:text-gray-300"></i>
                 </div>
                 <div>
                     <p class="font-bold text-gray-900 dark:text-white group-hover:text-slate-700 transition-colors">Tenant Management</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Browse all registered tenants and manage their status.</p>
                 </div>
-                <i class="fas fa-chevron-right text-gray-300 group-hover:text-slate-500 ml-auto transition-colors"></i>
+                <i class="fas fa-chevron-right text-gray-300 group-hover:text-slate-500 ml-auto transition-colors dark:text-gray-400"></i>
             </a>
 
         </div>{{-- /quick actions --}}
@@ -239,14 +239,14 @@
             </div>
 
             <!-- Missing Check-outs Card -->
-            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border {{ $stats['pending_issues'] > 0 ? 'border-orange-300' : 'border-gray-200' }} p-5 hover:shadow-md transition-all duration-200">
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border {{ $stats['pending_issues'] > 0 ? 'border-orange-300' : 'border-gray-200' }} p-5 hover:shadow-md transition-all duration-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Missing Check-outs</p>
                         <p class="text-3xl font-bold {{ $stats['pending_issues'] > 0 ? 'text-orange-600' : 'text-gray-900 dark:text-white' }}">{{ $stats['pending_issues'] }}</p>
                         <p class="text-xs text-gray-400 mt-1">{{ $stats['pending_issues'] > 0 ? 'Require attention' : 'All clear' }}</p>
                     </div>
-                    <div class="h-14 w-14 {{ $stats['pending_issues'] > 0 ? 'bg-orange-100' : 'bg-gray-100' }} rounded-xl flex items-center justify-center">
+                    <div class="h-14 w-14 {{ $stats['pending_issues'] > 0 ? 'bg-orange-100' : 'bg-gray-100' }} rounded-xl flex items-center justify-center dark:bg-gray-800">
                         <i class="fas fa-exclamation-triangle {{ $stats['pending_issues'] > 0 ? 'text-orange-600' : 'text-gray-400' }} text-xl"></i>
                     </div>
                 </div>
@@ -279,7 +279,7 @@
                             </span>
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">Live Activity Feed</h3>
-                                <p class="text-xs text-gray-500">Recent employee clock-ins, clock-outs, and attendance locations.</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Recent employee clock-ins, clock-outs, and attendance locations.</p>
                             </div>
                         </div>
                         <a href="{{ route('admin.insights') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors">
@@ -290,15 +290,15 @@
                 </div>
                 <div class="p-4 space-y-4">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="text-sm text-gray-600">Showing the latest activity for your active staff members.</div>
-                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <div class="text-sm text-gray-600 dark:text-gray-300">Showing the latest activity for your active staff members.</div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                             <i class="fas fa-clock"></i>
                             Updated {{ now()->diffForHumans() }}
                         </div>
                     </div>
-                    <div class="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm">
-                        <table id="activityTable" class="min-w-full admin-data-table display text-sm text-left text-gray-500" style="width:100%">
-                            <thead class="text-[11px] text-gray-600 uppercase tracking-[0.15em] bg-gray-50 dark:bg-gray-700">
+                    <div class="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm dark:border-gray-700">
+                        <table id="activityTable" class="min-w-full admin-data-table display text-sm text-left text-gray-500 dark:text-gray-400" style="width:100%">
+                            <thead class="text-[11px] text-gray-600 uppercase tracking-[0.15em] bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
                                 <tr>
                                     <th class="px-4 py-3 text-left">User</th>
                                     <th class="px-4 py-3 text-left">Action</th>
@@ -347,7 +347,7 @@
                         </div>
                     </div>
                     <div class="mt-6 pt-6 border-t border-slate-700">
-                        <p class="text-[10px] text-slate-500 italic text-center">Last updated: {{ now()->format('H:i:s') }}</p>
+                        <p class="text-[10px] text-slate-500 italic text-center dark:text-gray-400">Last updated: {{ now()->format('H:i:s') }}</p>
                     </div>
                 </div>
 

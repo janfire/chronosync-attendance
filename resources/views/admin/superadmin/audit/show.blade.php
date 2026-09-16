@@ -36,19 +36,19 @@
         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Context</h4>
         <div class="space-y-3">
             <div>
-                <span class="text-xs text-gray-500 block mb-0.5">Date Occurred</span>
+                <span class="text-xs text-gray-500 block mb-0.5 dark:text-gray-400">Date Occurred</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-200">{{ $log->created_at->format('F j, Y g:i:s A') }}</span>
             </div>
             <div>
-                <span class="text-xs text-gray-500 block mb-0.5">Tenant</span>
+                <span class="text-xs text-gray-500 block mb-0.5 dark:text-gray-400">Tenant</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-200">{{ $log->tenant->name ?? 'None' }}</span>
             </div>
             <div>
-                <span class="text-xs text-gray-500 block mb-0.5">User</span>
+                <span class="text-xs text-gray-500 block mb-0.5 dark:text-gray-400">User</span>
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-200">{{ $log->user->name ?? 'Guest' }} (ID: {{ $log->user_id ?? 'N/A' }})</span>
             </div>
             <div>
-                <span class="text-xs text-gray-500 block mb-0.5">Endpoint</span>
+                <span class="text-xs text-gray-500 block mb-0.5 dark:text-gray-400">Endpoint</span>
                 <span class="text-sm font-mono text-gray-900 dark:text-gray-200"><span class="text-indigo-600 font-bold mr-1">{{ $log->method }}</span> {{ $log->url }}</span>
             </div>
         </div>

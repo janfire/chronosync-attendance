@@ -411,30 +411,30 @@
             <!-- Navigation -->
             <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
                 @unless(Auth::user()->isPlatformAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="fas fa-chart-line w-4 text-gray-500"></i>
+                    <a href="{{ route('admin.dashboard') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.dashboard') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-chart-line w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Dashboard</span>
                     </a>
-                    <a href="{{ route('admin.users.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="fas fa-users-cog w-4 text-gray-500"></i>
+                    <a href="{{ route('admin.users.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.users.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-users-cog w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Staff Management</span>
                     </a>
                     @if(Auth::user()->canManageUsers())
-                        <a href="{{ route('admin.users.create') }}" class="sidebar-item sidebar-action inline-flex items-center space-x-2 px-3 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors {{ request()->routeIs('admin.users.create') ? 'active' : '' }}">
-                            <i class="fas fa-user-plus w-4 text-gray-500"></i>
+                        <a href="{{ route('admin.users.create') }}" class="sidebar-item sidebar-action inline-flex items-center space-x-2 px-3 py-2 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors {{ request()->routeIs('admin.users.create') ? 'active' : '' }} dark:bg-gray-900 dark:text-gray-200">
+                            <i class="fas fa-user-plus w-4 text-gray-500 dark:text-gray-400"></i>
                             <span class="font-medium">Add Employee</span>
                         </a>
                     @endif
-                    <a href="{{ route('admin.insights') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.insights') ? 'active' : '' }}">
-                        <i class="fas fa-chart-pie w-4 text-gray-500"></i>
+                    <a href="{{ route('admin.insights') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.insights') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-chart-pie w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Analytics</span>
                     </a>
-                    <a href="{{ route('admin.reports.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                        <i class="fas fa-file-contract w-4 text-gray-500"></i>
+                    <a href="{{ route('admin.reports.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.reports.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-file-contract w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Advanced Reports</span>
                     </a>
-                    <a href="{{ route('admin.exceptions.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.exceptions.*') ? 'active' : '' }}">
-                        <i class="fas fa-inbox w-4 text-gray-500"></i>
+                    <a href="{{ route('admin.exceptions.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.exceptions.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-inbox w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Approvals</span>
                         @php $pending = \App\Models\AttendanceException::where('status', 'pending')->count(); @endphp
                         @if($pending > 0)
@@ -442,37 +442,37 @@
                         @endif
                     </a>
 
-                    <a href="{{ route('attendance.qr') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('attendance.qr') ? 'active' : '' }}">
-                        <i class="fas fa-qrcode w-4 text-gray-500"></i>
+                    <a href="{{ route('attendance.qr') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('attendance.qr') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-qrcode w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">QR Code</span>
                     </a>
-                    <a href="{{ route('admin.guide') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.guide') ? 'active' : '' }}">
-                        <i class="fas fa-book w-4 text-gray-500"></i>
+                    <a href="{{ route('admin.guide') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.guide') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-book w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">User Guide</span>
                     </a>
 
                     <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">SaaS & Billing</div>
-                    <a href="{{ route('billing.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('billing.*') ? 'active' : '' }}">
-                        <i class="fas fa-credit-card w-4 text-gray-500"></i>
+                    <a href="{{ route('billing.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('billing.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-credit-card w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">My Subscription</span>
                     </a>
                 @endunless
 
                 @if(Auth::user()->isPlatformAdmin())
-                    <a href="{{ route('superadmin.dashboard') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
-                        <i class="fas fa-th-large w-4 text-gray-500"></i>
+                    <a href="{{ route('superadmin.dashboard') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-th-large w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Dashboard</span>
                     </a>
-                    <a href="{{ route('superadmin.tenants') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.tenants') ? 'active' : '' }}">
-                        <i class="fas fa-building w-4 text-gray-500"></i>
+                    <a href="{{ route('superadmin.tenants') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.tenants') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-building w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Tenant Directory</span>
                     </a>
-                    <a href="{{ route('superadmin.finance.pending') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.finance.*') ? 'active' : '' }}">
-                        <i class="fas fa-vault w-4 text-gray-500"></i>
+                    <a href="{{ route('superadmin.finance.pending') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.finance.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-vault w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Finance Ops</span>
                     </a>
-                    <a href="{{ route('superadmin.audit.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.audit.*') ? 'active' : '' }}">
-                        <i class="fas fa-shield-alt w-4 text-gray-500"></i>
+                    <a href="{{ route('superadmin.audit.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.audit.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-shield-alt w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">System Audit</span>
                         @php $newErrors = \App\Models\SystemErrorLog::where('status', 'new')->count(); @endphp
                         @if($newErrors > 0)
@@ -524,10 +524,10 @@
                                 </button>
 
                                 <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-2 z-50" role="menu" aria-label="User menu">
-                                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">My Profile</a>
+                                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:bg-gray-900">My Profile</a>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Logout</button>
+                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:bg-gray-900">Logout</button>
                                     </form>
                                 </div>
                             </div>

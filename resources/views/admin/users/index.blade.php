@@ -90,26 +90,26 @@
                     <button type="button" id="export-menu-button" onclick="toggleExportMenu(event)" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition-colors flex items-center space-x-2 font-medium">
                         <i class="fas fa-file-export text-emerald-600"></i>
                         <span>Export</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        <i class="fas fa-chevron-down text-xs text-gray-500 dark:text-gray-400"></i>
                     </button>
                     <div id="export-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-30 py-1">
-                        <button type="button" onclick="copyUsersToClipboard(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
-                            <i class="fas fa-copy w-4 text-slate-600"></i>
+                        <button type="button" onclick="copyUsersToClipboard(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                            <i class="fas fa-copy w-4 text-slate-600 dark:text-gray-300"></i>
                             <span>Copy</span>
                         </button>
-                        <button type="button" onclick="printUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <button type="button" onclick="printUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                             <i class="fas fa-print w-4 text-indigo-600"></i>
                             <span>Print</span>
                         </button>
-                        <button type="button" onclick="exportUsersPdf(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <button type="button" onclick="exportUsersPdf(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                             <i class="fas fa-file-pdf w-4 text-red-600"></i>
                             <span>PDF</span>
                         </button>
-                        <button type="button" onclick="exportUsersExcel(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <button type="button" onclick="exportUsersExcel(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                             <i class="fas fa-file-excel w-4 text-emerald-700"></i>
                             <span>Excel (.xlsx)</span>
                         </button>
-                        <button type="button" onclick="exportUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <button type="button" onclick="exportUsers(); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                             <i class="fas fa-download w-4 text-green-600"></i>
                             <span>CSV</span>
                         </button>
@@ -211,7 +211,7 @@
                                     <div>
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
                                         @if($lastActivity)
-                                            <div class="text-xs text-gray-500">Last active {{ $lastActivity->timestamp->diffForHumans() }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Last active {{ $lastActivity->timestamp->diffForHumans() }}</div>
                                         @endif
                                     </div>
                                 </div>
@@ -220,7 +220,7 @@
                                 <div class="text-sm text-gray-900 dark:text-gray-300">{{ $user->email }}</div>
                             </td>
                             <td class="hidden lg:table-cell whitespace-nowrap">
-                                <div class="text-sm font-mono text-gray-700">{{ $user->employee_number }}</div>
+                                <div class="text-sm font-mono text-gray-700 dark:text-gray-200">{{ $user->employee_number }}</div>
                             </td>
                             <td class="whitespace-nowrap">
                                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full {{ $roleColor }} border flex items-center w-fit">
@@ -238,7 +238,7 @@
                             </td>
                             <td class="hidden lg:table-cell whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->created_at->format('M j, Y') }}</div>
-                                <div class="text-xs text-gray-500">{{ $user->created_at->diffForHumans() }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->created_at->diffForHumans() }}</div>
                             </td>
                             <td class="whitespace-nowrap">
                                 @if($user->role->value === 'staff')

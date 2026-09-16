@@ -7,24 +7,24 @@
     <div class="max-w-6xl mx-auto">
         <!-- Back Button -->
         <div class="mb-4">
-            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors">
+            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-white">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Staff Management
             </a>
         </div>
 
         <!-- Employee Header Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 dark:bg-gray-800 dark:border-gray-700">
             <div class="flex items-start justify-between">
                 <div class="flex items-center space-x-6">
                     <div class="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ $user->name }}</h2>
-                        <p class="text-gray-600 mb-2">{{ $user->email }}</p>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-1 dark:text-white">{{ $user->name }}</h2>
+                        <p class="text-gray-600 mb-2 dark:text-gray-300">{{ $user->email }}</p>
                         <div class="flex items-center space-x-4">
-                            <span class="text-sm text-gray-500">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
                                 <i class="fas fa-id-badge mr-1"></i>{{ $user->employee_number }}
                             </span>
                             @if($user->biometricData && $user->biometricData->facial_status == 'captured')
@@ -32,7 +32,7 @@
                                     <i class="fas fa-check-circle mr-1"></i>Enrolled
                                 </span>
                             @else
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white">
                                     <i class="fas fa-times-circle mr-1"></i>Not Enrolled
                                 </span>
                             @endif
@@ -58,50 +58,50 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Statistics Cards -->
             <div class="lg:col-span-1 space-y-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Statistics</h3>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4 dark:text-white">Statistics</h3>
                     <div class="space-y-4">
                         <div>
-                            <p class="text-xs text-gray-500 mb-1">Total Clock-ins</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_clock_ins'] }}</p>
+                            <p class="text-xs text-gray-500 mb-1 dark:text-gray-400">Total Clock-ins</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_clock_ins'] }}</p>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-500 mb-1">This Month</p>
+                            <p class="text-xs text-gray-500 mb-1 dark:text-gray-400">This Month</p>
                             <p class="text-2xl font-bold text-emerald-600">{{ $stats['this_month'] }}</p>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-500 mb-1">Member Since</p>
-                            <p class="text-sm font-medium text-gray-900">{{ $user->created_at->format('F j, Y') }}</p>
+                            <p class="text-xs text-gray-500 mb-1 dark:text-gray-400">Member Since</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->created_at->format('F j, Y') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Recent Attendance</h3>
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Attendance</h3>
                 </div>
                 <div class="overflow-x-auto">
                     @if($recentAttendance->count() > 0)
                         <div class="divide-y divide-gray-200">
                             @foreach($recentAttendance as $log)
-                                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                <div class="px-6 py-4 hover:bg-gray-50 transition-colors dark:bg-gray-900">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-4">
                                             <div class="h-10 w-10 rounded-full {{ $log->action == 'clock_in' ? 'bg-green-100' : 'bg-red-100' }} flex items-center justify-center flex-shrink-0">
                                                 <i class="fas fa-{{ $log->action == 'clock_in' ? 'sign-in-alt' : 'sign-out-alt' }} text-{{ $log->action == 'clock_in' ? 'green' : 'red' }}-600"></i>
                                             </div>
                                             <div>
-                                                <p class="text-sm font-medium text-gray-900">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
                                                     {{ ucfirst(str_replace('_', ' ', $log->action)) }}
                                                 </p>
                                                 <div class="flex items-center space-x-2 mt-0.5">
-                                                    <p class="text-xs text-gray-500">{{ $log->timestamp->format('M j, Y') }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $log->timestamp->format('M j, Y') }}</p>
                                                     <span class="text-xs text-gray-400">•</span>
-                                                    <p class="text-xs text-gray-500">{{ $log->timestamp->format('g:i A') }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $log->timestamp->format('g:i A') }}</p>
                                                     <span class="text-xs text-gray-400">•</span>
-                                                    <p class="text-xs text-gray-500">{{ $log->timestamp->diffForHumans() }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $log->timestamp->diffForHumans() }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -115,11 +115,11 @@
                     @else
                         <div class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center">
-                                <div class="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                <div class="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4 dark:bg-gray-800">
                                     <i class="fas fa-clock text-gray-400 text-2xl"></i>
                                 </div>
-                                <p class="text-sm font-medium text-gray-900 mb-1">No attendance records</p>
-                                <p class="text-xs text-gray-500">This employee hasn't clocked in yet</p>
+                                <p class="text-sm font-medium text-gray-900 mb-1 dark:text-white">No attendance records</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">This employee hasn't clocked in yet</p>
                             </div>
                         </div>
                     @endif

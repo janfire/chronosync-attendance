@@ -176,7 +176,7 @@
                 </div>
 
                 <div class="flex items-center justify-end space-x-4 pt-5 border-t border-gray-200 dark:border-gray-700">
-                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:bg-gray-900">
                         Cancel
                     </a>
                     <button type="submit" id="create-user-submit" class="inline-flex items-center px-6 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-emerald-300 disabled:cursor-not-allowed transition-colors">
