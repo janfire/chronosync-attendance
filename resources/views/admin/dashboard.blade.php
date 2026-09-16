@@ -350,6 +350,14 @@
                         <p class="text-[10px] text-slate-500 italic text-center">Last updated: {{ now()->format('H:i:s') }}</p>
                     </div>
                 </div>
+
+                <!-- Daily Status Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Status Breakdown</h4>
+                    <div class="relative w-full h-64 flex justify-center">
+                        <canvas id="dailyStatusChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -369,6 +377,7 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     $(document).ready(function() {
         $('#activityTable').DataTable({
@@ -385,6 +394,78 @@
                 }
             },
             "dom": '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
+        });
+
+        // Initialize Polar Area Chart
+        const ctx = document.getElementById('dailyStatusChart').getContext('2d');
+        
+        Chart.defaults.font.family = "'Sora', 'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        new Chart(ctx, {
+            type: 'polarArea',
+            data: {
+                labels: ["Today's Attendance", 'Currently In', 'Missing Checkouts', 'Absents'],
+                datasets: [{
+                    data: [
+                        {{ $stats['today_attendance'] }}, 
+                        {{ $stats['currently_clocked_in'] }}, 
+                        {{ $stats['pending_issues'] }}, 
+                        {{ $stats['absents'] }}
+                    ],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.6)',  // Blue
+                        'rgba(16, 185, 129, 0.6)',  // Emerald
+                        'rgba(249, 115, 22, 0.6)',  // Orange
+                        'rgba(225, 29, 72, 0.6)'    // Rose
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(225, 29, 72, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                scales: {
+                    r: {
+                        ticks: {
+                            display: false // Hide numbers on rings for a cleaner look
+                        },
+                        grid: {
+                            color: 'rgba(203, 213, 225, 0.2)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        padding: 12,
+                        titleFont: { size: 13, family: "'Sora', sans-serif" },
+                        bodyFont: { size: 14, weight: 'bold', family: "'Sora', sans-serif" },
+                        cornerRadius: 8,
+                        displayColors: true
+                    }
+                }
+            }
         });
 
     });
