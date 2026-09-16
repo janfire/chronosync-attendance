@@ -352,8 +352,8 @@
                 </div>
 
                 <!-- Daily Status Chart -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Status Breakdown</h4>
+                <div class="bg-gradient-to-br from-gray-900 to-slate-800 rounded-xl shadow-xl border border-slate-700 p-6 text-white">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Status Breakdown</h4>
                     <div class="relative w-full h-64 flex justify-center">
                         <canvas id="dailyStatusChart"></canvas>
                     </div>
