@@ -44,10 +44,10 @@
                         <i class="fas fa-chart-line mr-2"></i>View History & Analytics
                     </a>
                     @if(Auth::user()->canManageUsers())
-                        <a href="{{ route('admin.users.edit', $user->id) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors">
+                        <a href="{{ route('admin.users.edit', $user) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors">
                             <i class="fas fa-edit mr-2"></i>Edit
                         </a>
-                        <a href="{{ route('biometric.enrollment', $user->id) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors">
+                        <a href="{{ route('biometric.enrollment', $user) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors">
                             <i class="fas fa-camera mr-2"></i>{{ $user->biometricData && $user->biometricData->facial_status === 'captured' ? 'Re-Enroll Facial Recognition' : 'Facial Recognition Enrollment' }}
                         </a>
                     @endif
