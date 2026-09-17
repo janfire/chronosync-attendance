@@ -58,9 +58,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Show report settings.
-     */
     public function settings()
     {
         $shiftRules = SystemSetting::get('shift_rules');
@@ -73,10 +70,22 @@ class ReportController extends Controller
              }, $holidays);
         }
 
+        // Filter out holidays from previous years
+        $currentYear = now()->year;
+        $holidays = array_filter($holidays, function($h) use ($currentYear) {
+            try {
+                return Carbon::parse($h['date'])->year >= $currentYear;
+            } catch (\Exception $e) {
+                return false;
+            }
+        });
+
         // Sort by date
         usort($holidays, function($a, $b) {
             return $a['date'] <=> $b['date'];
         });
+        
+        $holidays = array_values($holidays);
         
         return view('admin.reports.settings', compact('shiftRules', 'holidays'));
     }
