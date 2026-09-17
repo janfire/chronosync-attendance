@@ -31,7 +31,7 @@
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider dark:text-gray-200">Shift Start</label>
                     <div class="relative">
-                        <input type="time" name="shift_start" value="{{ $shiftRules['shift_start'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700">
+                        <input type="time" name="shift_start" value="{{ $shiftRules['shift_start'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700 dark:bg-gray-900">
                         <i class="fas fa-sun absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                     <p class="text-[11px] text-gray-400 leading-tight">Hours before this time will be clipped to match shift start.</p>
@@ -40,7 +40,7 @@
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider dark:text-gray-200">Shift End</label>
                     <div class="relative">
-                        <input type="time" name="shift_end" value="{{ $shiftRules['shift_end'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700">
+                        <input type="time" name="shift_end" value="{{ $shiftRules['shift_end'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700 dark:bg-gray-900">
                         <i class="fas fa-moon absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                     <p class="text-[11px] text-gray-400 leading-tight">Hours after this time will be clipped to match shift end.</p>
@@ -49,7 +49,7 @@
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider dark:text-gray-200">Late Threshold</label>
                     <div class="relative">
-                        <input type="time" name="late_after" value="{{ $shiftRules['late_after'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700">
+                        <input type="time" name="late_after" value="{{ $shiftRules['late_after'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700 dark:bg-gray-900">
                         <i class="fas fa-user-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                     <p class="text-[11px] text-gray-400 leading-tight">Sign-ins after this time flag the user as <span class="text-amber-600 font-bold">'Late'</span>.</p>
@@ -58,7 +58,7 @@
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider dark:text-gray-200">Early Departure</label>
                     <div class="relative">
-                        <input type="time" name="early_out_before" value="{{ $shiftRules['early_out_before'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700">
+                        <input type="time" name="early_out_before" value="{{ $shiftRules['early_out_before'] }}" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all text-gray-700 font-medium dark:text-gray-200 dark:border-gray-700 dark:bg-gray-900">
                         <i class="fas fa-sign-out-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                     <p class="text-[11px] text-gray-400 leading-tight">Sign-outs before this time flag as <span class="text-red-600 font-bold">'Early Leave'</span>.</p>
