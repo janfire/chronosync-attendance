@@ -253,13 +253,26 @@
                 this.isLoading = false;
                 
                 if (errors.length > 0) {
-                    alert(errors.join('\n'));
-                }
-                
-                if (addedCount > 0 || updatedCount > 0) {
-                    alert(`Successfully added ${addedCount} new holidays and updated ${updatedCount} existing ones.`);
-                } else if (errors.length === 0) {
-                    alert('All holidays from API are already up to date in your list.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sync Errors',
+                        text: errors.join('\n'),
+                        confirmButtonColor: '#059669'
+                    });
+                } else if (addedCount > 0 || updatedCount > 0) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sync Complete',
+                        text: `Successfully added ${addedCount} new holidays and updated ${updatedCount} existing ones.`,
+                        confirmButtonColor: '#059669'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Up to Date',
+                        text: 'All holidays from the API are already up to date in your list.',
+                        confirmButtonColor: '#059669'
+                    });
                 }
             }
         }
