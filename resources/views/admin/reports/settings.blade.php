@@ -228,7 +228,7 @@
 
                 for (const year of yearsToFetch) {
                     try {
-                        const response = await fetch(`{{ route("admin.reports.fetch.holidays") }}?year=${year}`);
+                        const response = await fetch(`{{ route("admin.reports.fetch.holidays", [], false) }}?year=${year}`);
                         const data = await response.json();
                         
                         if (data.success) {
