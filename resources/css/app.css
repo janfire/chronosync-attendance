@@ -44,13 +44,17 @@
 
 @layer components {
     .admin-table tbody tr:nth-child(even) {
-        @apply bg-gray-50 dark:bg-gray-800;
+        background-color: #f3f4f6; /* gray-100 */
     }
     .admin-table tbody tr {
-        @apply transition-all duration-200 border-b border-transparent;
+        transition: all 0.2s;
     }
     .admin-table tbody tr:hover {
-        @apply bg-white dark:bg-gray-700 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] relative z-20 scale-[1.005];
+        background-color: #ffffff;
+        box-shadow: 0 4px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+        transform: scale(1.005);
         outline: 1px solid rgba(0,0,0,0.08);
+        position: relative;
+        z-index: 20;
     }
 }
