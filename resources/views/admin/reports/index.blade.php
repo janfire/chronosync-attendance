@@ -40,30 +40,30 @@
                 <span>Shift & Rules</span>
             </a>
             
-            <div class="relative" id="export-menu-wrapper" x-data="{ open: false }">
-                <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+            <div class="relative" id="export-menu-wrapper">
+                <button type="button" onclick="toggleExportMenu(event)" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
                     <i class="fas fa-file-export"></i>
                     <span>Export Monthly</span>
                     <i class="fas fa-chevron-down text-xs ml-1"></i>
                 </button>
-                <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-30 py-1">
-                    <button type="button" onclick="exportMonthly('copy')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                <div id="export-menu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-30 py-1">
+                    <button type="button" onclick="exportMonthly('copy'); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                         <i class="fas fa-copy w-4 text-slate-600 dark:text-gray-300"></i>
                         <span>Copy</span>
                     </button>
-                    <button type="button" onclick="exportMonthly('print')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                    <button type="button" onclick="exportMonthly('print'); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                         <i class="fas fa-print w-4 text-indigo-600"></i>
                         <span>Print</span>
                     </button>
-                    <button type="button" onclick="exportMonthly('pdf')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                    <button type="button" onclick="exportMonthly('pdf'); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                         <i class="fas fa-file-pdf w-4 text-red-600"></i>
                         <span>PDF</span>
                     </button>
-                    <button type="button" onclick="exportMonthly('excel')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                    <button type="button" onclick="exportMonthly('excel'); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                         <i class="fas fa-file-excel w-4 text-emerald-700"></i>
                         <span>Excel (.xlsx)</span>
                     </button>
-                    <button type="button" onclick="exportMonthly('csv')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                    <button type="button" onclick="exportMonthly('csv'); closeExportMenu();" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
                         <i class="fas fa-download w-4 text-green-600"></i>
                         <span>CSV</span>
                     </button>
@@ -536,6 +536,24 @@
             "dom": '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
         });
     });
+
+    // Custom dropdown logic
+    function toggleExportMenu(event) {
+        event.stopPropagation();
+        document.getElementById('export-menu').classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('export-menu');
+        if (menu && !menu.classList.contains('hidden') && !event.target.closest('#export-menu-wrapper')) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    function closeExportMenu() {
+        const menu = document.getElementById('export-menu');
+        if (menu) menu.classList.add('hidden');
+    }
 
     async function exportMonthly(format) {
         // Show loading state
