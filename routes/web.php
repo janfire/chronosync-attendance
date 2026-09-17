@@ -125,6 +125,7 @@ Route::middleware(['tenant'])->group(function () {
             Route::post('/reports/settings', [\App\Http\Controllers\ReportController::class, 'updateSettings'])->name('admin.reports.settings.update');
             Route::get('/reports/fetch-holidays', [\App\Http\Controllers\ReportController::class, 'fetchHolidays'])->name('admin.reports.fetch.holidays');
             Route::get('/reports/export', [\App\Http\Controllers\ReportController::class, 'exportMonthly'])->name('admin.reports.export');
+            Route::get('/reports/export-json', [\App\Http\Controllers\ReportController::class, 'exportMonthlyJson'])->name('admin.reports.export.json');
 
             // Attendance Exceptions / Corrections
             Route::get('/exceptions', [\App\Http\Controllers\AttendanceExceptionController::class, 'index'])->name('admin.exceptions.index');

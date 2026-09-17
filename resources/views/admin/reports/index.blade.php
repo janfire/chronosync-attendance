@@ -39,10 +39,36 @@
                 <i class="fas fa-cog"></i>
                 <span>Shift & Rules</span>
             </a>
-            <a href="{{ route('admin.reports.export', ['month' => $month]) }}" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
-                <i class="fas fa-file-export"></i>
-                <span>Export Monthly</span>
-            </a>
+            
+            <div class="relative" id="export-menu-wrapper" x-data="{ open: false }">
+                <button type="button" @click="open = !open" @click.outside="open = false" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-file-export"></i>
+                    <span>Export Monthly</span>
+                    <i class="fas fa-chevron-down text-xs ml-1"></i>
+                </button>
+                <div x-show="open" style="display: none;" class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-30 py-1">
+                    <button type="button" onclick="exportMonthly('copy')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                        <i class="fas fa-copy w-4 text-slate-600 dark:text-gray-300"></i>
+                        <span>Copy</span>
+                    </button>
+                    <button type="button" onclick="exportMonthly('print')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                        <i class="fas fa-print w-4 text-indigo-600"></i>
+                        <span>Print</span>
+                    </button>
+                    <button type="button" onclick="exportMonthly('pdf')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                        <i class="fas fa-file-pdf w-4 text-red-600"></i>
+                        <span>PDF</span>
+                    </button>
+                    <button type="button" onclick="exportMonthly('excel')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                        <i class="fas fa-file-excel w-4 text-emerald-700"></i>
+                        <span>Excel (.xlsx)</span>
+                    </button>
+                    <button type="button" onclick="exportMonthly('csv')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 dark:bg-gray-900">
+                        <i class="fas fa-download w-4 text-green-600"></i>
+                        <span>CSV</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -510,7 +536,170 @@
             "dom": '<"admin-dt-toolbar"lf>rt<"admin-dt-footer"ip>'
         });
     });
+
+    async function exportMonthly(format) {
+        // Show loading state
+        Swal.fire({
+            title: 'Generating Export...',
+            text: 'Fetching monthly data',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            // Determine absolute URL (handles subdirectories/proxies)
+            const exportUrl = `{{ route('admin.reports.export.json', [], false) }}?month={{ $month }}`;
+            const response = await fetch(exportUrl);
+            const result = await response.json();
+
+            if (!result.success || !result.data || result.data.length === 0) {
+                Swal.fire('No Data', 'No data available for this month.', 'warning');
+                return;
+            }
+
+            const rows = result.data;
+            const columns = ['Employee Number', 'Name', 'Month', 'Hours (within shift)', 'Days Counted', 'Avg Sign In', 'Avg Sign Out'];
+            
+            if (format === 'csv') {
+                const escapeCsv = (value) => String(value ?? '').replace(/"/g, '""');
+                let csv = columns.join(',') + '\n';
+                rows.forEach(row => {
+                    csv += `"${escapeCsv(row.empNumber)}","${escapeCsv(row.name)}","${escapeCsv(row.month)}","${escapeCsv(row.total_hours)}","${escapeCsv(row.days_present)}","${escapeCsv(row.avg_sign_in)}","${escapeCsv(row.avg_sign_out)}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `monthly_report_{{ $month }}.csv`;
+                a.click();
+                Swal.close();
+            } 
+            else if (format === 'excel') {
+                if (typeof XLSX === 'undefined') {
+                    Swal.fire('Error', 'Excel library failed to load.', 'error');
+                    return;
+                }
+                const workbookData = rows.map(row => ({
+                    'Employee Number': row.empNumber,
+                    'Name': row.name,
+                    'Month': row.month,
+                    'Hours (within shift)': row.total_hours,
+                    'Days Counted': row.days_present,
+                    'Avg Sign In': row.avg_sign_in,
+                    'Avg Sign Out': row.avg_sign_out
+                }));
+                const worksheet = XLSX.utils.json_to_sheet(workbookData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Monthly Report');
+                XLSX.writeFile(workbook, `monthly_report_{{ $month }}.xlsx`);
+                Swal.close();
+            }
+            else if (format === 'pdf') {
+                if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                    Swal.fire('Error', 'PDF library failed to load.', 'error');
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape' });
+                const body = rows.map(row => [row.empNumber, row.name, row.month, row.total_hours, row.days_present, row.avg_sign_in, row.avg_sign_out]);
+                
+                doc.setFontSize(14);
+                doc.text(`Monthly Attendance Report: {{ Carbon\Carbon::parse($month)->format('F Y') }}`, 14, 15);
+                doc.setFontSize(10);
+                doc.text('Generated: ' + new Date().toLocaleString(), 14, 22);
+
+                doc.autoTable({
+                    head: [columns],
+                    body: body,
+                    startY: 28,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    headStyles: { fillColor: [16, 185, 129] } // Emerald 500
+                });
+
+                doc.save(`monthly_report_{{ $month }}.pdf`);
+                Swal.close();
+            }
+            else if (format === 'print') {
+                Swal.close();
+                let tableRowsHtml = '';
+                rows.forEach(row => {
+                    tableRowsHtml += `<tr>
+                        <td>${row.empNumber}</td>
+                        <td>${row.name}</td>
+                        <td>${row.month}</td>
+                        <td>${row.total_hours}</td>
+                        <td>${row.days_present}</td>
+                        <td>${row.avg_sign_in}</td>
+                        <td>${row.avg_sign_out}</td>
+                    </tr>`;
+                });
+
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Monthly Report Print View</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+                            h1 { margin: 0 0 8px; font-size: 20px; }
+                            p { margin: 0 0 16px; color: #4b5563; font-size: 12px; }
+                            table { width: 100%; border-collapse: collapse; }
+                            th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 12px; text-align: left; }
+                            th { background: #ecfdf5; color: #065f46; font-weight: 700; }
+                            tr:nth-child(even) { background: #f9fafb; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Monthly Attendance Report</h1>
+                        <p>Focus Month: {{ Carbon\Carbon::parse($month)->format('F Y') }} | Generated: ${new Date().toLocaleString()}</p>
+                        <table>
+                            <thead>
+                                <tr>${columns.map(c => `<th>${c}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>${tableRowsHtml}</tbody>
+                        </table>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            }
+            else if (format === 'copy') {
+                const header = columns.join('\t');
+                const lines = rows.map(row => [row.empNumber, row.name, row.month, row.total_hours, row.days_present, row.avg_sign_in, row.avg_sign_out].join('\t'));
+                const payload = [header, ...lines].join('\n');
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(payload);
+                    Swal.fire({ title: 'Copied', text: 'Data copied to clipboard.', icon: 'success', timer: 1500, showConfirmButton: false });
+                } else {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = payload;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-9999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    Swal.fire({ title: 'Copied', text: 'Data copied to clipboard.', icon: 'success', timer: 1500, showConfirmButton: false });
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error', 'Failed to generate export. Please try again.', 'error');
+        }
+    }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 @endpush
 
 

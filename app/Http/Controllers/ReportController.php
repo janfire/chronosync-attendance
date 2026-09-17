@@ -165,6 +165,38 @@ class ReportController extends Controller
     }
 
     /**
+     * Export monthly report data as JSON.
+     */
+    public function exportMonthlyJson(Request $request)
+    {
+        $month = $request->get('month', now()->format('Y-m'));
+        $start = Carbon::parse($month)->startOfMonth();
+        $end = Carbon::parse($month)->endOfMonth();
+
+        $users = User::where('role', 'staff')->get();
+        $data = [];
+
+        foreach ($users as $user) {
+            $details = $this->reportService->getUserMonthlyDetails($user->id, $start, $end);
+            $data[] = [
+                'empNumber' => $user->employee_number,
+                'name' => $user->name,
+                'month' => $start->format('F Y'),
+                'total_hours' => $details['total_hours'],
+                'days_present' => $details['days_present'],
+                'avg_sign_in' => $details['avg_sign_in'],
+                'avg_sign_out' => $details['avg_sign_out']
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'month' => $month
+        ]);
+    }
+
+    /**
      * Fetch holidays from external API (Nager.Date).
      */
     public function fetchHolidays(Request $request)

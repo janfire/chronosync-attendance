@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const credential = await navigator.credentials.get({ publicKey: options });
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Getting location...';
-            const position = await getCurrentPosition();
+            const position = await getPosition();
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Verifying...';
 

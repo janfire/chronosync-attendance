@@ -1,0 +1,7 @@
+# Composer & Deployment Rules
+
+1. **Composer Syncing**: Whenever you install or update a Composer package locally, you MUST ensure that both `composer.json` and `composer.lock` are fully committed to version control and pushed to the remote server.
+2. **Remote Container Builds**: The remote server builds use `composer install --no-dev`. If `composer.lock` is missing or out of sync, the package will NOT be installed or might even be removed from the live `vendor/` folder.
+3. **Restarting Containers**: After successfully installing a new Composer package or forcing an autoload update on the live server, you MUST forcefully restart the application containers (e.g., `docker compose restart app queue`) to flush OPcache and force the PHP process to load the newly generated autoloader files into memory.
+4. **Zero-Downtime Deployments**: Always use the Targeted Rebuilding zero-downtime deployment strategy instead of `docker compose down`. Rebuild the affected containers in the background (`docker compose build app queue`), and hot-swap them (`docker compose up -d --no-deps app queue`) to prevent bringing the `ml-server` or database offline.
+5. **Remote Server Connection**: The live production server is hosted on Oracle Cloud. To execute remote deployments, SSH into the server using the `opc` user with the following command: `ssh -i "C:\Users\M.T\Desktop\The Docs\ssh-key-2026-08-24 (1).key" -o StrictHostKeyChecking=no -o BatchMode=yes opc@92.4.155.24`. The project directory is located at `~/chronosync-attendance`.
