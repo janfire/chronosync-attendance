@@ -374,6 +374,9 @@
         }
     </style>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
     @stack('styles')
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
@@ -743,6 +746,46 @@
                 </script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Flatpickr for Date inputs
+            flatpickr('input[type="date"]', {
+                dateFormat: "Y-m-d",
+                allowInput: true,
+                altInput: true,
+                altFormat: "F j, Y"
+            });
+            
+            // Initialize Flatpickr for Month inputs
+            flatpickr('input[type="month"]', {
+                plugins: [
+                    new monthSelectPlugin({
+                        shorthand: true,
+                        dateFormat: "Y-m",
+                        altFormat: "F Y"
+                    })
+                ],
+                allowInput: true,
+                altInput: true,
+                onChange: function(selectedDates, dateStr, instance) {
+                    // Manually trigger change event for things like onchange="this.form.submit()"
+                    const event = new Event('change', { bubbles: true });
+                    instance.element.dispatchEvent(event);
+                }
+            });
+
+            // Initialize Flatpickr for Time inputs
+            flatpickr('input[type="time"]', {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                allowInput: true
+            });
+        });
+    </script>
     @stack('scripts')
     
     <!-- Session Keep-Alive -->
