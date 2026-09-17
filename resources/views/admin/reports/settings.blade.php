@@ -90,6 +90,19 @@
                 </div>
             </div>
 
+            <div x-show="holidays.length > 0" class="px-8 py-3 bg-white border-b border-gray-100 flex items-center dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span>Show</span>
+                    <select x-model.number="perPage" @change="currentPage = 1" class="mx-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-xs py-1 pl-2 pr-6 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 cursor-pointer">
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                    </select>
+                    <span>entries</span>
+                </div>
+            </div>
+
             <div class="p-0">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -132,18 +145,7 @@
                 </div>
 
                 <!-- Pagination Controls -->
-                <div x-show="holidays.length > 0" class="px-8 py-3 bg-white border-t border-gray-100 flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
-                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                        <span>Show</span>
-                        <select x-model.number="perPage" @change="currentPage = 1" class="mx-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-xs py-1 pl-2 pr-6 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 cursor-pointer">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="50">50</option>
-                        </select>
-                        <span>entries</span>
-                    </div>
-                    
+                <div x-show="holidays.length > 0" class="px-8 py-3 bg-white border-t border-gray-100 flex items-center justify-end dark:bg-gray-800 dark:border-gray-700">
                     <div class="flex items-center space-x-4">
                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
                             Page <span x-text="currentPage" class="font-bold text-gray-700 dark:text-gray-200"></span> of <span x-text="totalPages" class="font-bold text-gray-700 dark:text-gray-200"></span>
@@ -168,7 +170,7 @@
 
         <div class="flex items-center justify-end space-x-4 pt-4">
             <button type="reset" class="px-6 py-3 text-gray-500 font-medium hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all text-sm dark:bg-gray-800 dark:text-gray-200">Cancel</button>
-            <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
+            <button type="submit" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
                 Save Changes
             </button>
         </div>
@@ -183,7 +185,7 @@
             holidays: initialHolidays || [],
             isLoading: false,
             currentPage: 1,
-            perPage: 5,
+            perPage: 3,
 
             get totalPages() {
                 return Math.max(1, Math.ceil(this.holidays.length / this.perPage));
