@@ -12,9 +12,9 @@
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Range</label>
                     <div class="flex items-center space-x-2">
-                        <input type="date" name="from" value="{{ $dateFrom->toDateString() }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
+                        <input type="date" name="from" value="{{ $dateFrom->toDateString() }}" class="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-gray-200">
                         <span class="text-gray-400">to</span>
-                        <input type="date" name="to" value="{{ $dateTo->toDateString() }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
+                        <input type="date" name="to" value="{{ $dateTo->toDateString() }}" class="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-gray-200">
                     </div>
                 </div>
                 <div class="self-end">
@@ -29,7 +29,7 @@
             <form method="GET" action="{{ route('admin.reports.index') }}" class="flex items-center space-x-2">
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Month Focus</label>
-                    <input type="month" name="month" value="{{ $month }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500" onchange="this.form.submit()">
+                    <input type="month" name="month" value="{{ $month }}" class="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-gray-200" onchange="this.form.submit()">
                 </div>
             </form>
         </div>
