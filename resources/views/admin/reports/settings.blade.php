@@ -209,25 +209,29 @@
                     .then(response => response.json())
                     .then(data => {
                         if(data.success) {
-                            // Merge strategy: Add non-duplicate holidays
-                            const existingDates = new Set(this.holidays.map(h => h.date));
+                            // Merge strategy: Add non-duplicate holidays, update if name is generic
                             let addedCount = 0;
+                            let updatedCount = 0;
                             
                             data.holidays.forEach(h => {
-                                if (!existingDates.has(h.date)) {
+                                let existingHoliday = this.holidays.find(eh => eh.date === h.date);
+                                if (!existingHoliday) {
                                     this.holidays.push({ date: h.date, name: h.name });
                                     addedCount++;
+                                } else if (existingHoliday.name === 'Holiday') {
+                                    existingHoliday.name = h.name;
+                                    updatedCount++;
                                 }
                             });
                             
                             // Sort by date
                             this.holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
                             
-                            if(addedCount > 0) {
+                            if(addedCount > 0 || updatedCount > 0) {
                                 // show success notification if you have a toast library, else alert
-                                alert(`Successfully added ${addedCount} new holidays.`);
+                                alert(`Successfully added ${addedCount} new holidays and updated ${updatedCount} existing ones.`);
                             } else {
-                                alert('All holidays from API are already in your list.');
+                                alert('All holidays from API are already up to date in your list.');
                             }
                         } else {
                             alert('Error: ' + data.message);
