@@ -27,3 +27,8 @@ Schedule::command('attendance:cleanup-guests')
     ->hourly()
     ->withoutOverlapping()
     ->runInBackground();
+
+// Yearly holiday sync: automatically fetch public holidays for the new year on January 1st
+Schedule::command('holidays:sync-yearly')
+    ->yearlyOn(1, 1, '00:05') // Run on Jan 1st at 00:05
+    ->runInBackground();
