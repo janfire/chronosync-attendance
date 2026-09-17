@@ -4,6 +4,9 @@
 @section('page-title', 'Shift & Rule Configuration')
 
 @section('content')
+<!-- SweetAlert2 for nice alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="max-w-5xl mx-auto space-y-8">
     <div class="mb-6">
         <a href="{{ route('admin.reports.index') }}" class="text-sm text-emerald-600 hover:text-emerald-800 font-medium flex items-center transition-colors">
