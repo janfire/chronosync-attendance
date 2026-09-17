@@ -203,46 +203,64 @@
                 }
             },
 
-            fetchHolidays() {
+            async fetchHolidays() {
                 this.isLoading = true;
-                fetch('{{ route("admin.reports.fetch.holidays") }}')
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.success) {
-                            // Merge strategy: Add non-duplicate holidays, update if name is generic
-                            let addedCount = 0;
-                            let updatedCount = 0;
-                            
+                
+                // Determine years to fetch: Current year + any years already in the list
+                const currentYear = new Date().getFullYear();
+                const yearsToFetch = new Set([currentYear]);
+                
+                this.holidays.forEach(h => {
+                    if (h.date) {
+                        const year = h.date.split('-')[0];
+                        if (year && year.length === 4) {
+                            yearsToFetch.add(parseInt(year));
+                        }
+                    }
+                });
+                
+                let addedCount = 0;
+                let updatedCount = 0;
+                let errors = [];
+
+                for (const year of yearsToFetch) {
+                    try {
+                        const response = await fetch(`{{ route("admin.reports.fetch.holidays") }}?year=${year}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
                             data.holidays.forEach(h => {
                                 let existingHoliday = this.holidays.find(eh => eh.date === h.date);
                                 if (!existingHoliday) {
                                     this.holidays.push({ date: h.date, name: h.name });
                                     addedCount++;
-                                } else if (existingHoliday.name === 'Holiday') {
+                                } else if (existingHoliday.name.toLowerCase().includes('holiday')) {
                                     existingHoliday.name = h.name;
                                     updatedCount++;
                                 }
                             });
-                            
-                            // Sort by date
-                            this.holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
-                            
-                            if(addedCount > 0 || updatedCount > 0) {
-                                // show success notification if you have a toast library, else alert
-                                alert(`Successfully added ${addedCount} new holidays and updated ${updatedCount} existing ones.`);
-                            } else {
-                                alert('All holidays from API are already up to date in your list.');
-                            }
                         } else {
-                            alert('Error: ' + data.message);
+                            errors.push(`Error for ${year}: ` + data.message);
                         }
-                    })
-                    .catch(error => {
-                        alert('Connection error: ' + error);
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
+                    } catch (error) {
+                        errors.push(`Connection error for ${year}: ` + error);
+                    }
+                }
+                
+                // Sort by date
+                this.holidays.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                this.isLoading = false;
+                
+                if (errors.length > 0) {
+                    alert(errors.join('\n'));
+                }
+                
+                if (addedCount > 0 || updatedCount > 0) {
+                    alert(`Successfully added ${addedCount} new holidays and updated ${updatedCount} existing ones.`);
+                } else if (errors.length === 0) {
+                    alert('All holidays from API are already up to date in your list.');
+                }
             }
         }
     }
