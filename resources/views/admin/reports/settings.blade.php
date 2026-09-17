@@ -113,7 +113,7 @@
                             </template>
                             
                             <template x-for="(holiday, index) in holidays" :key="index">
-                                <tr class="hover:bg-gray-50/50 transition-colors group dark:bg-gray-900">
+                                <tr x-show="index >= (currentPage - 1) * perPage && index < currentPage * perPage" class="hover:bg-gray-50/50 transition-colors group dark:bg-gray-900">
                                     <td class="px-8 py-3">
                                         <input type="date" :name="`holidays[${index}][date]`" x-model="holiday.date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-gray-700 font-mono dark:text-gray-200" required>
                                     </td>
@@ -129,6 +129,34 @@
                             </template>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div x-show="holidays.length > 0" class="px-8 py-3 bg-white border-t border-gray-100 flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
+                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        <span>Show</span>
+                        <select x-model.number="perPage" @change="currentPage = 1" class="mx-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-xs py-1 pl-2 pr-6 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 cursor-pointer">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span>entries</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Page <span x-text="currentPage" class="font-bold text-gray-700 dark:text-gray-200"></span> of <span x-text="totalPages" class="font-bold text-gray-700 dark:text-gray-200"></span>
+                        </span>
+                        <div class="flex items-center space-x-1">
+                            <button type="button" @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1" class="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors dark:hover:bg-gray-700 dark:hover:text-emerald-400">
+                                <i class="fas fa-chevron-left text-xs"></i>
+                            </button>
+                            <button type="button" @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage === totalPages || totalPages === 0" class="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors dark:hover:bg-gray-700 dark:hover:text-emerald-400">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="px-8 py-4 bg-gray-50 border-t border-gray-200/60 flex items-start space-x-3 text-gray-500 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-700">
@@ -154,14 +182,23 @@
         return {
             holidays: initialHolidays || [],
             isLoading: false,
+            currentPage: 1,
+            perPage: 5,
+
+            get totalPages() {
+                return Math.max(1, Math.ceil(this.holidays.length / this.perPage));
+            },
 
             addHoliday() {
                 this.holidays.push({ date: '', name: '' });
-                // Focus logic could go here if needed
+                this.currentPage = this.totalPages;
             },
 
             removeHoliday(index) {
                 this.holidays.splice(index, 1);
+                if (this.currentPage > this.totalPages) {
+                    this.currentPage = this.totalPages;
+                }
             },
 
             fetchHolidays() {
