@@ -175,7 +175,7 @@
         <div id="tabContent-compliant" class="tab-content">
             @if(count($topCompliant) > 0)
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-sm admin-table">
                     <thead class="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-wider dark:bg-gray-900">
                         <tr>
                             <th class="px-6 py-3">Rank / User</th>
@@ -187,7 +187,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach($topCompliant as $data)
-                        <tr class="hover:bg-gray-50/30 transition-colors dark:bg-gray-900">
+                        <tr>
                             <td class="px-6 py-4 flex items-center space-x-3">
                                 <div class="flex-shrink-0">
                                     @if($loop->iteration == 1)
