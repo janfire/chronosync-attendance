@@ -7,6 +7,20 @@
 
 ChronoSync is a full-stack attendance management system designed for speed, security, and ease of use. It replaces traditional attendance methods with a touchless experience using computer vision and modern web standards.
 
+## System Previews
+
+| Landing Page | Admin Dashboard |
+|:---:|:---:|
+| ![Landing Page](docs/screenshots/landing-page.png) | ![Admin Dashboard](docs/screenshots/dashboard.png) |
+
+| Facial Scan | Fingerprint / WebAuthn |
+|:---:|:---:|
+| ![Facial Scan](docs/screenshots/scanning.png) | ![Fingerprint Scan](docs/screenshots/fingerprint-scan.png) |
+
+| Staff Dashboard | Analytics & Reports |
+|:---:|:---:|
+| ![Staff Dashboard](docs/screenshots/staff-dashboard.png) | ![Analytics](docs/screenshots/analytics.png) |
+
 ## Key Features
 
 - **AI Facial Recognition**: High-performance Python microservice using OpenCV and `face_recognition` to instantly identify and log users via webcam.
