@@ -7,37 +7,37 @@
 
     {{-- Expiry / suspension alert banner --}}
     @if(!$tenant->canAccess())
-        <div class="mb-8 flex items-start gap-4 bg-white border-l-4 border-rose-500 rounded-2xl px-5 py-4 shadow-sm dark:bg-gray-800 dark:border-rose-600">
+        <div class="mb-8 flex items-start gap-4 bg-white border-l-4 border-rose-500 rounded-2xl px-5 py-4 shadow-sm dark:bg-rose-900/20 dark:border-rose-800">
             <div class="w-9 h-9 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center shrink-0 mt-0.5 dark:bg-rose-900/50 dark:text-rose-400">
                 <i class="fas fa-lock text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="font-bold text-gray-900 dark:text-white">Subscription Expired — Access Suspended</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-0.5 dark:text-gray-400 dark:text-gray-500">Your account has been suspended due to a lapsed subscription. Generate an invoice, pay via EcoCash or ZIPIT, then upload your proof below.</p>
+                <p class="font-bold text-gray-900 dark:text-rose-300">Subscription Expired — Access Suspended</p>
+                <p class="text-sm text-gray-500 mt-0.5 dark:text-rose-400">Your account has been suspended due to a lapsed subscription. Generate an invoice, pay via EcoCash or ZIPIT, then upload your proof below.</p>
             </div>
         </div>
     @elseif($tenant->subscription_expires_at && $tenant->subscription_expires_at->diffInDays(now(), false) >= -7)
-        <div class="mb-8 flex items-start gap-4 bg-white border-l-4 border-amber-400 rounded-2xl px-5 py-4 shadow-sm dark:bg-gray-800 dark:border-amber-500">
+        <div class="mb-8 flex items-start gap-4 bg-white border-l-4 border-amber-400 rounded-2xl px-5 py-4 shadow-sm dark:bg-amber-900/20 dark:border-amber-800">
             <div class="w-9 h-9 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0 mt-0.5 dark:bg-amber-900/50 dark:text-amber-400">
                 <i class="fas fa-clock text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="font-bold text-gray-900 dark:text-white">Subscription expires {{ $tenant->subscription_expires_at->diffForHumans() }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500 mt-0.5 dark:text-gray-400 dark:text-gray-500">Renew now to avoid any interruption to your service. Use the button below to generate your invoice.</p>
+                <p class="font-bold text-gray-900 dark:text-amber-300">Subscription expires {{ $tenant->subscription_expires_at->diffForHumans() }}</p>
+                <p class="text-sm text-gray-500 mt-0.5 dark:text-amber-400">Renew now to avoid any interruption to your service. Use the button below to generate your invoice.</p>
             </div>
         </div>
     @endif
 
     @if(session('success'))
-        <div class="mb-6 flex items-center gap-3 bg-white border-l-4 border-emerald-500 rounded-2xl px-5 py-4 shadow-sm dark:bg-gray-800 dark:border-emerald-600">
+        <div class="mb-6 flex items-center gap-3 bg-white border-l-4 border-emerald-500 rounded-2xl px-5 py-4 shadow-sm dark:bg-emerald-900/20 dark:border-emerald-800">
             <i class="fas fa-check-circle text-emerald-500 shrink-0 dark:text-emerald-400"></i>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ session('success') }}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-emerald-300">{{ session('success') }}</span>
         </div>
     @endif
 
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white dark:text-white">Billing &amp; Subscription</h1>
-        <p class="text-gray-500 dark:text-gray-400 dark:text-gray-500">Manage your company's plan and payment history.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Billing &amp; Subscription</h1>
+        <p class="text-gray-500 dark:text-gray-400">Manage your company's plan and payment history.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -52,13 +52,13 @@
                         <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase tracking-wider dark:bg-emerald-900/50 dark:text-emerald-400">
                             {{ $tenant->getPlanLabel() }}
                         </span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
                             Status: <span class="font-medium text-{{ $tenant->canAccess() ? 'emerald' : 'rose' }}-600 dark:text-{{ $tenant->canAccess() ? 'emerald' : 'rose' }}-400">{{ ucfirst($tenant->status) }}</span>
                         </span>
                     </div>
 
                     <div class="mb-6">
-                        <span class="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">$35</span>
+                        <span class="text-4xl font-bold text-gray-900 dark:text-white">$35</span>
                         <span class="text-gray-400 dark:text-gray-500">/ month</span>
                     </div>
 
@@ -87,10 +87,10 @@
                         </div>
                     @endif
 
-                    <button disabled class="w-full py-3 bg-gray-100 text-gray-400 dark:text-gray-500 font-medium rounded-xl cursor-not-allowed">
+                    <button disabled class="w-full py-3 bg-gray-100 text-gray-400 font-medium rounded-xl cursor-not-allowed dark:bg-gray-700 dark:text-gray-500">
                         Change Plan
                     </button>
-                    <p class="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2 italic">Self-service plan switching coming soon.</p>
+                    <p class="text-[10px] text-gray-400 text-center mt-2 italic dark:text-gray-500">Self-service plan switching coming soon.</p>
 
                     {{-- Renew / Generate Invoice CTA --}}
                     @php
@@ -106,7 +106,7 @@
                                    class="block w-full py-3 text-center bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all dark:shadow-none">
                                     <i class="fas fa-file-invoice-dollar mr-2"></i> View Pending Invoice
                                 </a>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">Invoice {{ $pendingInvoice->invoice_number }} awaiting payment.</p>
+                                <p class="text-[10px] text-gray-400 text-center mt-2 dark:text-gray-500">Invoice {{ $pendingInvoice->invoice_number }} awaiting payment.</p>
                             @else
                                 <form action="{{ route('billing.renew') }}" method="POST">
                                     @csrf
@@ -115,7 +115,7 @@
                                         <i class="fas fa-sync-alt mr-2"></i> Generate Renewal Invoice
                                     </button>
                                 </form>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">A new invoice will be created instantly.</p>
+                                <p class="text-[10px] text-gray-400 text-center mt-2 dark:text-gray-500">A new invoice will be created instantly.</p>
                             @endif
                         </div>
                     @endif
@@ -128,12 +128,12 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
                 <div class="p-6 border-b border-gray-50 flex items-center justify-between dark:border-gray-700">
                     <h2 class="font-semibold text-gray-900 dark:text-white">Invoice History</h2>
-                    <span class="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-500">Showing all records</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">Showing all records</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="bg-gray-50/50 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                            <tr class="bg-gray-50/50 text-xs font-semibold text-gray-400 uppercase tracking-wider dark:bg-gray-700/50 dark:text-gray-500">
                                 <th class="px-6 py-4">Invoice #</th>
                                 <th class="px-6 py-4">Date</th>
                                 <th class="px-6 py-4">Amount</th>
@@ -145,8 +145,8 @@
                             @forelse($invoices as $invoice)
                                 <tr class="hover:bg-gray-50 transition-colors dark:hover:bg-gray-700/50">
                                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-200">{{ $invoice->invoice_number }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400 dark:text-gray-500">{{ $invoice->created_at->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white dark:text-white">${{ number_format($invoice->amount_usd, 2) }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $invoice->created_at->format('M d, Y') }}</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">${{ number_format($invoice->amount_usd, 2) }}</td>
                                     <td class="px-6 py-4">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border {{ $invoice->getStatusBadgeClass() }}">
                                             {{ $invoice->status }}
@@ -160,7 +160,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic dark:text-gray-500">
                                         No invoices found.
                                     </td>
                                 </tr>

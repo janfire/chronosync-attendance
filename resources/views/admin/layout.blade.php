@@ -541,13 +541,13 @@
             <!-- Page Content -->
             <main class="flex-1 min-h-0 overflow-y-auto py-6">
                 @if(session('success'))
-                    <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+                    <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
                         {{ session('error') }}
                     </div>
                 @endif
@@ -556,36 +556,36 @@
                 @if(app()->bound('current_tenant') && !Auth::user()->isPlatformAdmin() && !request()->is('billing*'))
                     @php $tenant = app('current_tenant'); @endphp
                     @if(!$tenant->canAccess())
-                        <div class="mb-6 flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
-                            <i class="fas fa-exclamation-circle text-rose-500 mt-0.5 shrink-0"></i>
+                        <div class="mb-6 flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 dark:bg-rose-900/20 dark:border-rose-800">
+                            <i class="fas fa-exclamation-circle text-rose-500 mt-0.5 shrink-0 dark:text-rose-400"></i>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-rose-800">Subscription Expired — Access Suspended</p>
-                                <p class="text-sm text-rose-600 mt-0.5">
+                                <p class="text-sm font-bold text-rose-800 dark:text-rose-300">Subscription Expired — Access Suspended</p>
+                                <p class="text-sm text-rose-600 mt-0.5 dark:text-rose-400">
                                     Go to <a href="{{ route('billing.index') }}" class="underline font-semibold">Billing &amp; Subscription</a> to generate your renewal invoice and submit payment.
                                 </p>
                             </div>
                         </div>
                     @elseif($tenant->trial_ends_at && $tenant->isOnTrial() && $tenant->trial_ends_at->diffInDays(now(), false) >= -7)
-                        <div id="billing-banner" class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                            <i class="fas fa-clock text-amber-500 mt-0.5 shrink-0"></i>
+                        <div id="billing-banner" class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 dark:bg-amber-900/20 dark:border-amber-800">
+                            <i class="fas fa-clock text-amber-500 mt-0.5 shrink-0 dark:text-amber-400"></i>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-amber-800">Trial expires {{ $tenant->trial_ends_at->diffForHumans() }}</p>
-                                <p class="text-sm text-amber-600 mt-0.5">
+                                <p class="text-sm font-bold text-amber-800 dark:text-amber-300">Trial expires {{ $tenant->trial_ends_at->diffForHumans() }}</p>
+                                <p class="text-sm text-amber-600 mt-0.5 dark:text-amber-400">
                                     <a href="{{ route('billing.index') }}" class="underline font-semibold">Visit Billing</a> to set up your subscription before access is interrupted.
                                 </p>
                             </div>
-                            <button onclick="document.getElementById('billing-banner').remove()" class="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none">&times;</button>
+                            <button onclick="document.getElementById('billing-banner').remove()" class="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none dark:text-amber-500 dark:hover:text-amber-400">&times;</button>
                         </div>
                     @elseif($tenant->subscription_expires_at && $tenant->subscription_expires_at->diffInDays(now(), false) >= -7)
-                        <div id="billing-banner" class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                            <i class="fas fa-clock text-amber-500 mt-0.5 shrink-0"></i>
+                        <div id="billing-banner" class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 dark:bg-amber-900/20 dark:border-amber-800">
+                            <i class="fas fa-clock text-amber-500 mt-0.5 shrink-0 dark:text-amber-400"></i>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-amber-800">Subscription expires {{ $tenant->subscription_expires_at->diffForHumans() }}</p>
-                                <p class="text-sm text-amber-600 mt-0.5">
+                                <p class="text-sm font-bold text-amber-800 dark:text-amber-300">Subscription expires {{ $tenant->subscription_expires_at->diffForHumans() }}</p>
+                                <p class="text-sm text-amber-600 mt-0.5 dark:text-amber-400">
                                     <a href="{{ route('billing.index') }}" class="underline font-semibold">Renew now</a> to avoid any interruption to your service.
                                 </p>
                             </div>
-                            <button onclick="document.getElementById('billing-banner').remove()" class="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none">&times;</button>
+                            <button onclick="document.getElementById('billing-banner').remove()" class="text-amber-400 hover:text-amber-600 shrink-0 text-lg leading-none dark:text-amber-500 dark:hover:text-amber-400">&times;</button>
                         </div>
                     @endif
                 @endif
