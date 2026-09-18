@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="p-6">
-        <h2 class="text-2xl font-semibold mb-4">Pending Attendance Requests</h2>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Pending Attendance Requests</h2>
 
         @include('auth.partials.messages')
 
@@ -22,10 +22,10 @@
                     @foreach($exceptions as $ex)
                         <tr class="border-b hover:bg-gray-50 dark:bg-gray-900">
                             <td class="p-2 text-sm text-gray-600 dark:text-gray-300">{{ $ex->requested_at?->format('Y-m-d H:i') }}</td>
-                            <td class="p-2 font-medium">{{ $ex->user->name }}</td>
-                            <td class="p-2 text-sm">{{ ucfirst(str_replace('_', ' ', $ex->type)) }}</td>
+                            <td class="p-2 font-medium text-gray-900 dark:text-gray-200">{{ $ex->user->name }}</td>
+                            <td class="p-2 text-sm text-gray-900 dark:text-gray-200">{{ ucfirst(str_replace('_', ' ', $ex->type)) }}</td>
                             <td class="p-2 text-sm text-gray-700 dark:text-gray-200">{{ Str::limit($ex->note, 120) }}</td>
-                            <td class="p-2 text-sm">{{ $ex->requester?->name ?? 'Self' }}</td>
+                            <td class="p-2 text-sm text-gray-900 dark:text-gray-200">{{ $ex->requester?->name ?? 'Self' }}</td>
                             <td class="p-2 text-sm">
                                 <!-- Approve with optional correction timestamp -->
                                 <div class="approve-wrapper">
