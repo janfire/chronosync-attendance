@@ -23,7 +23,7 @@
 
 {{-- ── Summary Stats Bar ── --}}
 <div class="mb-2">
-    <h2 class="text-xs font-bold text-gray-600 uppercase tracking-widest dark:text-gray-300"><i class="fas fa-filter mr-1"></i> Filter by Status</h2>
+    <h2 class="text-sm font-extrabold text-gray-800 uppercase tracking-widest dark:text-gray-100"><i class="fas fa-filter mr-1 text-gray-500"></i> Filter by Status</h2>
 </div>
 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
     @php
