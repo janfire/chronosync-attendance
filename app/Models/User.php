@@ -86,42 +86,59 @@ class User extends Authenticatable
     // Role helper methods - now delegate to enum
     public function isPlatformAdmin(): bool
     {
-        return $this->role === UserRole::PLATFORM_ADMIN;
+        return $this->role === UserRole::PLATFORM_ADMIN || (is_string($this->role) && $this->role === 'platform_admin') || (isset($this->role->value) && $this->role->value === 'platform_admin');
     }
 
     public function isSuperAdmin(): bool
     {
-        // PLATFORM_ADMIN is also treated as super admin within any tenant context
-        return in_array($this->role, [UserRole::SUPER_ADMIN, UserRole::PLATFORM_ADMIN]);
+        $roleValue = is_string($this->role) ? $this->role : ($this->role->value ?? null);
+        return in_array($roleValue, ['super_admin', 'platform_admin'], true) || in_array($this->role, [UserRole::SUPER_ADMIN, UserRole::PLATFORM_ADMIN]);
     }
 
     public function isAdmin(): bool
     {
-        return in_array($this->role, [UserRole::ADMIN, UserRole::SUPER_ADMIN, UserRole::PLATFORM_ADMIN]);
+        $roleValue = is_string($this->role) ? $this->role : ($this->role->value ?? null);
+        return in_array($roleValue, ['admin', 'super_admin', 'platform_admin'], true) || in_array($this->role, [UserRole::ADMIN, UserRole::SUPER_ADMIN, UserRole::PLATFORM_ADMIN]);
     }
 
     public function isGeneralUser(): bool
     {
-        return $this->role === UserRole::GENERAL_USER;
+        return $this->role === UserRole::GENERAL_USER || (is_string($this->role) && $this->role === 'general_user') || (isset($this->role->value) && $this->role->value === 'general_user');
     }
 
     public function isStaff(): bool
     {
-        return $this->role === UserRole::STAFF;
+        return $this->role === UserRole::STAFF || (is_string($this->role) && $this->role === 'staff') || (isset($this->role->value) && $this->role->value === 'staff');
     }
 
     public function isGuest(): bool
     {
-        return $this->role === UserRole::GUEST;
+        return $this->role === UserRole::GUEST || (is_string($this->role) && $this->role === 'guest') || (isset($this->role->value) && $this->role->value === 'guest');
     }
 
     public function canManageUsers(): bool
     {
-        return $this->role->canManageUsers();
+        if ($this->role instanceof UserRole) {
+            return $this->role->canManageUsers();
+        }
+        return $this->isAdmin(); // Fallback for string roles
     }
 
     public function getRoleLabel(): string
     {
-        return $this->role->label();
+        if ($this->role instanceof UserRole) {
+            return $this->role->label();
+        }
+        
+        $labels = [
+            'platform_admin' => 'Platform Admin',
+            'super_admin' => 'Super Admin',
+            'admin' => 'Admin',
+            'general_user' => 'General User',
+            'staff' => 'Staff',
+            'guest' => 'Guest',
+        ];
+        $val = is_string($this->role) ? $this->role : ($this->role->value ?? '');
+        return $labels[$val] ?? 'Unknown';
     }
 }
