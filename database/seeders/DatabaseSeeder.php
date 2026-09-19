@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
         // 1. Create the platform-level administrator account (tenant_id = null)
         User::withoutTenantScope()->create([
             'name'            => 'Platform Admin',
-            'email'           => 'admin@zou.ac.zw',
-            'password'        => Hash::make('forgodsoloved*1'),
+            'email'           => 'masiyam@zou.ac.zw',
+            'password'        => Hash::make(env('DEFAULT_ADMIN_PASSWORD', 'password')),
             'role'            => UserRole::PLATFORM_ADMIN,
             'employee_number' => 'PLATFORM-ADMIN-001',
             'tenant_id'       => null,
