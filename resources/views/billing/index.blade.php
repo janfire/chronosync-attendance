@@ -226,7 +226,10 @@
             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 mb-6 text-sm text-gray-600 dark:text-gray-300">
                 <p class="font-bold text-gray-900 dark:text-white mb-2"><i class="fas fa-balance-scale mr-2 text-gray-400"></i> How changes work:</p>
                 <ul class="list-disc pl-5 space-y-1">
-                    <li><strong>Upgrades:</strong> You will be immediately invoiced for the prorated difference for the rest of your billing cycle.</li>
+                    <li>
+                        <strong>Upgrades:</strong> You will be immediately invoiced for the prorated difference for the rest of your billing cycle.
+                        <span id="dynamicProrationText" class="hidden text-emerald-600 dark:text-emerald-400 font-bold ml-1"></span>
+                    </li>
                     <li><strong>Downgrades:</strong> Take effect at the end of your current billing cycle. Make sure you don't exceed the employee limit of the new plan!</li>
                 </ul>
             </div>
@@ -238,5 +241,55 @@
         </form>
     </div>
 </div>
+
+@php
+    // Calculate proration variables for JS
+    $currentPlanPrice = \App\Models\SubscriptionPlan::where('slug', $tenant->plan)->value('price_usd') ?? 0;
+    
+    $totalDays = $tenant->subscription_starts_at && $tenant->subscription_expires_at 
+        ? $tenant->subscription_starts_at->diffInDays($tenant->subscription_expires_at) 
+        : 30;
+    if ($totalDays <= 0) $totalDays = 30;
+
+    $daysRemaining = $tenant->subscription_expires_at && $tenant->subscription_expires_at->isFuture()
+        ? now()->diffInDays($tenant->subscription_expires_at)
+        : 0;
+@endphp
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentPrice = {{ $currentPlanPrice }};
+        const totalDays = {{ $totalDays }};
+        const daysRemaining = {{ $daysRemaining }};
+        
+        const planRadios = document.querySelectorAll('input[name="plan"]');
+        const prorationText = document.getElementById('dynamicProrationText');
+
+        planRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Find the price of the selected plan. We attached it to a data attribute.
+                // Let's get the price text from the DOM.
+                const parentDiv = e.target.nextElementSibling;
+                const priceText = parentDiv.querySelector('.text-3xl').innerText.replace('$', '');
+                const newPrice = parseFloat(priceText);
+
+                if (newPrice > currentPrice) {
+                    const currentDailyRate = currentPrice / totalDays;
+                    const newDailyRate = newPrice / totalDays;
+                    const proratedAmount = (newDailyRate - currentDailyRate) * daysRemaining;
+                    
+                    if (proratedAmount > 0) {
+                        prorationText.innerHTML = `(Upgrading today will cost $${proratedAmount.toFixed(2)})`;
+                        prorationText.classList.remove('hidden');
+                    } else {
+                        prorationText.classList.add('hidden');
+                    }
+                } else {
+                    prorationText.classList.add('hidden');
+                }
+            });
+        });
+    });
+</script>
 
 @endsection
