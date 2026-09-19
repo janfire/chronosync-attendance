@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant'         => \App\Http\Middleware\IdentifyTenant::class,
             'subscription'   => \App\Http\Middleware\CheckSubscription::class,
             'platform_admin' => \App\Http\Middleware\EnsureUserIsPlatformAdmin::class,
+            'feature'        => \App\Http\Middleware\CheckTenantFeature::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
     })

@@ -105,4 +105,75 @@ class BillingController extends Controller
 
         return back()->with('success', 'Proof of payment uploaded. Our team will verify and activate your account shortly.');
     }
+
+    public function changePlan(Request $request)
+    {
+        $request->validate([
+            'plan' => 'required|exists:subscription_plans,slug'
+        ]);
+
+        $tenant = app('current_tenant');
+        if ($tenant->plan === $request->plan) {
+            return back()->with('info', 'You are already on this plan.');
+        }
+
+        $newPlan = \App\Models\SubscriptionPlan::where('slug', $request->plan)->firstOrFail();
+        $currentPlan = \App\Models\SubscriptionPlan::where('slug', $tenant->plan)->first();
+
+        // 1. Check if the current user count exceeds the new plan's max employees
+        if ($newPlan->max_employees > 0) {
+            $employeeCount = \App\Models\User::where('tenant_id', $tenant->id)
+                ->where('role', '!=', \App\Enums\UserRole::PLATFORM_ADMIN)
+                ->count();
+            if ($employeeCount > $newPlan->max_employees) {
+                return back()->with('error', "Cannot switch to {$newPlan->name} plan. You currently have {$employeeCount} employees, but the limit is {$newPlan->max_employees}. Please remove employees first.");
+            }
+        }
+
+        // Downgrade logic (price is less)
+        if ($newPlan->price_usd < ($currentPlan->price_usd ?? 0)) {
+            $tenant->update(['upcoming_plan' => $newPlan->slug]);
+            return back()->with('success', "Your plan will be downgraded to {$newPlan->name} at the end of your current billing cycle.");
+        }
+
+        // Upgrade logic (Proration)
+        if ($newPlan->price_usd > ($currentPlan->price_usd ?? 0)) {
+            $totalDays = $tenant->subscription_starts_at && $tenant->subscription_expires_at 
+                ? $tenant->subscription_starts_at->diffInDays($tenant->subscription_expires_at) 
+                : 30;
+            if ($totalDays <= 0) $totalDays = 30;
+
+            $daysRemaining = $tenant->subscription_expires_at && $tenant->subscription_expires_at->isFuture()
+                ? now()->diffInDays($tenant->subscription_expires_at)
+                : 0;
+
+            $currentDailyRate = ($currentPlan->price_usd ?? 0) / $totalDays;
+            $newDailyRate = $newPlan->price_usd / $totalDays;
+
+            $proratedAmount = ($newDailyRate - $currentDailyRate) * $daysRemaining;
+
+            // Generate a prorated invoice if amount > 0
+            if ($proratedAmount > 0) {
+                $invoice = Invoice::create([
+                    'tenant_id' => $tenant->id,
+                    'subscription_plan_id' => $newPlan->id,
+                    'invoice_number' => Invoice::generateInvoiceNumber(),
+                    'amount_usd' => round($proratedAmount, 2),
+                    'period_start' => now(),
+                    'period_end' => $tenant->subscription_expires_at ?? now()->addDays(30),
+                    'due_date' => now()->addDays(7),
+                    'status' => 'pending',
+                ]);
+
+                return redirect()->route('billing.invoice', $invoice->id)
+                    ->with('success', "Your prorated upgrade invoice is ready. Your plan will switch to {$newPlan->name} as soon as this is paid.");
+            } else {
+                // If there are no days remaining or something else, just switch them
+                $tenant->update(['plan' => $newPlan->slug]);
+                return back()->with('success', "Plan changed to {$newPlan->name} successfully.");
+            }
+        }
+
+        return back()->with('success', 'Plan changed successfully.');
+    }
 }

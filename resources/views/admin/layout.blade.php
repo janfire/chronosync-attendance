@@ -428,10 +428,12 @@
                             <span class="font-medium">Add Employee</span>
                         </a>
                     @endif
-                    <a href="{{ route('admin.insights') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.insights') ? 'active' : '' }} dark:text-gray-200">
-                        <i class="fas fa-chart-pie w-4 text-gray-500 dark:text-gray-400"></i>
-                        <span class="font-medium">Analytics</span>
-                    </a>
+                    @if(app('current_tenant') && app('current_tenant')->hasFeature('Advanced Analytics'))
+                        <a href="{{ route('admin.insights') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.insights') ? 'active' : '' }} dark:text-gray-200">
+                            <i class="fas fa-chart-pie w-4 text-gray-500 dark:text-gray-400"></i>
+                            <span class="font-medium">Analytics</span>
+                        </a>
+                    @endif
                     <a href="{{ route('admin.reports.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.reports.*') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-file-contract w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Advanced Reports</span>
@@ -445,10 +447,12 @@
                         @endif
                     </a>
 
-                    <a href="{{ route('attendance.qr') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('attendance.qr') ? 'active' : '' }} dark:text-gray-200">
-                        <i class="fas fa-qrcode w-4 text-gray-500 dark:text-gray-400"></i>
-                        <span class="font-medium">QR Code</span>
-                    </a>
+                    @if(app('current_tenant') && app('current_tenant')->hasFeature('QR Codes'))
+                        <a href="{{ route('attendance.qr') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('attendance.qr') ? 'active' : '' }} dark:text-gray-200">
+                            <i class="fas fa-qrcode w-4 text-gray-500 dark:text-gray-400"></i>
+                            <span class="font-medium">QR Code</span>
+                        </a>
+                    @endif
                     <a href="{{ route('admin.guide') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.guide') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-book w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">User Guide</span>

@@ -63,8 +63,8 @@ Route::middleware(['tenant'])->group(function () {
     Route::post('/register/resend-otp', [RegisterController::class, 'resendOtp'])->name('register.resend-otp')->middleware('throttle:3,1');
 
     // Attendance Routes (Publicly accessible but tenant-scoped)
-    Route::get('/attendance/qr', [AttendanceController::class, 'showQRCode'])->name('attendance.qr');
-    Route::get('/attendance/qr/generate', [AttendanceController::class, 'generateQRCode'])->name('attendance.qr.generate')->middleware('throttle:20,1');
+    Route::get('/attendance/qr', [AttendanceController::class, 'showQRCode'])->name('attendance.qr')->middleware('feature:QR Codes');
+    Route::get('/attendance/qr/generate', [AttendanceController::class, 'generateQRCode'])->name('attendance.qr.generate')->middleware(['throttle:20,1', 'feature:QR Codes']);
     Route::get('/attendance/clock', [AttendanceController::class, 'showClockPage'])->name('attendance.clock');
     Route::post('/attendance/verify', [AttendanceController::class, 'verifyAndClock'])->name('attendance.verify')->middleware('throttle:60,1');
     Route::post('/attendance/exception/request', [\App\Http\Controllers\AttendanceExceptionController::class, 'store'])->name('attendance.exception.request')->middleware('auth');
@@ -94,6 +94,7 @@ Route::middleware(['tenant'])->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('/billing/renew', [BillingController::class, 'renew'])->name('billing.renew');
+        Route::post('/billing/change-plan', [BillingController::class, 'changePlan'])->name('billing.change-plan');
         Route::get('/billing/invoice/{invoice}', [BillingController::class, 'show'])->name('billing.invoice');
         Route::post('/billing/invoice/{invoice}/proof', [BillingController::class, 'uploadProof'])->name('billing.upload-proof');
     });
@@ -105,7 +106,7 @@ Route::middleware(['tenant'])->group(function () {
             Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
             Route::get('/guide', [AdminController::class, 'userGuide'])->name('admin.guide');
             Route::get('/staff/{user}', [AdminController::class, 'showEmployee'])->name('admin.staff.show');
-            Route::get('/insights', [AdminController::class, 'hrInsights'])->name('admin.insights');
+            Route::get('/insights', [AdminController::class, 'hrInsights'])->name('admin.insights')->middleware('feature:Advanced Analytics');
             
             // User Management Routes
             Route::resource('users', \App\Http\Controllers\UserManagementController::class)->names([

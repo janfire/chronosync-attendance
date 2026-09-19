@@ -35,16 +35,33 @@ class BillingService
             return $existing;
         }
 
+        // Process end-of-cycle downgrades
+        if ($tenant->upcoming_plan) {
+            $tenant->update(['plan' => $tenant->upcoming_plan, 'upcoming_plan' => null]);
+        }
+
         $plan = SubscriptionPlan::where('slug', $tenant->plan)->first();
         if (!$plan) {
             return null;
+        }
+
+        // Apply account balance credits
+        $invoiceAmount = $plan->price_usd;
+        if ($tenant->account_balance_usd > 0) {
+            if ($tenant->account_balance_usd >= $invoiceAmount) {
+                $tenant->update(['account_balance_usd' => $tenant->account_balance_usd - $invoiceAmount]);
+                $invoiceAmount = 0;
+            } else {
+                $invoiceAmount -= $tenant->account_balance_usd;
+                $tenant->update(['account_balance_usd' => 0]);
+            }
         }
 
         $invoice = Invoice::create([
             'tenant_id'            => $tenant->id,
             'subscription_plan_id' => $plan->id,
             'invoice_number'       => Invoice::generateInvoiceNumber(),
-            'amount_usd'           => $plan->price_usd,
+            'amount_usd'           => $invoiceAmount,
             'period_start'         => $periodStart,
             'period_end'           => $periodEnd,
             'due_date'             => now()->addDays(14),
@@ -86,6 +103,7 @@ class BillingService
 
             $tenant->update([
                 'status' => 'active',
+                'plan' => $invoice->subscriptionPlan->slug ?? $tenant->plan,
                 'subscription_starts_at' => now(),
                 'subscription_expires_at' => $baseDate->addDays(30),
             ]);

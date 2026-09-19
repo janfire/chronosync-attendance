@@ -87,10 +87,9 @@
                         </div>
                     @endif
 
-                    <button disabled class="w-full py-3 bg-gray-100 text-gray-400 font-medium rounded-xl cursor-not-allowed dark:bg-gray-700 dark:text-gray-500">
+                    <button type="button" onclick="document.getElementById('changePlanModal').classList.remove('hidden')" class="w-full py-3 bg-blue-50 text-blue-600 font-bold rounded-xl shadow-sm hover:bg-blue-100 transition-all dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50">
                         Change Plan
                     </button>
-                    <p class="text-[10px] text-gray-400 text-center mt-2 italic dark:text-gray-500">Self-service plan switching coming soon.</p>
 
                     {{-- Renew / Generate Invoice CTA --}}
                     @php
@@ -172,4 +171,72 @@
         </div>
     </div>
 </div>
+
+<!-- Change Plan Modal -->
+<div id="changePlanModal" class="fixed inset-0 z-50 hidden bg-gray-900/50 backdrop-blur-sm overflow-y-auto w-full h-full flex items-center justify-center">
+    <div class="relative w-full max-w-4xl mx-4 my-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Choose Your Plan</h3>
+            <button onclick="document.getElementById('changePlanModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 bg-gray-50 dark:bg-gray-700 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form action="{{ route('billing.change-plan') }}" method="POST" class="p-6">
+            @csrf
+            
+            @if($tenant->upcoming_plan)
+                <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-xl text-sm border border-blue-100 dark:border-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i> You have a scheduled plan change to <strong>{{ \App\Models\SubscriptionPlan::where('slug', $tenant->upcoming_plan)->value('name') }}</strong> at the end of your billing cycle. Selecting a new plan here will overwrite it.
+                </div>
+            @endif
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                @foreach(\App\Models\SubscriptionPlan::orderBy('price_usd')->get() as $plan)
+                    <label class="relative block cursor-pointer group">
+                        <input type="radio" name="plan" value="{{ $plan->slug }}" class="peer sr-only" required {{ $tenant->plan === $plan->slug && !$tenant->upcoming_plan ? 'disabled' : '' }}>
+                        <div class="h-full rounded-2xl border-2 p-6 transition-all {{ $tenant->plan === $plan->slug && !$tenant->upcoming_plan ? 'border-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-gray-700 peer-checked:border-blue-500 peer-checked:bg-blue-50/50 dark:peer-checked:bg-blue-900/20 group-hover:border-blue-300 dark:group-hover:border-blue-600' }}">
+                            @if($tenant->plan === $plan->slug && !$tenant->upcoming_plan)
+                                <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm">Current Plan</span>
+                            @endif
+                            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ $plan->name }}</h4>
+                            <div class="flex items-baseline mb-4">
+                                <span class="text-3xl font-extrabold text-gray-900 dark:text-white">${{ $plan->price_usd }}</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">/mo</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-emerald-500 mt-1 mr-2 text-xs"></i>
+                                    <span>{{ $plan->max_employees == 0 ? 'Unlimited' : 'Up to ' . $plan->max_employees }} Employees</span>
+                                </li>
+                                @if(is_array($plan->features))
+                                    @foreach($plan->features as $feature)
+                                        <li class="flex items-start">
+                                            <i class="fas fa-check text-emerald-500 mt-1 mr-2 text-xs"></i>
+                                            <span>{{ $feature }}</span>
+                                        </li>
+                                    @endforeach
+                                @endif
+                            </ul>
+                        </div>
+                    </label>
+                @endforeach
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 mb-6 text-sm text-gray-600 dark:text-gray-300">
+                <p class="font-bold text-gray-900 dark:text-white mb-2"><i class="fas fa-balance-scale mr-2 text-gray-400"></i> How changes work:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Upgrades:</strong> You will be immediately invoiced for the prorated difference for the rest of your billing cycle.</li>
+                    <li><strong>Downgrades:</strong> Take effect at the end of your current billing cycle. Make sure you don't exceed the employee limit of the new plan!</li>
+                </ul>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-gray-100 dark:border-gray-700 pt-6">
+                <button type="button" onclick="document.getElementById('changePlanModal').classList.add('hidden')" class="px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-700 transition-colors">Confirm Selection</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection

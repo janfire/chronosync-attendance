@@ -14,6 +14,7 @@ class Tenant extends Model
         'ecocash_number', 'zipit_account',
         'trial_ends_at', 'subscription_starts_at', 'subscription_expires_at',
         'trial_reminder_sent_at', 'subscription_reminder_sent_at',
+        'account_balance_usd', 'upcoming_plan',
     ];
 
     protected $casts = [
@@ -89,5 +90,15 @@ class Tenant extends Model
     public function getLatestInvoice(): ?Invoice
     {
         return $this->invoices()->latest()->first();
+    }
+
+    public function hasFeature(string $featureName): bool
+    {
+        $plan = SubscriptionPlan::where('slug', $this->plan)->first();
+        if (!$plan || !$plan->features) {
+            return false;
+        }
+
+        return in_array($featureName, $plan->features);
     }
 }

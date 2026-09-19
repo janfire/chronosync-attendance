@@ -92,6 +92,20 @@ class UserManagementController extends Controller
         
         // Validate role permissions
         $availableRoles = array_keys($this->getAvailableRoles($currentUser));
+
+        // Enforce max employees limit
+        $tenant = \App\Models\Tenant::find(Auth::user()->tenant_id) ?? current_tenant();
+        if ($tenant && $tenant->max_employees > 0) {
+            $currentEmployees = User::where('tenant_id', $tenant->id)
+                ->where('role', '!=', UserRole::PLATFORM_ADMIN)
+                ->count();
+                
+            if ($currentEmployees >= $tenant->max_employees) {
+                return redirect()
+                    ->back()
+                    ->with('error', "You have reached your plan's employee limit ({$tenant->max_employees}). Please upgrade your plan to add more employees.");
+            }
+        }
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
