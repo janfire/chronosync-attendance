@@ -116,6 +116,17 @@
                     </div>
                 </a>
                 
+                @if(Auth::user()->role === \App\Enums\UserRole::PLATFORM_ADMIN)
+                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors dark:bg-gray-900 dark:border-gray-700">
+                    <div class="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Dashboard</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Go to platform dashboard</p>
+                    </div>
+                </a>
+                @else
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors dark:bg-gray-900 dark:border-gray-700">
                     <div class="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
                         <i class="fas fa-chart-line text-green-600"></i>
@@ -125,8 +136,9 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Go to dashboard</p>
                     </div>
                 </a>
+                @endif
                 
-                @if(Auth::user()->canManageUsers())
+                @if(Auth::user()->canManageUsers() && Auth::user()->role !== \App\Enums\UserRole::PLATFORM_ADMIN)
                 <a href="{{ route('admin.users.index') }}" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors dark:bg-gray-900 dark:border-gray-700">
                     <div class="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
                         <i class="fas fa-users text-purple-600"></i>
