@@ -181,7 +181,7 @@
                                 <div class="text-xs text-gray-500">{{ $user->email }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                @if($user->isTenantAdmin())
+                                @if($user->isAdmin())
                                     <span class="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-0.5 rounded-full">Admin</span>
                                 @else
                                     <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">Staff</span>
