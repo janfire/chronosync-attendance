@@ -22,6 +22,9 @@
 </div>
 
 {{-- ── Summary Stats Bar ── --}}
+<div class="mb-2">
+    <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest dark:text-gray-500"><i class="fas fa-filter mr-1"></i> Filter by Status</h2>
+</div>
 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
     @php
         $statItems = [
@@ -36,7 +39,7 @@
     <button type="button"
             data-status-filter="{{ $stat['status'] }}"
             class="stat-filter-btn flex items-center gap-3 {{ $stat['bg'] }} rounded-xl px-4 py-3
-                   border border-transparent hover:border-gray-300 transition-all duration-150 text-left w-full">
+                   border border-transparent hover:border-gray-300 hover:-translate-y-0.5 hover:shadow-sm cursor-pointer transition-all duration-200 text-left w-full">
         <span class="h-2.5 w-2.5 rounded-full {{ $stat['dot'] }} shrink-0"></span>
         <div>
             <p class="text-xs text-gray-500 font-medium dark:text-gray-400">{{ $stat['label'] }}</p>
