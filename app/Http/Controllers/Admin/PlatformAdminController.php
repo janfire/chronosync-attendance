@@ -72,16 +72,16 @@ class PlatformAdminController extends Controller
             'users' => fn ($q) => $q->withoutGlobalScope('tenant')
         ]);
 
-        // Paginate users (15 per page)
+        // Get users for DataTables
         $users = \App\Models\User::withoutGlobalScope('tenant')
             ->where('tenant_id', $tenant->id)
-            ->paginate(15, ['*'], 'users_page');
+            ->get();
 
-        // Paginate invoices (15 per page)
+        // Get invoices for DataTables
         $invoices = \App\Models\Invoice::withoutGlobalScope('tenant')
             ->where('tenant_id', $tenant->id)
             ->latest()
-            ->paginate(15, ['*'], 'invoices_page');
+            ->get();
 
         return view('admin.superadmin.tenants.show', compact('tenant', 'users', 'invoices'));
     }
