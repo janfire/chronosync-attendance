@@ -67,20 +67,23 @@ class PlatformAdminController extends Controller
 
     public function showTenant(Tenant $tenant): \Illuminate\View\View
     {
-        // Fetch necessary relationships without global tenant scope
+        // Fetch tenant details and count
         $tenant->loadCount([
             'users' => fn ($q) => $q->withoutGlobalScope('tenant')
         ]);
 
-        $tenant->load([
-            'invoices' => fn ($q) => $q->withoutGlobalScope('tenant')->latest()
-        ]);
-
+        // Paginate users (15 per page)
         $users = \App\Models\User::withoutGlobalScope('tenant')
             ->where('tenant_id', $tenant->id)
-            ->get();
+            ->paginate(15, ['*'], 'users_page');
 
-        return view('admin.superadmin.tenants.show', compact('tenant', 'users'));
+        // Paginate invoices (15 per page)
+        $invoices = \App\Models\Invoice::withoutGlobalScope('tenant')
+            ->where('tenant_id', $tenant->id)
+            ->latest()
+            ->paginate(15, ['*'], 'invoices_page');
+
+        return view('admin.superadmin.tenants.show', compact('tenant', 'users', 'invoices'));
     }
 
     // =========================================================================

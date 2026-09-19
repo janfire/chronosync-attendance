@@ -177,7 +177,7 @@
                         @forelse($users as $user)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4">
-                                <div class="font-semibold text-gray-900 dark:text-white">{{ $user->first_name }} {{ $user->last_name }}</div>
+                                <div class="font-semibold text-gray-900 dark:text-white">{{ $user->name }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->email }}</div>
                             </td>
                             <td class="px-6 py-4">
@@ -198,6 +198,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($users->hasPages())
+                <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                    {{ $users->appends(['tab' => 'users'])->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -219,7 +224,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                        @forelse($tenant->invoices as $invoice)
+                        @forelse($invoices as $invoice)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                             <td class="px-6 py-4 font-mono text-gray-900 dark:text-gray-300">{{ $invoice->invoice_number }}</td>
                             <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">${{ number_format($invoice->amount_usd, 2) }}</td>
@@ -242,6 +247,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($invoices->hasPages())
+                <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                    {{ $invoices->appends(['tab' => 'billing'])->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -256,6 +266,13 @@
 
 @push('scripts')
 <script>
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab') || 'analytics';
+        switchTab(activeTab);
+    });
+
     // Tab Switching Logic
     function switchTab(tabId) {
         // Hide all panels
