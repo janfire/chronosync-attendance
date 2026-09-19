@@ -65,6 +65,24 @@ class PlatformAdminController extends Controller
         return response()->json($this->tenantSummary());
     }
 
+    public function showTenant(Tenant $tenant): \Illuminate\View\View
+    {
+        // Fetch necessary relationships without global tenant scope
+        $tenant->loadCount([
+            'users' => fn ($q) => $q->withoutGlobalScope('tenant')
+        ]);
+
+        $tenant->load([
+            'invoices' => fn ($q) => $q->withoutGlobalScope('tenant')->latest()
+        ]);
+
+        $users = \App\Models\User::withoutGlobalScope('tenant')
+            ->where('tenant_id', $tenant->id)
+            ->get();
+
+        return view('admin.superadmin.tenants.show', compact('tenant', 'users'));
+    }
+
     // =========================================================================
     // DATATABLES AJAX ENDPOINT
     // =========================================================================

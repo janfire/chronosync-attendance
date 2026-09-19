@@ -18,6 +18,7 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
     Route::get('/tenants',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenants'])->name('superadmin.tenants');
     Route::get('/tenants/data',     [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsData'])->name('superadmin.tenants.data');
     Route::get('/tenants/summary',  [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsSummary'])->name('superadmin.tenants.summary');
+    Route::get('/tenants/{tenant}', [\App\Http\Controllers\Admin\PlatformAdminController::class, 'showTenant'])->name('superadmin.tenants.show');
 
     // Per-tenant actions
     Route::post('/tenants/{tenant}/activate',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'activateTenant'])->name('superadmin.tenants.activate');

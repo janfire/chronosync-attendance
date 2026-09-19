@@ -399,8 +399,8 @@ $(function () {
         };
 
         if (action === 'view') {
-            // View details — for now open in new tab via subdomain (future: detail page)
-            Toast.show(`Viewing ${tenant.name}…`, 'info');
+            // Redirect to the new dedicated detail page
+            window.location.href = `/superadmin/tenants/${tenant.id}`;
             return;
         }
 
