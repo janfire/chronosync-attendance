@@ -26,7 +26,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
 
             {{-- Total Tenants --}}
-            <a href="{{ route('admin.tenants.index') }}"
+            <a href="{{ route('superadmin.tenants') }}"
                class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-200 cursor-pointer group">
                 <div class="flex items-center justify-between">
                     <div>
@@ -169,7 +169,7 @@
                 <i class="fas fa-chevron-right text-gray-300 group-hover:text-emerald-500 ml-auto transition-colors"></i>
             </a>
 
-            <a href="{{ route('admin.tenants.index') }}"
+            <a href="{{ route('superadmin.tenants') }}"
                class="flex items-center gap-5 bg-white dark:bg-gray-800 rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-slate-400 transition-all duration-200 group dark:border-gray-700">
                 <div class="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors shrink-0 dark:bg-gray-800">
                     <i class="fas fa-sitemap text-slate-600 text-xl dark:text-gray-300"></i>
