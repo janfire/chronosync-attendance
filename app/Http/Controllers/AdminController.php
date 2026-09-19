@@ -32,6 +32,10 @@ class AdminController extends Controller
 
     public function dashboard()
     {
+        if (Auth::user()->isPlatformAdmin()) {
+            return redirect()->route('superadmin.dashboard');
+        }
+
         $tenantId = Auth::user()->tenant_id;
 
         // Cache dashboard stats per tenant for 60 seconds.

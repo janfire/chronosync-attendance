@@ -162,6 +162,11 @@ Route::middleware(['tenant'])->group(function () {
     Route::post('/auth/staff/complete', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'completeStaffPrompt'])->name('auth.staff.complete');
 
     Route::get('/dashboard', function () {
+        if (Auth::user()->isPlatformAdmin()) {
+            return redirect()->route('superadmin.dashboard');
+        } elseif (Auth::user()->isStaff() || Auth::user()->isGeneralUser()) {
+            return redirect()->route('staff.dashboard');
+        }
         return redirect()->route('admin.dashboard');
     })->name('dashboard')->middleware('auth');
 });
