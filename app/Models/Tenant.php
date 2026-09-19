@@ -99,6 +99,8 @@ class Tenant extends Model
             return false;
         }
 
-        return in_array($featureName, $plan->features);
+        $features = is_string($plan->features) ? json_decode($plan->features, true) : $plan->features;
+
+        return is_array($features) && in_array($featureName, $features);
     }
 }
