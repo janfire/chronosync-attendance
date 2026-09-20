@@ -60,14 +60,14 @@
                     <td class="text-gray-500 text-sm dark:text-gray-400">{{ $user->created_at->format('M d, Y') }}</td>
                     <td class="text-right">
                         <div class="table-action-group">
-                            <button onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', '{{ $user->role->value }}')" class="table-action-btn table-action-btn--edit" title="Edit User">
+                            <button onclick="editUser('{{ $user->uuid }}', '{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', '{{ $user->role->value }}')" class="table-action-btn table-action-btn--edit" title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="resendInvitation({{ $user->id }}, '{{ addslashes($user->name) }}')" class="table-action-btn table-action-btn--view" title="Resend Invitation Email">
+                            <button onclick="resendInvitation('{{ $user->uuid }}', '{{ addslashes($user->name) }}')" class="table-action-btn table-action-btn--view" title="Resend Invitation Email">
                                 <i class="fas fa-envelope"></i>
                             </button>
                             @if(auth()->id() !== $user->id)
-                                <button onclick="deleteUser({{ $user->id }}, '{{ addslashes($user->name) }}')" class="table-action-btn table-action-btn--danger" title="Delete User">
+                                <button onclick="deleteUser('{{ $user->uuid }}', '{{ addslashes($user->name) }}')" class="table-action-btn table-action-btn--danger" title="Delete User">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             @else
