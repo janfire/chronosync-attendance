@@ -15,25 +15,46 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
     Route::get('/dashboard',      [\App\Http\Controllers\Admin\PlatformAdminController::class, 'dashboard'])->name('superadmin.dashboard');
 
     // Tenant list & DataTables AJAX
-    Route::get('/tenants',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenants'])->name('superadmin.tenants');
-    Route::get('/tenants/data',     [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsData'])->name('superadmin.tenants.data');
-    Route::get('/tenants/summary',  [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsSummary'])->name('superadmin.tenants.summary');
-    Route::get('/tenants/{tenant}', [\App\Http\Controllers\Admin\PlatformAdminController::class, 'showTenant'])->name('superadmin.tenants.show');
+    Route::middleware(['platform_role:platform_support'])->group(function () {
+        Route::get('/tenants',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenants'])->name('superadmin.tenants');
+        Route::get('/tenants/data',     [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsData'])->name('superadmin.tenants.data');
+        Route::get('/tenants/summary',  [\App\Http\Controllers\Admin\PlatformAdminController::class, 'tenantsSummary'])->name('superadmin.tenants.summary');
+        Route::get('/tenants/{tenant}', [\App\Http\Controllers\Admin\PlatformAdminController::class, 'showTenant'])->name('superadmin.tenants.show');
+    });
 
-    // Per-tenant actions
-    Route::post('/tenants/{tenant}/activate',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'activateTenant'])->name('superadmin.tenants.activate');
-    Route::post('/tenants/{tenant}/suspend',           [\App\Http\Controllers\Admin\PlatformAdminController::class, 'suspendTenant'])->name('superadmin.tenants.suspend');
-    Route::post('/tenants/{tenant}/reset-subscription',[\App\Http\Controllers\Admin\PlatformAdminController::class, 'resetTenantSubscription'])->name('superadmin.tenants.reset-subscription');
-    Route::delete('/tenants/{tenant}',                 [\App\Http\Controllers\Admin\PlatformAdminController::class, 'destroyTenant'])->name('superadmin.tenants.destroy');
+    // Per-tenant actions (Require full admin)
+    Route::middleware(['platform_role:platform_admin'])->group(function () {
+        Route::post('/tenants/{tenant}/activate',          [\App\Http\Controllers\Admin\PlatformAdminController::class, 'activateTenant'])->name('superadmin.tenants.activate');
+        Route::post('/tenants/{tenant}/suspend',           [\App\Http\Controllers\Admin\PlatformAdminController::class, 'suspendTenant'])->name('superadmin.tenants.suspend');
+        Route::post('/tenants/{tenant}/reset-subscription',[\App\Http\Controllers\Admin\PlatformAdminController::class, 'resetTenantSubscription'])->name('superadmin.tenants.reset-subscription');
+        Route::delete('/tenants/{tenant}',                 [\App\Http\Controllers\Admin\PlatformAdminController::class, 'destroyTenant'])->name('superadmin.tenants.destroy');
+    });
 
     // Finance
-    Route::get('/finance/pending', [\App\Http\Controllers\Admin\FinanceController::class, 'pendingInvoices'])->name('superadmin.finance.pending');
-    Route::post('/finance/invoice/{invoice}/confirm', [\App\Http\Controllers\Admin\FinanceController::class, 'confirmPayment'])->name('superadmin.finance.confirm');
+    Route::middleware(['platform_role:platform_finance'])->group(function () {
+        Route::get('/finance/pending', [\App\Http\Controllers\Admin\FinanceController::class, 'pendingInvoices'])->name('superadmin.finance.pending');
+        Route::post('/finance/invoice/{invoice}/confirm', [\App\Http\Controllers\Admin\FinanceController::class, 'confirmPayment'])->name('superadmin.finance.confirm');
+    });
+
     // System Audit
-    Route::get('/audit', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'index'])->name('superadmin.audit.index');
-    Route::get('/audit/{log}', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'show'])->name('superadmin.audit.show');
-    Route::post('/audit/{log}/resolve', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'resolve'])->name('superadmin.audit.resolve');
-    Route::post('/audit/resolve-all', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'resolveAll'])->name('superadmin.audit.resolve-all');
+    Route::middleware(['platform_role:platform_developer'])->group(function () {
+        Route::get('/audit', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'index'])->name('superadmin.audit.index');
+        Route::get('/audit/{log}', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'show'])->name('superadmin.audit.show');
+        Route::post('/audit/{log}/resolve', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'resolve'])->name('superadmin.audit.resolve');
+        Route::post('/audit/resolve-all', [\App\Http\Controllers\Admin\PlatformAuditController::class, 'resolveAll'])->name('superadmin.audit.resolve-all');
+    });
+
+    // System Users
+    Route::middleware(['platform_role:platform_admin'])->group(function () {
+        Route::resource('users', \App\Http\Controllers\Admin\PlatformSystemUserController::class)->names([
+            'index' => 'superadmin.users.index',
+            'create' => 'superadmin.users.create',
+            'store' => 'superadmin.users.store',
+            'edit' => 'superadmin.users.edit',
+            'update' => 'superadmin.users.update',
+            'destroy' => 'superadmin.users.destroy',
+        ]);
+    });
 });
 
 // SaaS Onboarding Routes

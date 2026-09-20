@@ -470,14 +470,22 @@
                         <i class="fas fa-th-large w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Dashboard</span>
                     </a>
+
+                    @if(Auth::user()->hasPlatformRole(\App\Enums\UserRole::PLATFORM_ADMIN) || Auth::user()->hasPlatformRole('platform_support'))
                     <a href="{{ route('superadmin.tenants') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.tenants') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-building w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Tenant Directory</span>
                     </a>
+                    @endif
+
+                    @if(Auth::user()->hasPlatformRole(\App\Enums\UserRole::PLATFORM_ADMIN) || Auth::user()->hasPlatformRole('platform_finance'))
                     <a href="{{ route('superadmin.finance.pending') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.finance.*') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-vault w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Finance Ops</span>
                     </a>
+                    @endif
+
+                    @if(Auth::user()->hasPlatformRole(\App\Enums\UserRole::PLATFORM_ADMIN) || Auth::user()->hasPlatformRole('platform_developer'))
                     <a href="{{ route('superadmin.audit.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.audit.*') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-shield-alt w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">System Audit</span>
@@ -489,6 +497,15 @@
                             </span>
                         @endif
                     </a>
+                    @endif
+
+                    @if(Auth::user()->hasPlatformRole(\App\Enums\UserRole::PLATFORM_ADMIN))
+                    <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Platform Settings</div>
+                    <a href="{{ route('superadmin.users.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.users.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-users-cog w-4 text-gray-500 dark:text-gray-400"></i>
+                        <span class="font-medium">Manage Users</span>
+                    </a>
+                    @endif
                 @endif
 
             </nav>

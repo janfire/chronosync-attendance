@@ -16,7 +16,7 @@ class EnsureUserIsPlatformAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->role === UserRole::PLATFORM_ADMIN) {
+        if (auth()->check() && auth()->user()->isPlatformAdmin()) {
             return $next($request);
         }
 

@@ -5,6 +5,9 @@ namespace App\Enums;
 enum UserRole: string
 {
     case PLATFORM_ADMIN = 'platform_admin';
+    case PLATFORM_FINANCE = 'platform_finance';
+    case PLATFORM_DEVELOPER = 'platform_developer';
+    case PLATFORM_SUPPORT = 'platform_support';
     case SUPER_ADMIN = 'super_admin';
     case ADMIN = 'admin';
     case GENERAL_USER = 'general_user';
@@ -18,6 +21,9 @@ enum UserRole: string
     {
         return match($this) {
             self::PLATFORM_ADMIN => 'Platform Admin',
+            self::PLATFORM_FINANCE => 'Platform Finance',
+            self::PLATFORM_DEVELOPER => 'Platform Developer',
+            self::PLATFORM_SUPPORT => 'Platform Support',
             self::SUPER_ADMIN => 'Super Admin',
             self::ADMIN => 'Admin',
             self::GENERAL_USER => 'General User',
@@ -33,6 +39,9 @@ enum UserRole: string
     {
         return match($this) {
             self::PLATFORM_ADMIN => 5,
+            self::PLATFORM_FINANCE => 5,
+            self::PLATFORM_DEVELOPER => 5,
+            self::PLATFORM_SUPPORT => 5,
             self::SUPER_ADMIN => 4,
             self::ADMIN => 3,
             self::GENERAL_USER => 2,

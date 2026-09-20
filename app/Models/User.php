@@ -86,7 +86,28 @@ class User extends Authenticatable
     // Role helper methods - now delegate to enum
     public function isPlatformAdmin(): bool
     {
-        return $this->role === UserRole::PLATFORM_ADMIN || (is_string($this->role) && $this->role === 'platform_admin') || (isset($this->role->value) && $this->role->value === 'platform_admin');
+        $platformRoles = [
+            UserRole::PLATFORM_ADMIN,
+            UserRole::PLATFORM_FINANCE,
+            UserRole::PLATFORM_DEVELOPER,
+            UserRole::PLATFORM_SUPPORT,
+            'platform_admin',
+            'platform_finance',
+            'platform_developer',
+            'platform_support'
+        ];
+        $roleValue = is_string($this->role) ? $this->role : ($this->role->value ?? $this->role);
+        return in_array($roleValue, $platformRoles, true) || in_array($this->role, $platformRoles);
+    }
+
+    public function hasPlatformRole($role): bool
+    {
+        if ($this->role === UserRole::PLATFORM_ADMIN || (is_string($this->role) && $this->role === 'platform_admin') || (isset($this->role->value) && $this->role->value === 'platform_admin')) {
+            return true; // Root platform admin has all platform roles
+        }
+        $roleValue = is_string($this->role) ? $this->role : ($this->role->value ?? $this->role);
+        $checkValue = $role instanceof UserRole ? $role->value : $role;
+        return $roleValue === $checkValue;
     }
 
     public function isSuperAdmin(): bool
@@ -132,6 +153,9 @@ class User extends Authenticatable
         
         $labels = [
             'platform_admin' => 'Platform Admin',
+            'platform_finance' => 'Platform Finance',
+            'platform_developer' => 'Platform Developer',
+            'platform_support' => 'Platform Support',
             'super_admin' => 'Super Admin',
             'admin' => 'Admin',
             'general_user' => 'General User',
