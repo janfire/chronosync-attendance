@@ -72,7 +72,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <input type="datetime-local" name="expires_at" id="expires_at" value="{{ old('expires_at', $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}" class="w-full pl-11 py-3 bg-white rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors cursor-pointer">
+                        <input type="datetime-local" name="expires_at" id="expires_at" value="{{ old('expires_at', $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}" class="w-full pl-11 py-3 bg-white rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:[color-scheme:dark] transition-colors cursor-pointer">
                     </div>
                     <p class="text-xs text-gray-500 mt-3"><i class="fas fa-info-circle mr-1 text-gray-400"></i> Leave blank to show until manually disabled.</p>
                 </div>
