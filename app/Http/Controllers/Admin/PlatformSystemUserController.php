@@ -7,8 +7,11 @@ use App\Models\User;
 use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use App\Mail\PlatformAdminInvitation;
 
 class PlatformSystemUserController extends Controller
 {
@@ -41,7 +44,6 @@ class PlatformSystemUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->whereNull('deleted_at')],
-            'password' => 'required|string|min:8',
             'role' => ['required', Rule::enum(UserRole::class)],
         ]);
 
@@ -58,16 +60,19 @@ class PlatformSystemUserController extends Controller
             return back()->with('error', 'Invalid platform role selected.');
         }
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make(Str::random(32)), // Random secure string since they will set it via email
             'role' => $role,
             'tenant_id' => null, // Platform users have no tenant
             'employee_number' => 'SYS-' . strtoupper(Str::random(6)), // Assign a unique internal identifier
         ]);
 
-        return redirect()->route('superadmin.users.index')->with('success', 'Platform user created successfully.');
+        $token = Password::broker()->createToken($user);
+        Mail::to($user->email)->send(new PlatformAdminInvitation($user, $token));
+
+        return redirect()->route('superadmin.users.index')->with('success', 'Platform user created and invitation sent successfully.');
     }
 
     /**
@@ -78,7 +83,6 @@ class PlatformSystemUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)->whereNull('deleted_at')],
-            'password' => 'nullable|string|min:8',
             'role' => ['required', Rule::enum(UserRole::class)],
         ]);
 
@@ -106,11 +110,6 @@ class PlatformSystemUserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->role = $role;
-        
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
-        }
-
         $user->save();
 
         return redirect()->route('superadmin.users.index')->with('success', 'Platform user updated successfully.');
@@ -135,5 +134,16 @@ class PlatformSystemUserController extends Controller
         $user->delete();
 
         return redirect()->route('superadmin.users.index')->with('success', 'Platform user deleted successfully.');
+    }
+
+    /**
+     * Resend the password setup invitation email.
+     */
+    public function resendInvitation(User $user)
+    {
+        $token = Password::broker()->createToken($user);
+        Mail::to($user->email)->send(new PlatformAdminInvitation($user, $token));
+
+        return redirect()->route('superadmin.users.index')->with('success', 'Invitation email resent successfully to ' . $user->email);
     }
 }

@@ -46,6 +46,7 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
 
     // System Users
     Route::middleware(['platform_role:platform_admin'])->group(function () {
+        Route::post('users/{user}/resend-invitation', [\App\Http\Controllers\Admin\PlatformSystemUserController::class, 'resendInvitation'])->name('superadmin.users.resend-invitation');
         Route::resource('users', \App\Http\Controllers\Admin\PlatformSystemUserController::class)->names([
             'index' => 'superadmin.users.index',
             'create' => 'superadmin.users.create',

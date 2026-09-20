@@ -63,6 +63,9 @@
                             <button onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', '{{ $user->role->value }}')" class="table-action-btn table-action-btn--edit" title="Edit User">
                                 <i class="fas fa-edit"></i>
                             </button>
+                            <button onclick="resendInvitation({{ $user->id }}, '{{ addslashes($user->name) }}')" class="table-action-btn table-action-btn--view" title="Resend Invitation Email">
+                                <i class="fas fa-envelope"></i>
+                            </button>
                             @if(auth()->id() !== $user->id)
                                 <button onclick="deleteUser({{ $user->id }}, '{{ addslashes($user->name) }}')" class="table-action-btn table-action-btn--danger" title="Delete User">
                                     <i class="fas fa-trash-alt"></i>
@@ -112,10 +115,6 @@
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Email Address</label>
                         <input type="email" name="email" id="email" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm px-3 py-2 border">
-                    </div>
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Password</label>
-                        <input type="password" name="password" id="password" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm px-3 py-2 border">
                     </div>
                     <div>
                         <label for="role" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Platform Role</label>
@@ -175,10 +174,6 @@
                         <input type="email" name="email" id="edit_email" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border">
                     </div>
                     <div>
-                        <label for="edit_password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Password <span class="font-normal text-xs text-gray-500">(Leave blank to keep current)</span></label>
-                        <input type="password" name="password" id="edit_password" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border">
-                    </div>
-                    <div>
                         <label for="edit_role" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Platform Role</label>
                         <select name="role" id="edit_role" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border">
                             <option value="platform_admin">Platform Admin (Full Access)</option>
@@ -206,6 +201,11 @@
 <form id="deleteForm" method="POST" class="hidden">
     @csrf
     @method('DELETE')
+</form>
+
+<!-- Resend Invitation form -->
+<form id="resendForm" method="POST" class="hidden">
+    @csrf
 </form>
 
 @endsection
@@ -246,7 +246,6 @@
         document.getElementById('edit_name').value = name;
         document.getElementById('edit_email').value = email;
         document.getElementById('edit_role').value = role;
-        document.getElementById('edit_password').value = ''; // clear password
         
         openModal('editUserModal');
     }
@@ -255,6 +254,14 @@
         if (confirm(`Are you sure you want to permanently delete platform user: ${name}?`)) {
             const form = document.getElementById('deleteForm');
             form.action = `/superadmin/users/${id}`;
+            form.submit();
+        }
+    }
+
+    function resendInvitation(id, name) {
+        if (confirm(`Send a new password setup invitation email to ${name}?`)) {
+            const form = document.getElementById('resendForm');
+            form.action = `/superadmin/users/${id}/resend-invitation`;
             form.submit();
         }
     }
