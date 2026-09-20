@@ -61,6 +61,10 @@
 
         {{-- Quick Actions --}}
         <div class="flex items-center gap-3 w-full md:w-auto">
+            <a href="{{ route('superadmin.tenants.impersonate', $tenant) }}" class="flex-1 md:flex-none px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50">
+                <i class="fas fa-user-secret"></i> Impersonate
+            </a>
+
             @if($tenant->status !== 'active')
             <button type="button" onclick="actionTenant('activate')" class="flex-1 md:flex-none px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2">
                 <i class="fas fa-check-circle"></i> Activate

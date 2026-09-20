@@ -56,6 +56,16 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
             'destroy' => 'superadmin.users.destroy',
         ]);
         
+        // Subscription Plans
+        Route::resource('plans', \App\Http\Controllers\Admin\PlatformSubscriptionController::class)->names([
+            'index' => 'superadmin.plans.index',
+            'create' => 'superadmin.plans.create',
+            'store' => 'superadmin.plans.store',
+            'edit' => 'superadmin.plans.edit',
+            'update' => 'superadmin.plans.update',
+            'destroy' => 'superadmin.plans.destroy',
+        ]);
+        
         // Global Announcements
         Route::resource('announcements', \App\Http\Controllers\Admin\PlatformAnnouncementController::class)->names([
             'index' => 'superadmin.announcements.index',
@@ -65,6 +75,13 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
             'update' => 'superadmin.announcements.update',
             'destroy' => 'superadmin.announcements.destroy',
         ]);
+        
+        // Tenant Impersonation
+        Route::get('tenants/{tenant}/impersonate', [\App\Http\Controllers\Admin\ImpersonationController::class, 'impersonate'])->name('superadmin.tenants.impersonate');
+        
+        // Global Settings
+        Route::get('settings', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'index'])->name('superadmin.settings.index');
+        Route::put('settings', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'update'])->name('superadmin.settings.update');
     });
 });
 
@@ -172,6 +189,9 @@ Route::middleware(['tenant'])->group(function () {
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::post('/profile/biometric/revoke', [\App\Http\Controllers\PrivacySettingsController::class, 'revokeConsent'])->name('profile.biometric.revoke');
+
+        // Leave Impersonation
+        Route::post('/impersonation/leave', [\App\Http\Controllers\Admin\ImpersonationController::class, 'leave'])->name('impersonation.leave');
 
         // Staff Dashboard
         Route::get('/staff/dashboard', [\App\Http\Controllers\StaffDashboardController::class, 'index'])->name('staff.dashboard');

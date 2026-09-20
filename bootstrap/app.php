@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform_role'  => \App\Http\Middleware\EnsurePlatformRole::class,
             'feature'        => \App\Http\Middleware\CheckTenantFeature::class,
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckMaintenanceMode::class,
+        ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

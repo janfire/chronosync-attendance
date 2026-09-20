@@ -380,6 +380,7 @@
     @stack('styles')
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <x-impersonation-banner />
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="w-56 hidden lg:flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-200">
@@ -509,6 +510,16 @@
                     <a href="{{ route('superadmin.users.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.users.*') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-users-cog w-4 text-gray-500 dark:text-gray-400"></i>
                         <span class="font-medium">Manage Users</span>
+                    </a>
+                    
+                    <a href="{{ route('superadmin.plans.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.plans.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-tags w-4 text-gray-500 dark:text-gray-400"></i>
+                        <span class="font-medium">Subscription Plans</span>
+                    </a>
+                    
+                    <a href="{{ route('superadmin.settings.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.settings.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-cogs w-4 text-gray-500 dark:text-gray-400"></i>
+                        <span class="font-medium">Configuration</span>
                     </a>
                     @endif
                 @endif

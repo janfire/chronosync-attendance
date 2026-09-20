@@ -321,6 +321,10 @@ class PlatformAdminController extends Controller
         $html .= '<button type="button" data-action="view" class="table-action-btn table-action-btn--view" title="View Details">
                     <i class="fas fa-eye text-sm"></i>
                   </button>';
+                  
+        $html .= '<button type="button" data-action="impersonate" class="table-action-btn text-indigo-600 hover:bg-indigo-50" title="Impersonate Tenant Admin">
+                    <i class="fas fa-user-secret text-sm"></i>
+                  </button>';
 
         if ($tenant->status !== 'active') {
             $html .= '<button type="button" data-action="activate" class="table-action-btn text-green-600 hover:bg-green-50" title="Activate">

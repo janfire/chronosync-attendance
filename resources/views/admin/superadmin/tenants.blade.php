@@ -404,6 +404,11 @@ $(function () {
             return;
         }
 
+        if (action === 'impersonate') {
+            window.location.href = `/superadmin/tenants/${tenant.id}/impersonate`;
+            return;
+        }
+
         if (action === 'delete') {
             DeleteModal.open(tenant);
             return;
