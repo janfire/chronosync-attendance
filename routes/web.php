@@ -174,6 +174,10 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/login/check-approval', [LoginController::class, 'checkApproval'])->name('login.check-approval');
     Route::get('/login/approve/{token}', [LoginController::class, 'approveLogin'])->name('login.approve');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    // Password Setup Routes
+    Route::get('/password/reset/{token}', [\App\Http\Controllers\Auth\PasswordSetupController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/password/reset', [\App\Http\Controllers\Auth\PasswordSetupController::class, 'reset'])->name('password.update');
     Route::post('/biometric/update-login', [LoginController::class, 'loginForBiometricUpdate'])
         ->name('biometric.update-login')
         ->middleware('throttle:10,1');
