@@ -55,6 +55,16 @@ Route::prefix('superadmin')->middleware(['auth', 'platform_admin'])->group(funct
             'update' => 'superadmin.users.update',
             'destroy' => 'superadmin.users.destroy',
         ]);
+        
+        // Global Announcements
+        Route::resource('announcements', \App\Http\Controllers\Admin\PlatformAnnouncementController::class)->names([
+            'index' => 'superadmin.announcements.index',
+            'create' => 'superadmin.announcements.create',
+            'store' => 'superadmin.announcements.store',
+            'edit' => 'superadmin.announcements.edit',
+            'update' => 'superadmin.announcements.update',
+            'destroy' => 'superadmin.announcements.destroy',
+        ]);
     });
 });
 

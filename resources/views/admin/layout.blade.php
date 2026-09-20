@@ -497,6 +497,11 @@
                             </span>
                         @endif
                     </a>
+                    
+                    <a href="{{ route('superadmin.announcements.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('superadmin.announcements.*') ? 'active' : '' }} dark:text-gray-200">
+                        <i class="fas fa-bullhorn w-4 text-gray-500 dark:text-gray-400"></i>
+                        <span class="font-medium">Announcements</span>
+                    </a>
                     @endif
 
                     @if(Auth::user()->hasPlatformRole(\App\Enums\UserRole::PLATFORM_ADMIN))
@@ -561,6 +566,8 @@
 
             <!-- Page Content -->
             <main class="flex-1 min-h-0 overflow-y-auto py-6">
+                <x-global-announcements />
+                
                 @if(session('success'))
                     <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
                         {{ session('success') }}
