@@ -51,12 +51,12 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 dark:bg-gray-900/50 dark:border-gray-700">
-                    <label for="type" class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-300">Announcement Type <span class="text-red-500">*</span></label>
+                    <label for="type" class="block text-sm font-bold text-gray-700 mb-3 dark:text-gray-300">Announcement Type <span class="text-red-500">*</span></label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-palette"></i>
                         </div>
-                        <select name="type" id="type" required class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors">
+                        <select name="type" id="type" required class="w-full pl-11 py-3 rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors cursor-pointer">
                             <option value="info" {{ old('type') == 'info' ? 'selected' : '' }}>Info (Blue)</option>
                             <option value="warning" {{ old('type') == 'warning' ? 'selected' : '' }}>Warning (Orange)</option>
                             <option value="success" {{ old('type') == 'success' ? 'selected' : '' }}>Success (Green)</option>
@@ -66,14 +66,14 @@
                 </div>
 
                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 dark:bg-gray-900/50 dark:border-gray-700">
-                    <label for="expires_at" class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-300">Expires At <span class="text-gray-400 font-normal text-xs">(Optional)</span></label>
+                    <label for="expires_at" class="block text-sm font-bold text-gray-700 mb-3 dark:text-gray-300">Expires At <span class="text-gray-400 font-normal text-xs">(Optional)</span></label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <input type="datetime-local" name="expires_at" id="expires_at" value="{{ old('expires_at') }}" class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors">
+                        <input type="datetime-local" name="expires_at" id="expires_at" value="{{ old('expires_at') }}" class="w-full pl-11 py-3 rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors cursor-pointer">
                     </div>
-                    <p class="text-xs text-gray-400 mt-2"><i class="fas fa-info-circle mr-1"></i> Leave blank to show until manually disabled.</p>
+                    <p class="text-xs text-gray-500 mt-3"><i class="fas fa-info-circle mr-1 text-gray-400"></i> Leave blank to show until manually disabled.</p>
                 </div>
             </div>
 
