@@ -211,6 +211,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Initialize DataTable
@@ -251,19 +252,39 @@
     }
 
     function deleteUser(id, name) {
-        if (confirm(`Are you sure you want to permanently delete platform user: ${name}?`)) {
-            const form = document.getElementById('deleteForm');
-            form.action = `/superadmin/users/${id}`;
-            form.submit();
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to permanently delete platform user: ${name}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/superadmin/users/${id}`;
+                form.submit();
+            }
+        });
     }
 
     function resendInvitation(id, name) {
-        if (confirm(`Send a new password setup invitation email to ${name}?`)) {
-            const form = document.getElementById('resendForm');
-            form.action = `/superadmin/users/${id}/resend-invitation`;
-            form.submit();
-        }
+        Swal.fire({
+            title: 'Resend Invitation?',
+            text: `Send a new password setup invitation email to ${name}?`,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, send it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('resendForm');
+                form.action = `/superadmin/users/${id}/resend-invitation`;
+                form.submit();
+            }
+        });
     }
 </script>
 @endpush
