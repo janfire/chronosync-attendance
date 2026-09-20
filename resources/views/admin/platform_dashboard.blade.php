@@ -25,7 +25,7 @@
 </div>
 
 {{-- ── Metric Cards ── --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
 
     {{-- Total Tenants --}}
     <a href="{{ route('superadmin.tenants') }}"
@@ -112,6 +112,27 @@
         </div>
     </div>
 
+    {{-- Total Users --}}
+    <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1 dark:text-gray-400">Total Users</p>
+                <p class="text-5xl font-bold text-gray-900 dark:text-white">
+                    {{ number_format($metrics['total_users'] ?? 0) }}
+                </p>
+                <p class="text-xs text-gray-400 mt-2">Across all tenants</p>
+            </div>
+            <div class="h-16 w-16 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                <i class="fas fa-users text-indigo-600 text-2xl"></i>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <span class="text-xs text-indigo-600 font-semibold">
+                <i class="fas fa-globe mr-1"></i> Global user base
+            </span>
+        </div>
+    </div>
+
     {{-- New Tenants (7 days) --}}
     <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:border-gray-700">
         <div class="flex items-center justify-between">
@@ -155,6 +176,16 @@
 
 </div>{{-- /metric cards --}}
 
+{{-- ── Analytics Chart ── --}}
+<div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8 dark:bg-gray-800 dark:border-gray-700">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Revenue Growth (6 Months)</h3>
+    </div>
+    <div class="relative h-72 w-full">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
 {{-- ── Quick Actions ── --}}
 <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Quick Actions</h3>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -183,5 +214,84 @@
     </div>
 
 </div>
+
+{{-- Chart.js --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const chartData = @json($metrics['revenue_chart_data'] ?? ['labels' => [], 'data' => []]);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Monthly Recurring Revenue (USD)',
+                    data: chartData.data,
+                    borderColor: '#10b981', // emerald-500
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#10b981',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        padding: 12,
+                        titleFont: { size: 13, family: "'Instrument Sans', sans-serif" },
+                        bodyFont: { size: 14, weight: 'bold', family: "'Instrument Sans', sans-serif" },
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f3f4f6',
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            font: { family: "'Instrument Sans', sans-serif" },
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            font: { family: "'Instrument Sans', sans-serif" }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+            }
+        });
+    });
+</script>
 
 @endsection

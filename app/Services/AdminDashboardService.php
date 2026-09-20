@@ -39,8 +39,37 @@ class AdminDashboardService
             // New tenants created in the last 7 days
             'new_tenants' => Tenant::where('created_at', '>=', $now->subDays(7))->count(),
 
+            // Total Users across all tenants
+            'total_users' => \App\Models\User::withoutTenantScope()->whereNotNull('tenant_id')->count(),
+
+            // Monthly Revenue Data for Chart (last 6 months)
+            'revenue_chart_data' => $this->getRevenueChartData(),
+
             // Number of jobs waiting in the queue
             'queue_jobs' => Queue::size(),
+        ];
+    }
+
+    private function getRevenueChartData(): array
+    {
+        $data = [];
+        $labels = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $labels[] = $month->format('M Y');
+            
+            $revenue = Invoice::where('status', 'paid')
+                ->whereDate('period_start', '<=', $month->endOfMonth())
+                ->whereDate('period_end', '>=', $month->startOfMonth())
+                ->sum('amount_usd');
+                
+            $data[] = (float) $revenue;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
         ];
     }
 }
