@@ -180,8 +180,7 @@ class AdminController extends Controller
         
         $recentAttendance = $user->attendanceLogs()
             ->orderBy('timestamp', 'desc')
-            ->limit(10)
-            ->get();
+            ->paginate(3);
 
         $stats = [
             'total_clock_ins' => $user->attendanceLogs()->where('action', 'clock_in')->count(),
