@@ -33,7 +33,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                         <i class="fas fa-heading"></i>
                     </div>
-                    <input type="text" name="title" id="title" value="{{ old('title', $announcement->title) }}" required class="w-full pl-11 py-3 bg-white rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white transition-colors" placeholder="e.g., Scheduled System Maintenance">
+                    <input type="text" name="title" id="title" value="{{ old('title', $announcement->title) }}" required class="w-full pl-11 py-3 bg-white rounded-xl border border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white transition-colors" placeholder="e.g., Scheduled System Maintenance">
                 </div>
                 @error('title')
                     <p class="text-red-500 text-xs mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
@@ -43,7 +43,7 @@
             <div class="mb-6">
                 <label for="message" class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-300">Message Content <span class="text-red-500">*</span></label>
                 <div class="relative">
-                    <textarea name="message" id="message" rows="4" required class="w-full p-4 bg-white rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white transition-colors" placeholder="What do you want to tell the users? Markdown or HTML is not supported, just plain text.">{{ old('message', $announcement->message) }}</textarea>
+                    <textarea name="message" id="message" rows="4" required class="w-full p-4 bg-white rounded-xl border border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white transition-colors" placeholder="What do you want to tell the users? Markdown or HTML is not supported, just plain text.">{{ old('message', $announcement->message) }}</textarea>
                 </div>
                 @error('message')
                     <p class="text-red-500 text-xs mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p>
@@ -57,7 +57,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-palette"></i>
                         </div>
-                        <select name="type" id="type" required class="w-full pl-11 py-3 bg-white rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors cursor-pointer">
+                        <select name="type" id="type" required class="w-full pl-11 py-3 bg-white rounded-xl border border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-colors cursor-pointer">
                             <option value="info" {{ old('type', $announcement->type) == 'info' ? 'selected' : '' }}>Info (Blue)</option>
                             <option value="warning" {{ old('type', $announcement->type) == 'warning' ? 'selected' : '' }}>Warning (Orange)</option>
                             <option value="success" {{ old('type', $announcement->type) == 'success' ? 'selected' : '' }}>Success (Green)</option>
@@ -72,7 +72,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <input type="datetime-local" name="expires_at" id="expires_at" value="{{ old('expires_at', $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}" class="w-full pl-11 py-3 bg-white rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:[color-scheme:dark] transition-colors cursor-pointer">
+                        <input type="datetime-local" name="expires_at" id="expires_at" value="{{ old('expires_at', $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}" class="w-full pl-11 py-3 bg-white rounded-xl border border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:[color-scheme:dark] transition-colors cursor-pointer">
                     </div>
                     <p class="text-xs text-gray-500 mt-3"><i class="fas fa-info-circle mr-1 text-gray-400"></i> Leave blank to show until manually disabled.</p>
                 </div>
