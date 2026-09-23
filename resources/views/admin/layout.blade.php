@@ -796,6 +796,14 @@
                 altInput: true,
                 altFormat: "F j, Y"
             });
+
+            // Initialize Flatpickr for Datetime-local inputs
+            flatpickr('input[type="datetime-local"]', {
+                enableTime: true,
+                dateFormat: "Y-m-d\\TH:i",
+                altInput: true,
+                altFormat: "F j, Y h:i K"
+            });
             
             // Initialize Flatpickr for Month inputs
             flatpickr('input[type="month"]', {
