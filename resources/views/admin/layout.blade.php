@@ -468,16 +468,16 @@
                                 const menu = document.getElementById('settings-menu');
                                 const isClosed = menu.classList.contains('max-h-0');
                                 if(isClosed) {
-                                    menu.classList.remove('max-h-0');
-                                    menu.classList.add('max-h-64');
+                                    menu.classList.remove('max-h-0', 'opacity-0');
+                                    menu.classList.add('max-h-64', 'opacity-100');
                                     menu.querySelectorAll('a').forEach(el => {
                                         el.style.animation = 'none';
                                         el.offsetHeight; 
                                         el.style.animation = null; 
                                     });
                                 } else {
-                                    menu.classList.add('max-h-0');
-                                    menu.classList.remove('max-h-64');
+                                    menu.classList.add('max-h-0', 'opacity-0');
+                                    menu.classList.remove('max-h-64', 'opacity-100');
                                 }
                                 this.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
                             ">
