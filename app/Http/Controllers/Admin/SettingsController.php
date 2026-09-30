@@ -9,17 +9,37 @@ use Illuminate\Support\Facades\Log;
 
 class SettingsController extends Controller
 {
-    public function index()
+    public function attendance()
     {
         $settings = [
             'gamification_rules' => SystemSetting::get('gamification_rules', $this->getDefaultGamificationRules()),
+        ];
+        return view('admin.settings.attendance', compact('settings'));
+    }
+
+    public function locations()
+    {
+        $settings = [
             'geofences' => SystemSetting::get('geofences', $this->getDefaultGeofences()),
+        ];
+        return view('admin.settings.locations', compact('settings'));
+    }
+
+    public function security()
+    {
+        $settings = [
             'biometric_tolerances' => SystemSetting::get('biometric_tolerances', $this->getDefaultBiometricTolerances()),
+        ];
+        return view('admin.settings.security', compact('settings'));
+    }
+
+    public function preferences()
+    {
+        $settings = [
             'pagination_limits' => SystemSetting::get('pagination_limits', $this->getDefaultPaginationLimits()),
             'expirations' => SystemSetting::get('expirations', $this->getDefaultExpirations()),
         ];
-
-        return view('admin.settings.index', compact('settings'));
+        return view('admin.settings.preferences', compact('settings'));
     }
 
     public function update(Request $request)

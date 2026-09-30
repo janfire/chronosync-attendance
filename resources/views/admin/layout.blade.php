@@ -460,10 +460,33 @@
                     </a>
 
                     @if(Auth::user()->canManageUsers())
-                        <a href="{{ route('admin.settings.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.settings.*') ? 'active' : '' }} dark:text-gray-200">
-                            <i class="fas fa-cogs w-4 text-gray-500 dark:text-gray-400"></i>
-                            <span class="font-medium">System Settings</span>
-                        </a>
+                        @php
+                            $isSettingsActive = request()->routeIs('admin.settings.*');
+                        @endphp
+                        <div class="sidebar-dropdown">
+                            <button type="button" class="w-full sidebar-item flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 transition-colors {{ $isSettingsActive ? 'bg-gray-100 dark:bg-gray-700' : '' }} dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" onclick="document.getElementById('settings-menu').classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-cogs w-4 text-gray-500 dark:text-gray-400"></i>
+                                    <span class="font-medium">System Settings</span>
+                                </div>
+                                <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 {{ $isSettingsActive ? 'rotate-180' : '' }}"></i>
+                            </button>
+                            
+                            <div id="settings-menu" class="mt-1 space-y-1 pl-9 pr-2 {{ $isSettingsActive ? '' : 'hidden' }}">
+                                <a href="{{ route('admin.settings.attendance') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.attendance') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                                    Attendance Rules
+                                </a>
+                                <a href="{{ route('admin.settings.locations') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.locations') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                                    Locations & GPS
+                                </a>
+                                <a href="{{ route('admin.settings.security') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.security') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                                    Security & Bio
+                                </a>
+                                <a href="{{ route('admin.settings.preferences') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.preferences') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                                    Preferences
+                                </a>
+                            </div>
+                        </div>
                     @endif
 
                     <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">SaaS & Billing</div>

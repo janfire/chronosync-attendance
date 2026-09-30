@@ -171,9 +171,15 @@ Route::middleware(['tenant'])->group(function () {
                 ->name('admin.users.bulk-destroy');
 
             // System Settings
-            Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings.index');
-            Route::put('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update');
-            Route::post('/settings/reset', [\App\Http\Controllers\Admin\SettingsController::class, 'reset'])->name('admin.settings.reset');
+            Route::prefix('settings')->group(function () {
+                Route::get('/attendance', [\App\Http\Controllers\Admin\SettingsController::class, 'attendance'])->name('admin.settings.attendance');
+                Route::get('/locations', [\App\Http\Controllers\Admin\SettingsController::class, 'locations'])->name('admin.settings.locations');
+                Route::get('/security', [\App\Http\Controllers\Admin\SettingsController::class, 'security'])->name('admin.settings.security');
+                Route::get('/preferences', [\App\Http\Controllers\Admin\SettingsController::class, 'preferences'])->name('admin.settings.preferences');
+                
+                Route::put('/update', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update');
+                Route::post('/reset', [\App\Http\Controllers\Admin\SettingsController::class, 'reset'])->name('admin.settings.reset');
+            });
 
             // Advanced Reports Routes
             Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('admin.reports.index');
