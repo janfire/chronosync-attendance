@@ -170,6 +170,11 @@ Route::middleware(['tenant'])->group(function () {
             Route::post('users/bulk-destroy', [\App\Http\Controllers\UserManagementController::class, 'bulkDestroy'])
                 ->name('admin.users.bulk-destroy');
 
+            // System Settings
+            Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings.index');
+            Route::put('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update');
+            Route::post('/settings/reset', [\App\Http\Controllers\Admin\SettingsController::class, 'reset'])->name('admin.settings.reset');
+
             // Advanced Reports Routes
             Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('admin.reports.index');
             Route::get('/reports/settings', [\App\Http\Controllers\ReportController::class, 'settings'])->name('admin.reports.settings');

@@ -23,28 +23,52 @@ class AttendanceScoringService
     // 16:30 – 17:59  Normal          +5
     // 18:00+         Late Departure   0
 
+    private function parseTime(string $timeStr): int
+    {
+        $parts = explode(':', $timeStr);
+        return (int) $parts[0] * 60 + (int) $parts[1];
+    }
+
     public function classifyClockIn(Carbon $time): array
     {
         $total = $time->hour * 60 + $time->minute;
+        $rules = \App\Models\SystemSetting::get('gamification_rules');
+
+        if (!$rules) {
+            // Fallback just in case
+            $rules = [
+                'early_before' => '07:50', 'punctual_before' => '08:00', 'on_time_before' => '08:15', 'grace_before' => '08:30',
+                'early_points' => 10, 'punctual_points' => 10, 'on_time_points' => -1, 'grace_points' => -2, 'late_points' => -5
+            ];
+        }
 
         return match(true) {
-            $total <= (7 * 60 + 50)  => ['status' => 'early',    'points' => 10],
-            $total <= (8 * 60)       => ['status' => 'punctual', 'points' => 10],
-            $total <= (8 * 60 + 15)  => ['status' => 'on_time',  'points' => -1],
-            $total <= (8 * 60 + 30)  => ['status' => 'grace',    'points' => -2],
-            default                  => ['status' => 'late',     'points' => -5],
+            $total <= $this->parseTime($rules['early_before'])    => ['status' => 'early',    'points' => (int) $rules['early_points']],
+            $total <= $this->parseTime($rules['punctual_before']) => ['status' => 'punctual', 'points' => (int) $rules['punctual_points']],
+            $total <= $this->parseTime($rules['on_time_before'])  => ['status' => 'on_time',  'points' => (int) $rules['on_time_points']],
+            $total <= $this->parseTime($rules['grace_before'])    => ['status' => 'grace',    'points' => (int) $rules['grace_points']],
+            default                                               => ['status' => 'late',     'points' => (int) $rules['late_points']],
         };
     }
 
     public function classifyClockOut(Carbon $time): array
     {
         $total = $time->hour * 60 + $time->minute;
+        $rules = \App\Models\SystemSetting::get('gamification_rules');
+
+        if (!$rules) {
+            // Fallback
+            $rules = [
+                'early_departure_before' => '16:00', 'left_early_before' => '16:30', 'normal_departure_before' => '18:00',
+                'early_departure_points' => -5, 'left_early_points' => -2, 'normal_departure_points' => 5, 'late_departure_points' => 0
+            ];
+        }
 
         return match(true) {
-            $total < (16 * 60)       => ['status' => 'early_departure', 'points' => -5],
-            $total <= (16 * 60 + 29) => ['status' => 'left_early',      'points' => -2],
-            $total < (18 * 60)       => ['status' => 'normal',          'points' =>  5],
-            default                  => ['status' => 'late_departure',  'points' =>  0],
+            $total < $this->parseTime($rules['early_departure_before'])  => ['status' => 'early_departure', 'points' => (int) $rules['early_departure_points']],
+            $total <= $this->parseTime($rules['left_early_before'])      => ['status' => 'left_early',      'points' => (int) $rules['left_early_points']],
+            $total < $this->parseTime($rules['normal_departure_before']) => ['status' => 'normal',          'points' => (int) $rules['normal_departure_points']],
+            default                                                      => ['status' => 'late_departure',  'points' => (int) $rules['late_departure_points']],
         };
     }
 

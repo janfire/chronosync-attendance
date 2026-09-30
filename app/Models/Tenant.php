@@ -60,9 +60,10 @@ class Tenant extends Model
 
     public function isWithinGracePeriod(): bool
     {
-        // 7-day grace after subscription_expires_at
+        // Configurable grace period after subscription_expires_at
         if ($this->status === 'active' && $this->subscription_expires_at?->isPast()) {
-            return $this->subscription_expires_at->diffInDays(now()) <= 7;
+            $graceDays = \App\Models\GlobalSetting::get('subscription_grace_period_days', 7);
+            return $this->subscription_expires_at->diffInDays(now()) <= $graceDays;
         }
         return false;
     }

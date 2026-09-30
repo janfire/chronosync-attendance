@@ -160,9 +160,10 @@ class RegisterController extends Controller
     {
         $otp = (string) random_int(100000, 999999);
 
+        $otpMinutes = \App\Models\SystemSetting::get('expirations')['otp_minutes'] ?? 10;
         session([
             'registration_otp' => $otp,
-            'registration_otp_expires_at' => now()->addMinutes(10),
+            'registration_otp_expires_at' => now()->addMinutes($otpMinutes),
         ]);
 
         // LOG THE OTP FOR LOCAL TESTING

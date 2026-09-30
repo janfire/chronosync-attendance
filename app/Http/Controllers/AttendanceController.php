@@ -189,7 +189,8 @@ class AttendanceController extends Controller
 
         // Generate redirect URL to the custom, secure summary profile page
         $isMobile = $this->isMobileDevice($request);
-        $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), ['user_id' => $user->id]);
+        $summaryMinutes = \App\Models\SystemSetting::get('expirations')['summary_link_minutes'] ?? 20;
+        $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes($summaryMinutes), ['user_id' => $user->id]);
 
         // Auto-logout if user is logged in (kiosk mode) to protect privacy outside the dashboard
         if (Auth::check()) {
@@ -333,7 +334,8 @@ class AttendanceController extends Controller
         // Log the manual clock out
         $this->createAttendanceLog($user, $action, $request, 'manual_override');
 
-        $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), ['user_id' => $user->id]);
+        $summaryMinutes = \App\Models\SystemSetting::get('expirations')['summary_link_minutes'] ?? 20;
+        $redirectUrl = URL::temporarySignedRoute('attendance.summary', now()->addMinutes($summaryMinutes), ['user_id' => $user->id]);
 
         return ApiResponse::success([
             'action' => $action,
@@ -376,7 +378,8 @@ class AttendanceController extends Controller
             // Do not log a failure. Instead, seamlessly redirect them to their profile.
             
             $isMobile = $this->isMobileDevice($request);
-            $redirectUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute('attendance.summary', now()->addMinutes(20), [
+            $summaryMinutes = \App\Models\SystemSetting::get('expirations')['summary_link_minutes'] ?? 20;
+            $redirectUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute('attendance.summary', now()->addMinutes($summaryMinutes), [
                 'user_id' => $user->id,
                 'prompt_clockout' => 1
             ]);
@@ -442,7 +445,7 @@ class AttendanceController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        $logs = $query->orderBy('timestamp', 'desc')->paginate(20);
+        $logs = $query->orderBy('timestamp', 'desc')->paginate(\App\Models\SystemSetting::get('pagination_limits')['default_rows'] ?? 20);
 
         return response()->json($logs);
     }

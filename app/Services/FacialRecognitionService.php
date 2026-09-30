@@ -146,8 +146,9 @@ class FacialRecognitionService
         return true;
     }
 
-    public function findBestMatchFromImage(string $base64Image, float $tolerance = self::DEFAULT_TOLERANCE)
+    public function findBestMatchFromImage(string $base64Image, ?float $tolerance = null)
     {
+        $tolerance = $tolerance ?? \App\Models\SystemSetting::get('biometric_tolerances')['default'] ?? self::DEFAULT_TOLERANCE;
         $host = config('services.recognition.host', 'http://localhost:5001');
         
         $tenantId = app()->bound('current_tenant') ? app('current_tenant')->id : 'default';
@@ -327,8 +328,9 @@ class FacialRecognitionService
     /**
      * Convert a distance into a normalized confidence value (0-1).
      */
-    public function confidenceFromDistance(float $distance, float $tolerance = self::DEFAULT_TOLERANCE): float
+    public function confidenceFromDistance(float $distance, ?float $tolerance = null): float
     {
+        $tolerance = $tolerance ?? \App\Models\SystemSetting::get('biometric_tolerances')['default'] ?? self::DEFAULT_TOLERANCE;
         if ($tolerance <= 0) {
             return 0.0;
         }
@@ -337,8 +339,9 @@ class FacialRecognitionService
         return max(0.0, min(1.0, round($confidence, 4)));
     }
 
-    public function isMatch(float $distance, float $tolerance = self::DEFAULT_TOLERANCE): bool
+    public function isMatch(float $distance, ?float $tolerance = null): bool
     {
+        $tolerance = $tolerance ?? \App\Models\SystemSetting::get('biometric_tolerances')['default'] ?? self::DEFAULT_TOLERANCE;
         return $distance <= $tolerance;
     }
 
@@ -364,8 +367,9 @@ class FacialRecognitionService
      * @param bool $onlyEnrolledUsers If true, only checks against records with an assigned User ID
      * @return array|null
      */
-    public function findBestMatch(array $newEncoding, ?int $excludeUserId = null, ?int $excludeBiometricId = null, float $tolerance = self::DEFAULT_TOLERANCE, bool $onlyEnrolledUsers = false): ?array
+    public function findBestMatch(array $newEncoding, ?int $excludeUserId = null, ?int $excludeBiometricId = null, ?float $tolerance = null, bool $onlyEnrolledUsers = false): ?array
     {
+        $tolerance = $tolerance ?? \App\Models\SystemSetting::get('biometric_tolerances')['default'] ?? self::DEFAULT_TOLERANCE;
         // Optimization: Only select necessary columns to reduce memory usage and hydration time
         $query = \App\Models\BiometricData::select(['id', 'user_id', 'user_name', 'facial_encoding'])
             ->whereNotNull('facial_encoding')
@@ -453,8 +457,9 @@ class FacialRecognitionService
     /**
      * Alias for findBestMatch to maintain backward compatibility.
      */
-    public function findDuplicateFace(array $newEncoding, ?int $excludeUserId = null, ?int $excludeBiometricId = null, float $tolerance = self::DEFAULT_TOLERANCE, bool $onlyEnrolledUsers = false): ?array
+    public function findDuplicateFace(array $newEncoding, ?int $excludeUserId = null, ?int $excludeBiometricId = null, ?float $tolerance = null, bool $onlyEnrolledUsers = false): ?array
     {
+        $tolerance = $tolerance ?? \App\Models\SystemSetting::get('biometric_tolerances')['enrollment'] ?? self::ENROLLMENT_TOLERANCE;
         return $this->findBestMatch($newEncoding, $excludeUserId, $excludeBiometricId, $tolerance, $onlyEnrolledUsers);
     }
 

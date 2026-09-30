@@ -53,11 +53,12 @@ class LoginController extends Controller
             $token = \Illuminate\Support\Str::random(64);
             $sessionId = \Illuminate\Support\Str::uuid()->toString();
 
+            $pendingMinutes = \App\Models\SystemSetting::get('expirations')['pending_login_minutes'] ?? 5;
             \Illuminate\Support\Facades\Cache::put("pending_login_{$token}", [
                 'user_id' => $user->id,
                 'session_id' => $sessionId,
                 'status' => 'pending'
-            ], now()->addMinutes(10));
+            ], now()->addMinutes($pendingMinutes));
 
             $deviceInfo = $request->header('User-Agent') ?? 'Unknown Device';
             $ipAddress = $request->header('X-Forwarded-For') ?? $request->ip();
@@ -134,7 +135,8 @@ class LoginController extends Controller
         }
 
         $cacheData['status'] = 'approved';
-        \Illuminate\Support\Facades\Cache::put("pending_login_{$token}", $cacheData, now()->addMinutes(5));
+        $pendingMinutes = \App\Models\SystemSetting::get('expirations')['pending_login_minutes'] ?? 5;
+        \Illuminate\Support\Facades\Cache::put("pending_login_{$token}", $cacheData, now()->addMinutes($pendingMinutes));
 
         return view('auth.approval-success', ['success' => true, 'message' => 'Login Approved! You can safely close this tab and return to your original device.']);
     }

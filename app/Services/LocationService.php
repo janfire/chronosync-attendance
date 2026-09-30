@@ -8,30 +8,6 @@ use Illuminate\Support\Facades\Log;
 class LocationService
 {
     /**
-     * Known locations with their coordinates and a small radius (in meters) for matching.
-     */
-    protected const KNOWN_LOCATIONS = [
-        // Example: ZOU National Centre (Approximate coords, can be updated)
-        'ZOU National Centre' => [
-            'lat' => -17.825166, 
-            'lon' => 31.033510, 
-            'radius' => 500 // 500 meters radius
-        ],
-        // Specific location provided by user (Mubatsiri Masiya's location)
-        'ZOU Harare Main Campus' => [
-            'lat' => -17.8273817,
-            'lon' => 31.0448893,
-            'radius' => 200 // 200 meters radius
-        ],
-        // Default Harare Regional Campus (Keeping as fallback or secondary point)
-        'ZOU Harare Regional Campus' => [
-            'lat' => -17.821629,
-            'lon' => 31.049226,
-            'radius' => 500
-        ],
-    ];
-
-    /**
      * Resolve a location name from latitude and longitude.
      *
      * @param float|null $lat
@@ -49,10 +25,20 @@ class LocationService
         }
 
         // 1. Check Known Locations (Geofencing)
-        foreach (self::KNOWN_LOCATIONS as $name => $data) {
+        $geofences = \App\Models\SystemSetting::get('geofences');
+        
+        if (!$geofences || !is_array($geofences)) {
+            $geofences = [
+                ['name' => 'ZOU National Centre', 'lat' => -17.825166, 'lon' => 31.033510, 'radius' => 500],
+                ['name' => 'ZOU Harare Main Campus', 'lat' => -17.8273817, 'lon' => 31.0448893, 'radius' => 200],
+                ['name' => 'ZOU Harare Regional Campus', 'lat' => -17.821629, 'lon' => 31.049226, 'radius' => 500]
+            ];
+        }
+
+        foreach ($geofences as $data) {
             $distance = $this->calculateDistance($lat, $lon, $data['lat'], $data['lon']);
             if ($distance <= $data['radius']) {
-                return $name;
+                return $data['name'];
             }
         }
 

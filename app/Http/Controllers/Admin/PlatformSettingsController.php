@@ -14,6 +14,7 @@ class PlatformSettingsController extends Controller
             'maintenance_mode' => GlobalSetting::get('maintenance_mode', false),
             'maintenance_message' => GlobalSetting::get('maintenance_message', 'The system is currently undergoing scheduled maintenance. Please check back later.'),
             'default_trial_days' => GlobalSetting::get('default_trial_days', 14),
+            'subscription_grace_period_days' => GlobalSetting::get('subscription_grace_period_days', 7),
             'allow_new_registrations' => GlobalSetting::get('allow_new_registrations', true),
         ];
 
@@ -26,12 +27,14 @@ class PlatformSettingsController extends Controller
             'maintenance_mode' => 'nullable|boolean',
             'maintenance_message' => 'nullable|string',
             'default_trial_days' => 'required|integer|min:0',
+            'subscription_grace_period_days' => 'required|integer|min:0',
             'allow_new_registrations' => 'nullable|boolean',
         ]);
 
         GlobalSetting::set('maintenance_mode', $request->has('maintenance_mode'));
         GlobalSetting::set('maintenance_message', $validated['maintenance_message'] ?? '');
         GlobalSetting::set('default_trial_days', $validated['default_trial_days']);
+        GlobalSetting::set('subscription_grace_period_days', $validated['subscription_grace_period_days']);
         GlobalSetting::set('allow_new_registrations', $request->has('allow_new_registrations'));
 
         return redirect()->back()->with('success', 'Platform settings updated successfully.');

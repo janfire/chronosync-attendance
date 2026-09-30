@@ -136,7 +136,8 @@ class ReportController extends Controller
         $start = Carbon::parse($month)->startOfMonth();
         $end = Carbon::parse($month)->endOfMonth();
 
-        $users = User::where('role', 'staff')->get();
+        $limit = \App\Models\SystemSetting::get('pagination_limits')['export_limit'] ?? 500;
+        $users = User::where('role', 'staff')->limit($limit)->get();
         
         $filename = "attendance_report_{$month}.csv";
         $handle = fopen('php://output', 'w');
@@ -173,7 +174,8 @@ class ReportController extends Controller
         $start = Carbon::parse($month)->startOfMonth();
         $end = Carbon::parse($month)->endOfMonth();
 
-        $users = User::where('role', 'staff')->get();
+        $limit = \App\Models\SystemSetting::get('pagination_limits')['export_limit'] ?? 500;
+        $users = User::where('role', 'staff')->limit($limit)->get();
         $data = [];
 
         foreach ($users as $user) {

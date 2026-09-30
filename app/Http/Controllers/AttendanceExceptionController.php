@@ -20,7 +20,7 @@ class AttendanceExceptionController extends Controller
         $exceptions = AttendanceException::with(['user', 'requester'])
             ->where('status', 'pending')
             ->orderBy('requested_at', 'desc')
-            ->paginate(25);
+            ->paginate(\App\Models\SystemSetting::get('pagination_limits')['exceptions_rows'] ?? 25);
 
         return view('admin.approvals.exceptions', compact('exceptions'));
     }
@@ -102,7 +102,8 @@ class AttendanceExceptionController extends Controller
                         if ($requestedCorrection) {
                             $clockOutTime = Carbon::parse($requestedCorrection);
                         } else {
-                            $clockOutTime = $exception->requested_at ? Carbon::parse($exception->requested_at) : Carbon::parse($clockIn->timestamp)->addHours(8);
+                            $shiftHours = \App\Models\SystemSetting::get('expirations')['default_shift_hours'] ?? 8;
+                            $clockOutTime = $exception->requested_at ? Carbon::parse($exception->requested_at) : Carbon::parse($clockIn->timestamp)->addHours($shiftHours);
                         }
 
                         if ($clockOutTime->lessThanOrEqualTo($clockIn->timestamp)) {

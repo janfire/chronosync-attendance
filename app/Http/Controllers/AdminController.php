@@ -156,7 +156,7 @@ class AdminController extends Controller
             }
         }
 
-        $employees = $query->orderBy('created_at', 'desc')->paginate(20);
+        $employees = $query->orderBy('created_at', 'desc')->paginate(\App\Models\SystemSetting::get('pagination_limits')['default_rows'] ?? 20);
 
         // Calculate enrollment stats using direct count queries instead of loading all records.
         // Previously this loaded every staff member into memory just to count two numbers.

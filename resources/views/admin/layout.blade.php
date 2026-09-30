@@ -459,6 +459,13 @@
                         <span class="font-medium">User Guide</span>
                     </a>
 
+                    @if(Auth::user()->canManageUsers())
+                        <a href="{{ route('admin.settings.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('admin.settings.*') ? 'active' : '' }} dark:text-gray-200">
+                            <i class="fas fa-cogs w-4 text-gray-500 dark:text-gray-400"></i>
+                            <span class="font-medium">System Settings</span>
+                        </a>
+                    @endif
+
                     <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">SaaS & Billing</div>
                     <a href="{{ route('billing.index') }}" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 transition-colors {{ request()->routeIs('billing.*') ? 'active' : '' }} dark:text-gray-200">
                         <i class="fas fa-credit-card w-4 text-gray-500 dark:text-gray-400"></i>
