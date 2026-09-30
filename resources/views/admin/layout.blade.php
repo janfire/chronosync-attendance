@@ -464,7 +464,23 @@
                             $isSettingsActive = request()->routeIs('admin.settings.*');
                         @endphp
                         <div class="sidebar-dropdown">
-                            <button type="button" class="w-full sidebar-item flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 transition-colors {{ $isSettingsActive ? 'bg-gray-100 dark:bg-gray-700' : '' }} dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" onclick="document.getElementById('settings-menu').classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')">
+                            <button type="button" class="w-full sidebar-item flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 transition-colors {{ $isSettingsActive ? 'bg-gray-100 dark:bg-gray-700' : '' }} dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" onclick="
+                                const menu = document.getElementById('settings-menu');
+                                const isClosed = menu.classList.contains('max-h-0');
+                                if(isClosed) {
+                                    menu.classList.remove('max-h-0');
+                                    menu.classList.add('max-h-64');
+                                    menu.querySelectorAll('a').forEach(el => {
+                                        el.style.animation = 'none';
+                                        el.offsetHeight; 
+                                        el.style.animation = null; 
+                                    });
+                                } else {
+                                    menu.classList.add('max-h-0');
+                                    menu.classList.remove('max-h-64');
+                                }
+                                this.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+                            ">
                                 <div class="flex items-center space-x-3">
                                     <i class="fas fa-cogs w-4 text-gray-500 dark:text-gray-400"></i>
                                     <span class="font-medium">System Settings</span>
@@ -472,19 +488,36 @@
                                 <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 {{ $isSettingsActive ? 'rotate-180' : '' }}"></i>
                             </button>
                             
-                            <div id="settings-menu" class="mt-1 space-y-1 pl-9 pr-2 {{ $isSettingsActive ? '' : 'hidden' }}">
-                                <a href="{{ route('admin.settings.attendance') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.attendance') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
-                                    Attendance Rules
-                                </a>
-                                <a href="{{ route('admin.settings.locations') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.locations') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
-                                    Locations & GPS
-                                </a>
-                                <a href="{{ route('admin.settings.security') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.security') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
-                                    Security & Bio
-                                </a>
-                                <a href="{{ route('admin.settings.preferences') }}" class="block px-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.preferences') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
-                                    Preferences
-                                </a>
+                            <style>
+                            @keyframes slideInRightBranch {
+                                0% { opacity: 0; transform: translateX(-15px); }
+                                100% { opacity: 1; transform: translateX(0); }
+                            }
+                            .branch-animate {
+                                animation: slideInRightBranch 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                                opacity: 0;
+                            }
+                            .branch-delay-1 { animation-delay: 0.05s; }
+                            .branch-delay-2 { animation-delay: 0.1s; }
+                            .branch-delay-3 { animation-delay: 0.15s; }
+                            .branch-delay-4 { animation-delay: 0.2s; }
+                            </style>
+
+                            <div id="settings-menu" class="mt-1 space-y-1 pl-8 pr-2 overflow-hidden transition-all duration-300 ease-in-out {{ $isSettingsActive ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0' }}">
+                                <div class="relative before:absolute before:inset-y-0 before:left-3 before:w-px before:bg-gray-200 dark:before:bg-gray-700 py-1">
+                                    <a href="{{ route('admin.settings.attendance') }}" class="branch-animate branch-delay-1 relative block pl-6 pr-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.attendance') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300 before:absolute before:left-3 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-blue-600 dark:before:bg-blue-400' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200' }}">
+                                        Attendance Rules
+                                    </a>
+                                    <a href="{{ route('admin.settings.locations') }}" class="branch-animate branch-delay-2 relative block pl-6 pr-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.locations') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300 before:absolute before:left-3 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-blue-600 dark:before:bg-blue-400' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200' }}">
+                                        Locations & GPS
+                                    </a>
+                                    <a href="{{ route('admin.settings.security') }}" class="branch-animate branch-delay-3 relative block pl-6 pr-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.security') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300 before:absolute before:left-3 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-blue-600 dark:before:bg-blue-400' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200' }}">
+                                        Security & Bio
+                                    </a>
+                                    <a href="{{ route('admin.settings.preferences') }}" class="branch-animate branch-delay-4 relative block pl-6 pr-3 py-1.5 text-sm rounded-lg transition-colors {{ request()->routeIs('admin.settings.preferences') ? 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/30 dark:text-blue-300 before:absolute before:left-3 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-blue-600 dark:before:bg-blue-400' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200' }}">
+                                        Preferences
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @endif
